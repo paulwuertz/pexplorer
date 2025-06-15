@@ -3,28 +3,17 @@
     import { onMount } from 'svelte';
     import { browser } from '$app/environment';
     // ui stuff
-    import { Col, Container, Input, Row } from '@sveltestrap/sveltestrap';
+    import {
+      Button, Container,
+      Card, CardBody, CardFooter, CardHeader, CardSubtitle, CardText, CardTitle,
+      Input, InputGroup
+    } from '@sveltestrap/sveltestrap';
 
   	import { symbols } from './symbols.svelte.js';
 
-    import { scaleSequential, scaleOrdinal } from 'd3-scale';
-    import * as chromatic from 'd3-scale-chromatic';
-    import { hsl } from 'd3-color';
+    let { data } = $props();
 
-	  let { data } = $props();
-
-    const sequentialColor = scaleSequential([4, -1], chromatic.interpolateGnBu);
-    // filter out hard to see yellow and green
-    const ordinalColor = scaleOrdinal(
-        chromatic.schemeSpectral[9].filter((c) => hsl(c).h < 60 || hsl(c).h > 90)
-    );
-	  // let { data } = $props();
-    // symbols.symbols = data.symbols;
-    // symbols.selected_version = data.selected_version;
-    // symbols.selected_versions_to_compare = data.selected_versions_to_compare;
-    // symbols.elfDataProvided = data.elfDataProvided;
     let files = $state();
-    let versions = $derived(Object.keys(symbols.symbols || []));
     let selected_symbols = $state({});
     let function_table_data = $state([]);
     let variable_table_data = $state([]);
@@ -119,31 +108,45 @@
 
 <div class="container" id="content">
 
-    <Row>
-        <Col>
-            Select a version of the .elf you want to see:
-            <Input type="select"
-                bind:value={symbols.selected_version}
-                on:change={updateSelectedVersion}
-            >
-                {#each versions as version}
-                    <option>{version}</option>
-                {/each}
-            </Input>
-        </Col>
-      </Row>
-
-      <hr>
-
     <Container fluid>
-        {#if !symbols.elfDataProvided && files && !files[0]}
-            <label for="elfinput">Upload a puncover .json file:</label>
-            <input accept="*/json" bind:files id="elfinput" name="elfinput" type="file" />
-        {:else if !symbols.selected_version}
-            <h3>Select a version to browse elf symbols :)</h3>
-        {:else}
-            // TODO
-        {/if}
+      <Card>
+        <CardHeader>
+          <CardTitle>Add your firmwares symbol files</CardTitle>
+        </CardHeader>
+        <CardBody>
+          <CardSubtitle><b>By link:</b></CardSubtitle>
+          <CardText>Adding the symbol via links saves them in your browsers local storage so you can continue browsing the same file when you come back.</CardText>
+
+          <InputGroup>
+            <Input type="url" placeholder="enter a link to your firmwares symbol json..." />
+            <Button size="md" color="success">Download symbols</Button>
+          </InputGroup>
+
+          <br>
+
+          <CardSubtitle><b>By file:</b></CardSubtitle>
+          <CardText>Uploading the symbol file is session based and is reset when refreshing or returning later.</CardText>
+          <InputGroup>
+            <Input type="file" accept="*/json" bind:files id="elfinput" name="elfinput" />
+            <Button size="md" color="success">Upload symbols</Button>
+          </InputGroup>
+        </CardBody>
+        <CardFooter>
+          Currently provided symbol via links:
+
+          <ul>
+            <li>link</li>
+          </ul>
+
+          and temporarily provided symbols via file upload:
+
+          <ul>
+            <li>file</li>
+          </ul>
+
+          <Button size="md" color="danger">Clear all links and files (TODO)</Button>
+        </CardFooter>
+      </Card>
 
     </Container>
 </div>
