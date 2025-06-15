@@ -1,3 +1,5 @@
+import { goto } from '$app/navigation';
+
 export const trailingSlash = 'always';
 export const prerender = false;
 export const ssr = false;
@@ -8,9 +10,19 @@ export async function load({ url, params }) {
     let componentData = {};
 
     const hasElfURLData = url.searchParams.has('elfURLData');
-    const storedElfURLData = localStorage.getItem("lastOpenElfURL");
-    const elfUrl = (hasElfURLData) ? decodeURIComponent(url.searchParams.get('elfURLData'))
+    const storedElfURLData = localStorage.getItem("lastOpenElfURLs");
+    const elfUrl = (hasElfURLData) ? [decodeURIComponent(url.searchParams.get('elfURLData'))]
                                     : storedElfURLData;
+
+    try {
+        test_if_a_valid_url = new URL(elfUrl);
+        console.log("trurl")
+    } catch (_) {
+        console.log("furl")
+        goto("/")
+        return;
+    }
+
     if(elfUrl)
     {
         // download data
