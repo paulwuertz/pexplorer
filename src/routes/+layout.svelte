@@ -9,7 +9,9 @@
   import { page } from '$app/stores';
   
   import {
+      Col,
       Collapse,
+      Container,
       Nav,
       Navbar,
       NavbarBrand,
@@ -50,8 +52,10 @@
 
 <hr>
 
-<div id="page-footer">
-    brought to you with &#128150;
-    by <a href="https://twitter.com/hbehrens">Heiko Behrens</a>, Paul Würtz
-    <span class="secondary">– MIT license, copyright &copy; 2014-2025</span>
+<div id="page-footer" class="container">
+    <Container fluid>
+      brought to you with &#128150;
+      by data exported from puncover - <a href="https://twitter.com/hbehrens">Heiko Behrens</a> with some UI sugar by Paul Würtz
+      <span class="secondary">– MIT license, copyright &copy; 2014-2025</span>
+    </Container>
 </div>
