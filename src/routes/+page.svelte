@@ -117,6 +117,10 @@
         }
     }
 
+    function addLocalSample() {
+      addFirmwareByLink("/report.json");
+    }
+
     function addCanncectifitySample() {
         addFirmwareByLink(CANNECTIVITY_SAMPLE_URL);
     }
@@ -147,7 +151,7 @@
 
           <br>
 
-          <CardSubtitle><b>By file:</b></CardSubtitle>
+          <CardSubtitle><b>By file (TODO enable again :):</b></CardSubtitle>
           <CardText>Uploading the symbol file is session based and is reset when refreshing or returning later.</CardText>
           <InputGroup>
             <Input type="file" accept="*/json" bind:files id="elfinput" name="elfinput" />
@@ -162,14 +166,14 @@
             <Button color="light" onclick={addCanncectifitySample}>cannectivity Releases</Button>
             <Button color="light">Sample2 (TODO)</Button>
             <Button color="light">Sample3 (TODO)</Button>
-            <Button color="light">Local report.json sample (TODO)</Button>
+            <Button color="light" onclick={addLocalSample}>Local report.json sample</Button>
           </ButtonGroup>
         </CardBody>
         <CardFooter>
           Currently provided symbol via links:
 
           <ul>
-            {#each symbol_links as symbol_link, i (symbol_links)}
+            {#each symbol_links as symbol_link, i ("link-"+symbol_link)}
               <li>{symbol_link}</li>
             {:else}
               <p>No links given yet.</p>
@@ -189,8 +193,8 @@
           yielding these firmware versions to view:
 
           <ul>
-            {#each Object.keys(symbols.symbols) as sym_version, i (sym_version)}
-              <li>{i} {sym_version}</li>
+            {#each Object.keys(symbols.symbols) as sym_version, i ("ver-"+sym_version)}
+              <li>{sym_version}</li>
             {:else}
               <p>No versions yet.</p>
             {/each}
