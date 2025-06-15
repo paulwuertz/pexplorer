@@ -130,6 +130,18 @@
         addFirmwareByLink(link_input_field);
         link_input_field = null;
     }
+
+    function resetLinks() {
+        localStorage.removeItem("lastOpenElfURLs");
+        symbol_links = []
+        versions = []
+        selected_symbols = {}
+        symbols.symbols = {}
+        symbols.symbolLinks = []
+        symbols.selected_version = null
+        symbols.selected_versions_to_compare = null
+        symbols.elfDataProvided = false
+    }
 </script>
 
 <style>
@@ -206,7 +218,7 @@
             {/each}
           </ul>
 
-          <Button size="md" color="danger">Clear all links and files (TODO)</Button>
+          <Button size="md" color="danger" onclick={resetLinks}>Clear all links and files</Button>
         </CardFooter>
       </Card>
 
