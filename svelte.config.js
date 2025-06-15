@@ -10,7 +10,7 @@ const config = {
 			fallback: "index.html",
 		}),
         paths: {
-            base: process.env.NODE_ENV === 'production' ? '/pexplorer' : '',
+            base: process.env.NODE_ENV === 'production' ? '' : '',
         },
         prerender: {entries: []},
         appDir: 'app', // Required as the default is _app
