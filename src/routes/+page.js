@@ -3,9 +3,9 @@ import { symbols } from './symbols.svelte.js';
 export async function load({ fetch, url }) {
     // load elf data
     let componentData = {};
-    const hasElfURLData = url.searchParams.has('elfURLData'); // TODO make array param
+    const hasElfURLData = url.searchParams.has('elfURLData[]'); // TODO make array param
     const storedElfURLData = JSON.parse(localStorage.getItem("lastOpenElfURLs"));
-    const elfUrls = (hasElfURLData) ? [decodeURIComponent(url.searchParams.get('elfURLData'))]
+    const elfUrls = (hasElfURLData) ? url.searchParams.getAll('elfURLData[]').map(e => decodeURIComponent(e))
                                     : storedElfURLData;
 
     if(elfUrls)
