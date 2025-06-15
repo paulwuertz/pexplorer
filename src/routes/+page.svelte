@@ -15,6 +15,7 @@
     let { data } = $props();
 
     let files = $state();
+    let link_input_field = $state();
     let symbol_links = $state(symbols.symbolLinks);
     let versions = $derived(Object.keys(symbols.symbols));
     let selected_symbols = $state({});
@@ -124,6 +125,11 @@
     function addCanncectifitySample() {
         addFirmwareByLink(CANNECTIVITY_SAMPLE_URL);
     }
+
+    function addLink() {
+        addFirmwareByLink(link_input_field);
+        link_input_field = null;
+    }
 </script>
 
 <style>
@@ -145,8 +151,8 @@
           <CardText>Adding the symbol via links saves them in your browsers local storage so you can continue browsing the same file when you come back.</CardText>
 
           <InputGroup>
-            <Input type="url" placeholder="enter a link to your firmwares symbol json..." />
-            <Button size="md" color="success">Download symbols</Button>
+            <Input type="url" bind:value={link_input_field} placeholder="enter a link to your firmwares symbol json..." />
+            <Button size="md" color="success" onclick={addLink}>Download symbols</Button>
           </InputGroup>
 
           <br>
