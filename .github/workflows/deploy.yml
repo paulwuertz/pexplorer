@@ -43,7 +43,7 @@ jobs:
           static_site_generator: sveltekit
 
       - name: Build
-        run: npm run build
+        run: npm run build && cp build/index.html build/404.html
 
       - name: Upload Artifacts
         uses: actions/upload-pages-artifact@v3
