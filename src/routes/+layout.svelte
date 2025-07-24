@@ -1,13 +1,13 @@
 <script>
   //import '../app.css';
-  
+
   let { children } = $props();
-  
+
   import { base } from '$app/paths';
   import { browser } from '$app/environment';
   import { onMount } from 'svelte';
   import { page } from '$app/stores';
-  
+
   import {
       Col,
       Collapse,
@@ -19,11 +19,11 @@
       NavLink,
       NavbarToggler
   } from '@sveltestrap/sveltestrap';
-  
+
   import { symbols } from './symbols.svelte.js';
-  
+
   let isOpen = $state(true);
-  
+
   function handleUpdate(event) {
       isOpen = event.detail.isOpen;
   }
@@ -40,6 +40,7 @@
             <NavItem><NavLink href="{base}/">Interrupts (TODO)</NavLink></NavItem>
             <NavItem><NavLink href="{base}/symbols">Symbols</NavLink></NavItem>
             <NavItem><NavLink href="{base}/">Thread (TODO)</NavLink></NavItem>
+            <NavItem><NavLink href="{base}/trends">Trends</NavLink></NavItem>
             <NavItem><NavLink href="{base}/">Settings (TODO)</NavLink></NavItem>
             <NavItem><NavLink href="{base}/">About (TODO)</NavLink></NavItem>
         </Nav>

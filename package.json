@@ -28,6 +28,7 @@
 		"d3-hierarchy": "^3.1.2",
 		"d3-scale": "^4.0.2",
 		"d3-scale-chromatic": "^3.1.0",
+		"echarts": "^5.6.0",
 		"gh-pages": "^6.3.0",
 		"layerchart": "^1.0.10",
 		"svelte-ux": "^1.0.4"
