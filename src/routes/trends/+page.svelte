@@ -89,7 +89,6 @@
             let ordered_timestamps = ordered_versions_and_timestamps.map( vt => vt["timestamp"].getTime())
 
             let series_maxstack_data = [];
-            console.log("pp", ordered_timestamps)
             for(let thread of threads){
                 let maxstack_data = [];
                 for(let [i, v] of ordered_versions.entries()){
@@ -99,22 +98,20 @@
                     let max_stack_size = thread_stack["max_static_stack_size"];
                     maxstack_data.push([ordered_timestamps[i], max_stack_size, ordered_versions[i]])
                 }
-                console.log(thread, maxstack_data)
                 series_maxstack_data.push({
                     name: thread,
                     type: 'line',
                     data: maxstack_data
                 })
             }
-            console.log("dana ",ordered_versions,ordered_timestamps)
             // Create the echarts instance
-            var myChart = echarts.init(
-                    document.getElementById('main'),
+            var maxStackSizeChart = echarts.init(
+                    document.getElementById('maxStackSizeChartID'),
                 {width: "95%", height: 600}
             );
 
             // Draw the chart
-            myChart.setOption({
+            maxStackSizeChart.setOption({
                 title: {
                     text: 'Static max stack sizes'
                 },
@@ -143,6 +140,79 @@
                 },
                 series: series_maxstack_data
             });
+
+            let alloc_call_data = [];
+            const allocating_functions = [
+                "operator new(unsigned int)",
+                "operator new[](unsigned int)",
+                "malloc",
+                "calloc",
+            ]
+            let alloc_map_f = {};
+            for(let sym of allocating_functions){
+                alloc_map_f[sym] = []
+            }
+            for(let v of ordered_versions){
+                let vdata = symbols.symbols[v];
+                let vsymbols = vdata["symbols"];
+                let vtimestamp = vdata["timestamp"];
+                for(let sym of vsymbols){
+                    if(!sym.hasOwnProperty("display_name")) continue;
+                    let sym_name = sym["display_name"]
+                    if(allocating_functions.includes(sym["display_name"])){
+                        if(!sym.hasOwnProperty("callers")) continue;
+                        let callers_str = sym["callers"];
+                        let callers = JSON.parse(callers_str);
+                        alloc_map_f[sym_name].push([vtimestamp, callers.length]);
+                    }
+                }
+            }
+            for(let sym of allocating_functions){
+                let nr_calls = (alloc_map_f.hasOwnProperty(sym)) ? alloc_map_f[sym] : 0;
+                alloc_call_data.push({
+                    name: sym,
+                    type: 'line',
+                    stack: 'Total',
+                    data: nr_calls
+                })
+            }
+            console.log("alloc_call_data ",alloc_call_data, alloc_map_f)
+            // Create the echarts instance
+            var maxStackSizeChart = echarts.init(
+                    document.getElementById('nrDynamicAllocs'),
+                {width: "95%", height: 600}
+            );
+
+            // Draw the chart
+            maxStackSizeChart.setOption({
+                title: {
+                    text: 'Number of dynamic allocations'
+                },
+                tooltip: {
+                    trigger: 'axis',
+                },
+                legend: {
+                    data: threads
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                toolbox: {
+                    feature: {
+                        saveAsImage: {}
+                    }
+                },
+                xAxis: {
+                    type: 'time',
+                },
+                yAxis: {
+                    type: 'value'
+                },
+                series: alloc_call_data
+            });
         }
     });
 </script>
@@ -155,7 +225,11 @@
 </style>
 
 <div class="container" id="content">
-    <div id="main" style="width: 100%;height:600px;"></div>
+    <div id="maxStackSizeChartID" style="width: 100%;height:600px;"></div>
+
+    <hr>
+
+    <div id="nrDynamicAllocs" style="width: 100%;height:600px;"></div>
 </div>
 
 
