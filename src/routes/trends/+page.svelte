@@ -86,20 +86,23 @@
             let threads = get_all_threads(symbols.symbols)
             let ordered_versions_and_timestamps = get_versions_ordered_by_timestamps(symbols.symbols);
             let ordered_versions = ordered_versions_and_timestamps.map( vt => vt["version"])
-            let ordered_timestamps = ordered_versions_and_timestamps.map( vt => vt["timestamp"])
+            let ordered_timestamps = ordered_versions_and_timestamps.map( vt => vt["timestamp"].getTime())
 
             let series_maxstack_data = [];
+            console.log("pp", ordered_timestamps)
             for(let thread of threads){
                 let maxstack_data = [];
-                for(let v of ordered_versions){
-                    let max_stack_size = symbols.symbols[v]["stack_reports"][thread]["max_static_stack_size"]
-                    maxstack_data.push(max_stack_size)
+                for(let [i, v] of ordered_versions.entries()){
+                    let thread_stack = symbols.symbols[v]["stack_reports"][thread]
+                    if(!(thread_stack && thread_stack.hasOwnProperty("max_static_stack_size")))
+                        continue;
+                    let max_stack_size = thread_stack["max_static_stack_size"];
+                    maxstack_data.push([ordered_timestamps[i], max_stack_size, ordered_versions[i]])
                 }
                 console.log(thread, maxstack_data)
                 series_maxstack_data.push({
                     name: thread,
                     type: 'line',
-                    stack: 'Total',
                     data: maxstack_data
                 })
             }
@@ -107,16 +110,16 @@
             // Create the echarts instance
             var myChart = echarts.init(
                     document.getElementById('main'),
-                {width: "100%", height: 600}
+                {width: "95%", height: 600}
             );
 
             // Draw the chart
             myChart.setOption({
                 title: {
-                    text: 'Stacked Line'
+                    text: 'Static max stack sizes'
                 },
                 tooltip: {
-                    trigger: 'axis'
+                    trigger: 'axis',
                 },
                 legend: {
                     data: threads
@@ -129,13 +132,11 @@
                 },
                 toolbox: {
                     feature: {
-                    saveAsImage: {}
+                        saveAsImage: {}
                     }
                 },
                 xAxis: {
-                    type: 'category',
-                    boundaryGap: false,
-                    data: ordered_timestamps
+                    type: 'time',
                 },
                 yAxis: {
                     type: 'value'
