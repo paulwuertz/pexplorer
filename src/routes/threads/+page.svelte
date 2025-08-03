@@ -101,12 +101,12 @@
             <h3>Stack data for {symbols.selected_version}</h3>
 
             {#key selected_thread_stat}
-            
+
             <ul>
-                {#each Object.keys(selected_thread_stat) as thread_name (thread_name)}
+                {#each Object.keys(selected_thread_stat) as thread_name, index (thread_name+index)}
                 <h4>Thread stats for '{thread_name}'</h4>
 
-                <Table>   
+                <Table>
                     <thead>
                         <tr>
                             <th width="100%">Name</th>
@@ -123,7 +123,7 @@
                         </tr> -->
                     </thead>
                     <tbody>
-                        {#each selected_thread_stat[thread_name]["call_stack"] as fn (fn.name)}
+                        {#each selected_thread_stat[thread_name]["call_stack"] as fn, fn_index  (thread_name+"_"+fn.name+"_"+index+"_"+fn_index)}
                             <tr>
                                 <td>{fn.name}</td>
                                 <td>{fn.stack_size}</td>
@@ -139,7 +139,7 @@
                       </tr>
                     </tfoot>
                 </Table>
-                
+
                 <hr>
                 {/each}
             </ul>
