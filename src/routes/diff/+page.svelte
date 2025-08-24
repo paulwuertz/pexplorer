@@ -45,13 +45,15 @@
 
     let symbolsToMap = (syms) => {
         let symMap = {};
-        for (const sym of syms) {
-            sym.remark = "";
-            sym.newSymbols = false;
-            sym.deletedSymbols = false;
-            sym.d_size = null;
-            sym.d_stack = null;
-            symMap[sym.file+sym.display_name] = sym;
+        if(syms) {
+            for (const sym of syms) {
+                sym.remark = "";
+                sym.newSymbols = false;
+                sym.deletedSymbols = false;
+                sym.d_size = null;
+                sym.d_stack = null;
+                symMap[sym.file+sym.display_name] = sym;
+            }
         }
         return symMap;
     }
@@ -69,6 +71,13 @@
     }
 
     const updateSelectedSymbols = () => {
+        if(symbols.selected_version && symbols.selected_versions_to_compare) {
+            console.log("updateSelectedSymbols - all versions defined");
+        } else {
+            console.log("not all versions for a diff defined");
+            return;
+        }
+
         selected_symbols = symbolsToMap(symbols.symbols[symbols.selected_version]["symbols"]);
         selected_symbols_to_compare = symbolsToMap(symbols.symbols[symbols.selected_versions_to_compare]["symbols"]);
         selected_thread_stat = symbols.symbols[symbols.selected_version]["stack_reports"];
@@ -83,7 +92,7 @@
         for (const symPath of deletedSymbols) {
             selected_symbols_to_compare[symPath].remark  += "Deleted!";
             if(selected_symbols_to_compare[symPath].size){
-                selected_symbols_to_compare[symPath].d_size   = -selected_symbols_to_compare[symPath].size;
+                selected_symbols_to_compare[symPath].d_size = -selected_symbols_to_compare[symPath].size;
             }
             if(selected_symbols_to_compare[symPath].stack_size){
                 selected_symbols_to_compare[symPath].d_stack  = -selected_symbols_to_compare[symPath].stack_size;
@@ -261,7 +270,7 @@
             </ul>
 
             {#key selected_thread_stat}
-            <h3>Thread stats</h3>
+            <h3>Thread stats and total size change</h3>
 
             <p>From {symbols.selected_version} to {symbols.selected_versions_to_compare} the change in...</p>
             <ul>
@@ -275,7 +284,7 @@
             </ul>
             {/key}
 
-            <h3>Function symbols for {symbols.selected_version}</h3>
+            <h3>Function symbols changed</h3>
 
             <Table>
                 <thead>
@@ -315,7 +324,7 @@
                 </tbody>
             </Table>
 
-            <h3>Variable symbols for {symbols.selected_version}</h3>
+            <h3>Variable symbols changed</h3>
 
             <Table>
                 <thead>
