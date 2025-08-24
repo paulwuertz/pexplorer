@@ -278,9 +278,11 @@
             <p>From {symbols.selected_version} to {symbols.selected_versions_to_compare} the change in...</p>
             <ul>
                 {#each Object.keys(selected_thread_stat) as thread_name (thread_name)}
+                {@const stackDiff = selected_thread_stat[thread_name].max_static_stack_size - selected_thread_stat_to_compare[thread_name].max_static_stack_size}
                 <li>
-                    ...<b>{thread_name}'s</b> static stack usage is
-                    {selected_thread_stat[thread_name].max_static_stack_size - selected_thread_stat_to_compare[thread_name].max_static_stack_size} bytes -
+                    ...<b>{thread_name}'s</b> static stack usage
+                    {#if stackDiff > 0} grew by {:else if stackDiff < 0 } shrank by {:else} still is{/if}
+                    {stackDiff} bytes -
                     now at {selected_thread_stat[thread_name].max_static_stack_size} / {selected_thread_stat[thread_name].max_stack_size}
                 </li>
                 {/each}
