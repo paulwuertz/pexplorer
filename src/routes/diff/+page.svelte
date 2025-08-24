@@ -8,9 +8,9 @@
     import { DataTable } from '@careswitch/svelte-data-table';
     import { Button, Col, Container, Input, Row, Table } from '@sveltestrap/sveltestrap';
 
-	import { symbols } from '../symbols.svelte.js';
+    import { symbols } from '../symbols.svelte.js';
 
-	let { data } = $props();
+    let { data } = $props();
     let files = $state();
     let versions = $derived(Object.keys(symbols.symbols));
     let selected_symbols = $state({});
@@ -21,27 +21,29 @@
     let function_table_data = $state([]);
     let variable_table_data = $state([]);
     let function_table = $derived(new DataTable({
-        pageSize: 9999, // TODO
-		data: function_table_data,
-		columns: [
-			{ id: 'name', key: 'display_name', name: 'Name' },
+        pageSize: 999999, // TODO
+        data: function_table_data,
+        columns: [
+            { id: 'name', key: 'display_name', name: 'Name' },
+            { id: 'base_file', key: 'base_file', name: 'Defined in' },
             { id: 'remark', key: 'remark', name: 'Remarks' },
-			{ id: 'size', key: 'size', name: 'Code size' },
-			{ id: 'd_size', key: 'd_size', name: 'Δ size' },
-			{ id: 'stack_size', key: 'stack_size', name: 'Stack size'},
-			{ id: 'd_stack', key: 'd_stack', name: 'Δ stack' },
-		]
-	}));
+            { id: 'size', key: 'size', name: 'Code size' },
+            { id: 'd_size', key: 'd_size', name: 'Δ size' },
+            { id: 'stack_size', key: 'stack_size', name: 'Stack size'},
+            { id: 'd_stack', key: 'd_stack', name: 'Δ stack' },
+        ]
+    }));
     let variable_table = $derived(new DataTable({
-        pageSize: 9999, // TODO
-		data: variable_table_data,
-		columns: [
-			{ id: 'name', key: 'display_name', name: 'Name' },
+        pageSize: 999999, // TODO
+        data: variable_table_data,
+        columns: [
+            { id: 'name', key: 'display_name', name: 'Name' },
+            { id: 'base_file', key: 'base_file', name: 'Defined in' },
             { id: 'remark', key: 'remark', name: 'Remarks' },
-			{ id: 'size', key: 'size', name: 'Static size' },
-			{ id: 'd_size', key: 'd_size', name: 'Δ size' },
-		]
-	}));
+            { id: 'size', key: 'size', name: 'Static size' },
+            { id: 'd_size', key: 'd_size', name: 'Δ size' },
+        ]
+    }));
 
     let symbolsToMap = (syms) => {
         let symMap = {};
@@ -52,7 +54,8 @@
                 sym.deletedSymbols = false;
                 sym.d_size = null;
                 sym.d_stack = null;
-                symMap[sym.file+sym.display_name] = sym;
+                // TODO find sth that works for different build dirs and repeated sym+file-names
+                symMap[sym.base_file+sym.display_name] = sym;
             }
         }
         return symMap;
@@ -167,11 +170,11 @@
         updateSelectedSymbols();
     };
 
-	$effect(() => {
-		if (files) {
-			// Note that `files` is of type `FileList`, not an Array:
-			// https://developer.mozilla.org/en-US/docs/Web/API/FileList
-			console.log("files "+files);
+    $effect(() => {
+        if (files) {
+            // Note that `files` is of type `FileList`, not an Array:
+            // https://developer.mozilla.org/en-US/docs/Web/API/FileList
+            console.log("files "+files);
             const file = files[0];
 
             // Validate file existence and type
@@ -194,8 +197,8 @@
                 showMessage("Error reading the file. Please try again.", "error");
             };
             reader.readAsText(file);
-		}
-	});
+        }
+    });
 
     onMount(async () => {
         if (browser) {
