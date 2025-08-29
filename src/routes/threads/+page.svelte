@@ -7,9 +7,13 @@
     // ui stuff
     import { Badge, Button, Col, Container, Input, Row, Table } from '@sveltestrap/sveltestrap';
 
-	import { symbols } from '../symbols.svelte.js';
+    import { symbols } from '../symbols.svelte.js';
 
-	let { data } = $props();
+    import * as echarts from 'echarts';
+
+    const PLOT_ID_PREFIX = "stackSizeLayered_"
+
+    let { data } = $props();
     let files = $state();
     let versions = $derived(Object.keys(symbols.symbols));
     let selected_thread_stat = $state({});
@@ -41,8 +45,86 @@
         let versionObj = symbols.symbols[symbols.selected_version];
         if(!versionObj || !versionObj.hasOwnProperty("stack_reports")) return;
         console.log(versionObj["stack_reports"]);
+        let plotsContainer = document.getElementById("plotsContainer");
+        plotsContainer.innerHTML = "";
         for (const [k,v] of Object.entries(versionObj["stack_reports"])) {
+            const plotContainerID = PLOT_ID_PREFIX+k;
             selected_thread_stat[k] = v;
+            plotsContainer.innerHTML += `
+            <div class="col">
+                <h6>`+k+`</h6>
+                <div style="width: 100%;height:400px;" id="`+plotContainerID+`"></div>
+            </div>
+            `;
+        }
+
+        for (const [thread_name, v] of Object.entries(selected_thread_stat)) {
+            const plotContainerID = PLOT_ID_PREFIX+thread_name;
+            console.log("idddd", plotContainerID, document.getElementById(plotContainerID));
+
+            // Create the echarts instance
+            var maxStackSizeChart = echarts.init(
+                document.getElementById(plotContainerID),
+                {width: "95%", height: 400}
+            );
+
+            // Draw the chart
+            maxStackSizeChart.setOption({
+                title: {text: ''},
+                colorBy: 'series',
+                color: ['#e5f5e0','#c7e9c0','#a1d99b','#74c476','#41ab5d','#238b45','#006d2c','#00441b'],
+                tooltip: {
+                    trigger: 'axis',
+                },
+                legend: {
+                    data: ['Email', 'Union Ads'],
+                },
+                grid: {
+                    left: '3%',
+                    right: '4%',
+                    bottom: '3%',
+                    containLabel: true
+                },
+                toolbox: {
+                    feature: {
+                        saveAsImage: {}
+                    }
+                },
+                xAxis: [
+                    {
+                    type: 'category',
+                    boundaryGap: false,
+                    data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+                    }
+                ],
+                yAxis: {
+                    type: 'value'
+                },
+                series: [
+                    {
+                        name: 'Email',
+                        type: 'line',
+                        stack: 'Total',
+                        areaStyle: {},
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        step: true,
+                        data: [120, 132, 101, 134, 90, 230, 210]
+                    },
+                    {
+                        name: 'Union Ads',
+                        type: 'line',
+                        stack: 'Total',
+                        areaStyle: {},
+                        emphasis: {
+                            focus: 'series'
+                        },
+                        step: true,
+                        data: [220, 182, 191, 234, 290, 330, 310]
+                    }
+                ]
+            });
         }
     };
 
@@ -100,11 +182,16 @@
 
             <h3>Stack data for {symbols.selected_version}</h3>
 
+            <Row cols={{ lg: 3, md: 2, sm: 1 }} id="plotsContainer">
+            </Row>
+
+
             {#key selected_thread_stat}
+
 
             <ul>
                 {#each Object.keys(selected_thread_stat) as thread_name, index (thread_name+index)}
-                <h4>Thread stats for '{thread_name}'</h4>
+                <h4>{thread_name}</h4>
 
                 <Table>
                     <thead>

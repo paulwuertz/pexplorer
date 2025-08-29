@@ -213,6 +213,11 @@
                 },
                 series: alloc_call_data
             });
+
+
+            for (const [k,v] of Object.entries(versionObj["stack_reports"])) {
+                selected_thread_stat[k] = v;
+            }
         }
     });
 </script>
