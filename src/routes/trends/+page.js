@@ -7,13 +7,13 @@ export const ssr = false;
 export const csr = true;
 
 export async function load({ url, parent }) {
-    // load elf data
-    let componentData = await parent();
-    console.log("sym",symbols)
+	// load elf data
+	let componentData = await parent();
+	console.log('sym', symbols);
 
-    if (!symbols.elfDataProvided){
-        goto("/");
-        return;
-    }
+	if (!symbols.elfDataProvided) {
+		goto('/');
+		return;
+	}
 	return componentData;
-};
+}

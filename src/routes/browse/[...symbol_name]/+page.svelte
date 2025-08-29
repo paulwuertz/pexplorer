@@ -1,21 +1,20 @@
 <script>
-    import { page } from '$app/stores';
-    import { writable } from "svelte/store";
-    import { base } from '$app/paths';
+	import { page } from '$app/stores';
+	import { writable } from 'svelte/store';
+	import { base } from '$app/paths';
 
 	let { data } = $props();
 </script>
 
 <div class="flex">
-    {JSON.stringify(data.currentSubfolders)}
-    <a href="/symbols/home/p4w5/git/cannecti/cannectivity/app/">test</a>
-    <ul>
-        {#each data.currentSubfolders as sym}
-        <li><a href="./{sym}">{sym}</a></li>
-		<!--li><a href="/symbols/{sym.file}">{sym.display_name}</a></li-->
-        {/each}
-    </ul>
-
+	{JSON.stringify(data.currentSubfolders)}
+	<a href="/symbols/home/p4w5/git/cannecti/cannectivity/app/">test</a>
+	<ul>
+		{#each data.currentSubfolders as sym}
+			<li><a href="./{sym}">{sym}</a></li>
+			<!--li><a href="/symbols/{sym.file}">{sym.display_name}</a></li-->
+		{/each}
+	</ul>
 </div>
 
 <style>

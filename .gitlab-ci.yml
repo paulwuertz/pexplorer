@@ -12,8 +12,8 @@ pages:
     - mv build public
   artifacts:
     paths:
-    - public
+      - public
   only:
-  - main
+    - main
   tags:
     - docker
