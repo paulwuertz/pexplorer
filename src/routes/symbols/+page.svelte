@@ -8,9 +8,10 @@
     import { DataTable } from '@careswitch/svelte-data-table';
     import { Badge, Button, Col, Container, Input, Row, Table } from '@sveltestrap/sveltestrap';
 
-	import { symbols } from '../symbols.svelte.js';
+    import { symbols } from '../symbols.svelte.js';
+    import * as helpers from "../helpers.js"
 
-	let { data } = $props();
+    let { data } = $props();
     let files = $state();
     let versions = $derived(Object.keys(symbols.symbols));
     let selected_symbols = $state({});
@@ -36,33 +37,10 @@
 		]
 	}));
 
-    let symbolsToMap = (syms) => {
-        let symMap = {};
-        for (const sym of syms) {
-            sym.remark = sym.called_from_other_file ? "x-module" : "";
-            sym.newSymbols = false;
-            sym.deletedSymbols = false;
-            symMap[sym.file+sym.display_name] = sym;
-        }
-        return symMap;
-    }
-
-    let symbolsToFunctionMap = (symMap) => {
-        return Object.values(symMap).filter((e) => {return e["type"] === "function";})
-    }
-
-    let symbolsToVariableMap = (symMap) => {
-        return Object.values(symMap).filter((e) => {return e["type"] === "variable";})
-    }
-
-    let symMapToSymNameSet = (symMap) => {
-        return new Set(Object.keys(symMap));
-    }
-
     const updateSelectedSymbols = () => {
-        selected_symbols = symbolsToMap(symbols.symbols[symbols.selected_version]["symbols"]);
-        function_table_data = symbolsToFunctionMap(selected_symbols);
-        variable_table_data = symbolsToVariableMap(selected_symbols);
+        selected_symbols = helpers.symbolsToMap(symbols.symbols[symbols.selected_version]["symbols"]);
+        function_table_data = helpers.symbolsToFunctionMap(selected_symbols);
+        variable_table_data = helpers.symbolsToVariableMap(selected_symbols);
         //alert(function_table_data.length+" !! "+variable_table_data.length)
         function_table = new DataTable({
             pageSize: function_table_data.length,

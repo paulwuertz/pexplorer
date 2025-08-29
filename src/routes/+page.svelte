@@ -10,6 +10,7 @@
     } from '@sveltestrap/sveltestrap';
 
   	import { symbols } from './symbols.svelte.js';
+    import * as helpers from "./helpers.js"
 
     let CANNECTIVITY_SAMPLE_URL = "https://p4w5.eu/report.json"
     let { data } = $props();
@@ -22,33 +23,10 @@
     let function_table_data = $state([]);
     let variable_table_data = $state([]);
 
-    let symbolsToMap = (syms) => {
-        let symMap = {};
-        for (const sym of syms) {
-            sym.remark = sym.called_from_other_file ? "x-module" : "";
-            sym.newSymbols = false;
-            sym.deletedSymbols = false;
-            symMap[sym.file+sym.display_name] = sym;
-        }
-        return symMap;
-    }
-
-    let symbolsToFunctionMap = (symMap) => {
-        return Object.values(symMap).filter((e) => {return e["type"] === "function";})
-    }
-
-    let symbolsToVariableMap = (symMap) => {
-        return Object.values(symMap).filter((e) => {return e["type"] === "variable";})
-    }
-
-    let symMapToSymNameSet = (symMap) => {
-        return new Set(Object.keys(symMap));
-    }
-
     const updateSelectedSymbols = () => {
-        selected_symbols = symbolsToMap(symbols.symbols[symbols.selected_version]["symbols"]);
-        function_table_data = symbolsToFunctionMap(selected_symbols);
-        variable_table_data = symbolsToVariableMap(selected_symbols);
+        selected_symbols = helpers.symbolsToMap(symbols.symbols[symbols.selected_version]["symbols"]);
+        function_table_data = helpers.symbolsToFunctionMap(selected_symbols);
+        variable_table_data = helpers.symbolsToVariableMap(selected_symbols);
     };
 
     const updateSelectedVersion = () => {
@@ -175,7 +153,7 @@
             <Input type="file" accept="*/json" bind:files id="elfinput" name="elfinput" />
             <Button size="md" color="success">Upload symbols</Button>
           </InputGroup>
-          
+
           <br>
 
           <CardSubtitle><b>Load a sample:</b></CardSubtitle>

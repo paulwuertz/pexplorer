@@ -11,80 +11,18 @@
 	import { symbols } from '../symbols.svelte.js';
 
 	import * as echarts from 'echarts';
+    import * as helpers from "../helpers.js";
 
 	let { data } = $props();
     let files = $state();
     let versions = $derived(Object.keys(symbols.symbols));
     let selected_symbols = $state({});
 
-    let symbolsToMap = (syms) => {
-        let symMap = {};
-        for (const sym of syms) {
-            sym.remark = sym.called_from_other_file ? "x-module" : "";
-            sym.newSymbols = false;
-            sym.deletedSymbols = false;
-            symMap[sym.file+sym.display_name] = sym;
-        }
-        return symMap;
-    }
-
-    let symbolsToFunctionMap = (symMap) => {
-        return Object.values(symMap).filter((e) => {return e["type"] === "function";})
-    }
-
-    let symbolsToVariableMap = (symMap) => {
-        return Object.values(symMap).filter((e) => {return e["type"] === "variable";})
-    }
-
-    let symMapToSymNameSet = (symMap) => {
-        return new Set(Object.keys(symMap));
-    }
-
-    let get_all_threads = (allSymVersions) => {
-        let threads = new Set();
-            console.log(allSymVersions)
-        for(let symVersion of Object.values(allSymVersions)){
-            for(let thread_name of Object.keys(symVersion["stack_reports"])){
-                threads.add(thread_name);
-            }
-        }
-        // alert(threads)
-        return threads;
-    }
-
-    /**
-     * Gets all versions ordered by timestamp
-     * @param allSymVersions
-     */
-    let get_versions_ordered_by_timestamps = (allSymVersions) => {
-        let versions = [];
-        // get all versions
-        for(const [versionStr, symVersion] of Object.entries(allSymVersions)){
-            const timestamp = new Date(symVersion["timestamp"]);
-            versions.push({"version": versionStr, "timestamp": timestamp})
-        }
-        versions.sort(function(a, b) {
-            return a["timestamp"] > b["timestamp"];
-        });
-        return versions;
-    }
-
-    let get_max_stack_sizes_of_thread = (allSymVersions, threadname) => {
-        let threads = new Set();
-        for(let symVersion of Object.values(allSymVersions)){
-            for(let thread_name of Object.keys(symVersion["stack_reports"])){
-                threads.add(thread_name);
-            }
-        }
-        // alert(threads)
-        return threads;
-    }
-
     onMount(async () => {
         if (browser) {
             let trend_data = versions;
-            let threads = get_all_threads(symbols.symbols)
-            let ordered_versions_and_timestamps = get_versions_ordered_by_timestamps(symbols.symbols);
+            let threads = helpers.get_all_threads(symbols.symbols)
+            let ordered_versions_and_timestamps = helpers.get_versions_ordered_by_timestamps(symbols.symbols);
             let ordered_versions = ordered_versions_and_timestamps.map( vt => vt["version"])
             let ordered_timestamps = ordered_versions_and_timestamps.map( vt => vt["timestamp"].getTime())
 
@@ -213,11 +151,6 @@
                 },
                 series: alloc_call_data
             });
-
-
-            for (const [k,v] of Object.entries(versionObj["stack_reports"])) {
-                selected_thread_stat[k] = v;
-            }
         }
     });
 </script>

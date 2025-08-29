@@ -18,38 +18,19 @@
     let versions = $derived(Object.keys(symbols.symbols));
     let selected_thread_stat = $state({});
 
-    let symbolsToMap = (syms) => {
-        let symMap = {};
-        for (const sym of syms) {
-            sym.remark = sym.called_from_other_file ? "x-module" : "";
-            sym.newSymbols = false;
-            sym.deletedSymbols = false;
-            symMap[sym.file+sym.display_name] = sym;
-        }
-        return symMap;
-    }
-
-    let symbolsToFunctionMap = (symMap) => {
-        return Object.values(symMap).filter((e) => {return e["type"] === "function";})
-    }
-
-    let symbolsToVariableMap = (symMap) => {
-        return Object.values(symMap).filter((e) => {return e["type"] === "variable";})
-    }
-
-    let symMapToSymNameSet = (symMap) => {
-        return new Set(Object.keys(symMap));
-    }
-
     const updateSelectedSymbols = () => {
         let versionObj = symbols.symbols[symbols.selected_version];
         if(!versionObj || !versionObj.hasOwnProperty("stack_reports")) return;
         console.log(versionObj["stack_reports"]);
         let plotsContainer = document.getElementById("plotsContainer");
         plotsContainer.innerHTML = "";
+
+        let tread_stack_series_map = {};
         for (const [k,v] of Object.entries(versionObj["stack_reports"])) {
             const plotContainerID = PLOT_ID_PREFIX+k;
             selected_thread_stat[k] = v;
+            //let
+            tread_stack_series_map[k] =
             plotsContainer.innerHTML += `
             <div class="col">
                 <h6>`+k+`</h6>
@@ -182,12 +163,9 @@
 
             <h3>Stack data for {symbols.selected_version}</h3>
 
-            <Row cols={{ lg: 3, md: 2, sm: 1 }} id="plotsContainer">
-            </Row>
-
+            <Row cols={{ lg: 3, md: 2, sm: 1 }} id="plotsContainer"></Row>
 
             {#key selected_thread_stat}
-
 
             <ul>
                 {#each Object.keys(selected_thread_stat) as thread_name, index (thread_name+index)}

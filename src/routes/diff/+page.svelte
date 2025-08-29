@@ -9,6 +9,7 @@
     import { Button, Col, Container, Input, Row, Table } from '@sveltestrap/sveltestrap';
 
     import { symbols } from '../symbols.svelte.js';
+    import * as helpers from "../helpers.js"
 
     let { data } = $props();
     let files = $state();
@@ -45,34 +46,6 @@
         ]
     }));
 
-    let symbolsToMap = (syms) => {
-        let symMap = {};
-        if(syms) {
-            for (const sym of syms) {
-                sym.remark = "";
-                sym.newSymbols = false;
-                sym.deletedSymbols = false;
-                sym.d_size = null;
-                sym.d_stack = null;
-                // TODO find sth that works for different build dirs and repeated sym+file-names
-                symMap[sym.base_file+sym.display_name] = sym;
-            }
-        }
-        return symMap;
-    }
-
-    let symbolsToFunctionMap = (symMap) => {
-        return Object.values(symMap).filter((e) => {return e["type"] === "function";})
-    }
-
-    let symbolsToVariableMap = (symMap) => {
-        return Object.values(symMap).filter((e) => {return e["type"] === "variable";})
-    }
-
-    let symMapToSymNameSet = (symMap) => {
-        return new Set(Object.keys(symMap));
-    }
-
     const updateSelectedSymbols = () => {
         if(symbols.selected_version && symbols.selected_versions_to_compare) {
             console.log("updateSelectedSymbols - all versions defined");
@@ -81,13 +54,13 @@
             return;
         }
 
-        selected_symbols = symbolsToMap(symbols.symbols[symbols.selected_version]["symbols"]);
-        selected_symbols_to_compare = symbolsToMap(symbols.symbols[symbols.selected_versions_to_compare]["symbols"]);
+        selected_symbols = helpers.symbolsToMap(symbols.symbols[symbols.selected_version]["symbols"]);
+        selected_symbols_to_compare = helpers.symbolsToMap(symbols.symbols[symbols.selected_versions_to_compare]["symbols"]);
         selected_thread_stat = symbols.symbols[symbols.selected_version]["stack_reports"];
         selected_thread_stat_to_compare = symbols.symbols[symbols.selected_versions_to_compare]["stack_reports"];
 
-        let symKey = symMapToSymNameSet(selected_symbols);
-        let symKey_ref = symMapToSymNameSet(selected_symbols_to_compare);
+        let symKey = helpers.symMapToSymNameSet(selected_symbols);
+        let symKey_ref = helpers.symMapToSymNameSet(selected_symbols_to_compare);
         let newSymbols = Object.keys(Object.fromEntries(symKey.difference(symKey_ref).entries()));
         let deletedSymbols = Object.keys(Object.fromEntries(symKey_ref.difference(symKey).entries()));
 
@@ -128,8 +101,8 @@
             }
         }
 
-        function_table_data = symbolsToFunctionMap(symbols_to_show);
-        variable_table_data = symbolsToVariableMap(symbols_to_show);
+        function_table_data = helpers.symbolsToFunctionMap(symbols_to_show);
+        variable_table_data = helpers.symbolsToVariableMap(symbols_to_show);
         //alert(function_table_data.length+" !! "+variable_table_data.length)
         function_table = new DataTable({
             pageSize: function_table_data.length,
