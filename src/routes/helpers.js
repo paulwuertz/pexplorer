@@ -25,16 +25,27 @@ export let symMapToSymNameSet = (symMap) => {
 	return new Set(Object.keys(symMap));
 };
 
-export let get_all_threads = (allSymVersions) => {
+export let get_all_threads_names = (allSymVersions) => {
 	let threads = new Set();
-	console.log(allSymVersions);
 	for (let symVersion of Object.values(allSymVersions)) {
 		for (let thread_name of Object.keys(symVersion['stack_reports'])) {
 			threads.add(thread_name);
 		}
 	}
-	// alert(threads)
 	return threads;
+};
+
+export let get_all_threads_function_names_on_stacks = (allSymVersions) => {
+	let functions = new Set();
+	for (let symVersion of Object.values(allSymVersions)) {
+		for (let thread_obj of Object.values(symVersion['stack_reports'])) {
+			if (typeof thread_obj != 'object') continue;
+			for (let function_obj of thread_obj['call_stack']) {
+				functions.add(function_obj['function']);
+			}
+		}
+	}
+	return functions;
 };
 
 /**

@@ -8,6 +8,7 @@
 	import { Badge, Button, Col, Container, Input, Row, Table } from '@sveltestrap/sveltestrap';
 
 	import { symbols } from '../symbols.svelte.js';
+	import * as helpers from '../helpers.js';
 
 	import * as echarts from 'echarts';
 
@@ -21,20 +22,46 @@
 	const updateSelectedSymbols = () => {
 		let versionObj = symbols.symbols[symbols.selected_version];
 		if (!versionObj || !versionObj.hasOwnProperty('stack_reports')) return;
-		console.log(versionObj['stack_reports']);
 		let plotsContainer = document.getElementById('plotsContainer');
 		plotsContainer.innerHTML = '';
 
-		let tread_stack_series_map = {};
-		for (const [k, v] of Object.entries(versionObj['stack_reports'])) {
-			const plotContainerID = PLOT_ID_PREFIX + k;
-			selected_thread_stat[k] = v;
-			//let
-			tread_stack_series_map[k] = plotsContainer.innerHTML +=
+		let firmware_versions = helpers.get_versions_ordered_by_timestamps(symbols.symbols);
+		let all_threads_names = helpers.get_all_threads_names(symbols.symbols);
+		let all_fuctions_names = helpers.get_all_threads_function_names_on_stacks(symbols.symbols);
+		let function_size_series_map = {};
+		// all sizes default to 0
+		for (const fuctions_names of all_fuctions_names) {
+			function_size_series_map[fuctions_names] = Array.from(
+				{ length: firmware_versions.length },
+				(v, i) => 0
+			);
+		}
+		// set sizes for function for all versions where it is defined
+		for (const functions_name of all_fuctions_names) {
+			let found = false;
+			for (const [i, version] of firmware_versions.entries()) {
+				let versionStr = version.version;
+				// console.log(versionStr, symbols.symbols[versionStr]);
+
+				let versionReport = symbols.symbols[versionStr]['stack_reports'];
+				for (const fn_call_stack_info of Object.values(versionReport)) {
+					let fn_call_stack = fn_call_stack_info.call_stack;
+					let symVersion = fn_call_stack.find((e) => e['function'] == functions_name);
+					if (!symVersion) {
+						continue;
+					}
+					function_size_series_map[functions_name][i] = symVersion['stack_size'];
+				}
+			}
+		}
+		for (const [thread_name, threadObj] of Object.entries(versionObj['stack_reports'])) {
+			const plotContainerID = PLOT_ID_PREFIX + thread_name;
+			selected_thread_stat[thread_name] = threadObj;
+			plotsContainer.innerHTML +=
 				`
             <div class="col">
                 <h6>` +
-				k +
+				thread_name +
 				`</h6>
                 <div style="width: 100%;height:400px;" id="` +
 				plotContainerID +
@@ -43,7 +70,7 @@
             `;
 		}
 
-		for (const [thread_name, v] of Object.entries(selected_thread_stat)) {
+		for (const [thread_name, thread_info] of Object.entries(selected_thread_stat)) {
 			const plotContainerID = PLOT_ID_PREFIX + thread_name;
 			console.log('idddd', plotContainerID, document.getElementById(plotContainerID));
 
@@ -52,6 +79,23 @@
 				width: '95%',
 				height: 400
 			});
+
+			let thread_function_stack_series = [];
+			for (const function_info of thread_info['call_stack']) {
+				let function_name = function_info['function'];
+				let function_stack_size_by_versions = function_size_series_map[function_name];
+				thread_function_stack_series.push({
+					name: function_name,
+					type: 'line',
+					stack: 'Total',
+					areaStyle: {},
+					emphasis: {
+						focus: 'series'
+					},
+					step: true,
+					data: function_stack_size_by_versions
+				});
+			}
 
 			// Draw the chart
 			maxStackSizeChart.setOption({
@@ -70,9 +114,9 @@
 				tooltip: {
 					trigger: 'axis'
 				},
-				legend: {
-					data: ['Email', 'Union Ads']
-				},
+				// legend: {
+				// 	data: ['Email', 'Union Ads']
+				// },
 				grid: {
 					left: '3%',
 					right: '4%',
@@ -88,36 +132,13 @@
 					{
 						type: 'category',
 						boundaryGap: false,
-						data: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun']
+						data: firmware_versions
 					}
 				],
 				yAxis: {
 					type: 'value'
 				},
-				series: [
-					{
-						name: 'Email',
-						type: 'line',
-						stack: 'Total',
-						areaStyle: {},
-						emphasis: {
-							focus: 'series'
-						},
-						step: true,
-						data: [120, 132, 101, 134, 90, 230, 210]
-					},
-					{
-						name: 'Union Ads',
-						type: 'line',
-						stack: 'Total',
-						areaStyle: {},
-						emphasis: {
-							focus: 'series'
-						},
-						step: true,
-						data: [220, 182, 191, 234, 290, 330, 310]
-					}
-				]
+				series: thread_function_stack_series
 			});
 		}
 	};

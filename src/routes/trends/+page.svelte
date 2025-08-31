@@ -21,7 +21,7 @@
 	onMount(async () => {
 		if (browser) {
 			let trend_data = versions;
-			let threads = helpers.get_all_threads(symbols.symbols);
+			let threads = helpers.get_all_threads_names(symbols.symbols);
 			let ordered_versions_and_timestamps = helpers.get_versions_ordered_by_timestamps(
 				symbols.symbols
 			);
