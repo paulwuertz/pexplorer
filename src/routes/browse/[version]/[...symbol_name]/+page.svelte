@@ -26,7 +26,7 @@
 	let code_size = $derived(symbol_data.size);
 
 	const callxrs_text_to_links = (callxrs_text) => {
-		return "/browse/" + symbol_version + "/" +  callxrs_text
+		return base+"/browse/" + symbol_version + "/" +  callxrs_text
 	};
 
 	const callxrs_text_to_symname = (callxrs_text) => {

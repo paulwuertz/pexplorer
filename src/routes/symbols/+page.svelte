@@ -73,7 +73,7 @@
 	};
 
 	const row2AHref = (row_data) => {
-		return "/browse/" + symbols.selected_version + "/" + row_data.file  + "/" + row_data.display_name
+		return base + "/browse/" + symbols.selected_version + "/" + row_data.file  + "/" + row_data.display_name
 	};
 
 	onMount(async () => {
