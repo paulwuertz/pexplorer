@@ -72,35 +72,9 @@
 		updateSelectedSymbols();
 	};
 
-	$effect(() => {
-		if (files) {
-			// Note that `files` is of type `FileList`, not an Array:
-			// https://developer.mozilla.org/en-US/docs/Web/API/FileList
-			console.log('files ' + files);
-			const file = files[0];
-
-			// Validate file existence and type
-			if (!file) {
-				console.log('No file selected. Please choose a file.', 'error');
-				return;
-			}
-
-			if (!(file.type.endsWith('JSON') || file.type.endsWith('json'))) {
-				console.log(file.type + 'Unsupported file type. Please select a text file.', 'error');
-				return;
-			}
-
-			// Read the file
-			const reader = new FileReader();
-			reader.onload = () => {
-				symbols.symbols = JSON.parse(reader.result);
-			};
-			reader.onerror = () => {
-				showMessage('Error reading the file. Please try again.', 'error');
-			};
-			reader.readAsText(file);
-		}
-	});
+	const row2AHref = (row_data) => {
+		return "/browse/" + symbols.selected_version + "/" + row_data.file  + "/" + row_data.display_name
+	};
 
 	onMount(async () => {
 		if (browser) {
@@ -172,7 +146,11 @@
 					{#each function_table.rows as row (row.file + row.name)}
 						<tr>
 							{#each function_table.columns as column (column.name)}
-								<td>{row[column.key]}</td>
+                                {#if column.key == "display_name"}
+                                    <td><a data-sveltekit-preload-data="tap" href="{row2AHref(row)}">{row[column.key]}</a></td>
+                                {:else}
+								    <td>{row[column.key]}</td>
+                                {/if}
 							{/each}
 						</tr>
 					{/each}
