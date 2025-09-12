@@ -1,6 +1,4 @@
 <script>
-	//import '../app.css';
-
 	let { children } = $props();
 
 	import { base } from '$app/paths';
@@ -62,3 +60,7 @@
 		<span class="secondary">– MIT license, copyright &copy; 2014-2025</span>
 	</Container>
 </div>
+
+<style>
+	@import 'https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css';
+</style>
