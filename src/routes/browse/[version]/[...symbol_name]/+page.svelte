@@ -4,6 +4,7 @@
 	import { base } from '$app/paths';
     import { symbols } from '../../../symbols.svelte.js';
 
+    import { Table } from '@sveltestrap/sveltestrap';
     import Highlight from "svelte-highlight";
     import atomOneDark from "svelte-highlight/styles/atom-one-dark";
     import armasm from "svelte-highlight/languages/armasm";
@@ -56,12 +57,11 @@
 
     <hr>
 
-    <table>
+    <Table hover bordered>
         <tbody>
 
             <tr>
-                <td><b>Address</b>;</td>
-                <td>{" "}</td>
+                <td><b>Address</b>:</td>
                 <td>
                     0x{address}
                 </td>
@@ -69,7 +69,6 @@
 
             <tr>
                 <td><b>Function code size</b>:</td>
-                <td>{" "}</td>
                 <td>
                     {code_size} bytes
                 </td>
@@ -77,7 +76,6 @@
 
             <tr>
                 <td><b>Callers </b> ({callers.length}):</td>
-                <td>{" "}</td>
                 <td>
                     {#each callers as caller}
                     <a href="{callxrs_text_to_links(caller)}">
@@ -91,7 +89,6 @@
             </tr>
             <tr>
                 <td><b>Callees</b> ({callees.length}):</td>
-                <td>{" "}</td>
                 <td>
                     {#each callees as callee}
                     <a href="{callxrs_text_to_links(callee)}">
@@ -104,24 +101,25 @@
                 </td>
             </tr>
         </tbody>
-    </table>
+    </Table>
 
+    <h4>Disassembly</h4>
     <!-- TODO figure out better export to highlight and diff... <Highlight language={armasm} {asm_code} /> -->
     <pre>
         {#if show_full_asm}
             {asm_code}
-		{:else}
+            {:else}
             {asm_code_preview}
             ...
         {/if}
-        <div class="center" onclick={() => show_full_asm=!show_full_asm}>
+        <span class="center" onclick={() => show_full_asm=!show_full_asm}>
             {#if show_full_asm}↑ show less ↑{:else}↓ show more ↓{/if}
-        </div>
+        </span>
     </pre>
 
     <h4>Stack Worst-Case Scenarios</h4>
 
-    <table>
+    <Table hover bordered>
         <thead>
             <tr>
                 <th>#</th>
@@ -158,15 +156,18 @@
             <tr>
                 <td></td>
                 <td></td>
-                <td>&sum; {symbol_data.deepest_callee_tree_size + symbol_data.deepest_caller_tree_size}</td>
+                <td><b>&sum; {symbol_data.deepest_callee_tree_size + symbol_data.deepest_caller_tree_size}</b></td>
             </tr>
         </tfoot>
-    </table>
+    </Table>
 </div>
 
 <style>
-table tbody tr:last-child {
-    border-bottom: 1px solid black;
-    border: 0;
+
+pre {
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  border-radius: 4px;
 }
+
 </style>

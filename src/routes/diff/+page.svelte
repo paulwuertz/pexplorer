@@ -290,7 +290,7 @@
 
 			<h3>Function symbols changed</h3>
 
-			<Table>
+			<Table hover bordered>
 				<thead>
 					<tr>
 						{#each function_table.columns as column (column.name)}
@@ -330,7 +330,7 @@
 
 			<h3>Variable symbols changed</h3>
 
-			<Table>
+			<Table hover bordered>
 				<thead>
 					<tr>
 						{#each variable_table.columns as column (column.name)}
