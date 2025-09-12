@@ -115,7 +115,7 @@
 		{:else}
 			<h3>Function symbols for {symbols.selected_version}</h3>
 
-			<Table>
+			<Table hover bordered>
 				<thead>
 					<tr>
 						{#each function_table.columns as column (column.name)}

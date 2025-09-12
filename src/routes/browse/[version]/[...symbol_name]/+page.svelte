@@ -9,6 +9,8 @@
     import atomOneDark from "svelte-highlight/styles/atom-one-dark";
     import armasm from "svelte-highlight/languages/armasm";
 
+	import * as helpers from '../../../helpers.js';
+
 	let { data, route, params } = $props();
 
     let show_full_asm = $state(false);
@@ -25,16 +27,6 @@
 	let deepest_callers_tree = $derived(JSON.parse(symbol_data.deepest_caller_tree || false));
 	let deepest_callees_tree = $derived(JSON.parse(symbol_data.deepest_callee_tree || false));
 	let code_size = $derived(symbol_data.size);
-
-	const callxrs_text_to_links = (callxrs_text) => {
-		return base+"/browse/" + symbol_version + "/" +  callxrs_text
-	};
-
-	const callxrs_text_to_symname = (callxrs_text) => {
-        let callxrs_slugs = callxrs_text.split("/")
-        let sym_name = callxrs_slugs[ callxrs_slugs.length - 1 ]
-        return sym_name
-	};
 
 	const worst_call_stack = () => {
         let my_symbol = {full_symbol_path: symbol_path_and_name, stack_size: symbol_data.stack_size};
@@ -78,9 +70,9 @@
                 <td><b>Callers </b> ({callers.length}):</td>
                 <td>
                     {#each callers as caller}
-                    <a href="{callxrs_text_to_links(caller)}">
+                    <a href="{helpers.callxrs_text_to_links(base, symbol_version, caller)}">
                         <small>
-                            {callxrs_text_to_symname(caller)}
+                            {helpers.callxrs_text_to_symname(caller)}
                         </small>
                     </a>{", "}
                     {/each}
@@ -91,9 +83,9 @@
                 <td><b>Callees</b> ({callees.length}):</td>
                 <td>
                     {#each callees as callee}
-                    <a href="{callxrs_text_to_links(callee)}">
+                    <a href="{helpers.callxrs_text_to_links(base, symbol_version, callee)}">
                         <small>
-                            {callxrs_text_to_symname(callee)}
+                            {helpers.callxrs_text_to_symname(callee)}
                         </small>
                     </a>{", "}
                     {/each}
@@ -134,14 +126,14 @@
                 <tr>
                     <td>{index + " "}</td>
                     <td>
-                        <a href="{callxrs_text_to_links(caller.full_symbol_path)}">
+                        <a href="{helpers.callxrs_text_to_links(base, symbol_version, caller.full_symbol_path)}">
                             {#if symbol_path_and_name.includes(caller.full_symbol_path)}
                                 <small>
-                                    <b>{callxrs_text_to_symname(caller.full_symbol_path)}</b> - (this function)
+                                    <b>{helpers.callxrs_text_to_symname(caller.full_symbol_path)}</b> - (this function)
                                 </small>
                             {:else}
                                 <small>
-                                    {callxrs_text_to_symname(caller.full_symbol_path)}
+                                    {helpers.callxrs_text_to_symname(caller.full_symbol_path)}
                                 </small>
                             {/if}
                         </a>

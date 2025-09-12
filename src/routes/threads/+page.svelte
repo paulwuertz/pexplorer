@@ -191,7 +191,7 @@
 					{#each Object.keys(selected_thread_stat) as thread_name, index (thread_name + index)}
 						<h4>{thread_name}</h4>
 
-						<Table>
+						<Table hover bordered>
 							<thead>
 								<tr>
 									<th width="100%">Name</th>
