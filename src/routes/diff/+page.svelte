@@ -73,7 +73,10 @@
 
 		symbols_to_show = {};
 		for (const symPath of deletedSymbols) {
-			selected_symbols_to_compare[symPath].remark += 'Deleted!';
+            if(selected_symbols_to_compare[symPath].remark){
+                selected_symbols_to_compare[symPath].remark += ", "
+            }
+			selected_symbols_to_compare[symPath].remark += 'Deleted in '+symbols.selected_versions_to_compare;
 			if (selected_symbols_to_compare[symPath].size) {
 				selected_symbols_to_compare[symPath].d_size = -selected_symbols_to_compare[symPath].size;
 			}
@@ -89,7 +92,10 @@
 			}
 			let shouldAdd = false;
 			if (newSymbols.includes(symPath)) {
-				selected_symbols[symPath].remark += 'Newly added!';
+                if(selected_symbols[symPath].remark){
+                    selected_symbols[symPath].remark += ", "
+                }
+				selected_symbols[symPath].remark += 'Newly added '+symbols.selected_versions_to_compare;
 				shouldAdd = true;
 			} else {
 				// if not a new variable check if it has a change in code or stack size

@@ -1,7 +1,7 @@
 export let symbolsToMap = (syms) => {
 	let symMap = {};
 	for (const sym of syms) {
-		sym.remark = sym.called_from_other_file ? 'x-module' : '';
+		sym.remark = sym.called_from_other_file ? 'linked-from-library' : '';
 		sym.newSymbols = false;
 		sym.deletedSymbols = false;
 		symMap[sym.file + sym.display_name] = sym;
