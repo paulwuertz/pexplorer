@@ -33,14 +33,35 @@
 		<NavbarToggler on:click={() => (isOpen = !isOpen)} />
 		<Collapse {isOpen} navbar expand="md" on:update={handleUpdate}>
 			<Nav class="ms-auto" navbar>
-				<NavItem><NavLink data-sveltekit-preload-data="tap" href="{base}/browse">Browse</NavLink></NavItem>
-				<NavItem><NavLink data-sveltekit-preload-data="tap" href="{base}/diff">Compare Versions</NavLink></NavItem>
-				<NavItem><NavLink data-sveltekit-preload-data="tap" href="{base}/">Interrupts (TODO)</NavLink></NavItem>
-				<NavItem><NavLink data-sveltekit-preload-data="tap" href="{base}/symbols">Symbols</NavLink></NavItem>
-				<NavItem><NavLink data-sveltekit-preload-data="tap" href="{base}/threads">Threads</NavLink></NavItem>
-				<NavItem><NavLink data-sveltekit-preload-data="tap" href="{base}/trends">Trends</NavLink></NavItem>
-				<NavItem><NavLink data-sveltekit-preload-data="tap" href="{base}/">Settings (TODO)</NavLink></NavItem>
-				<NavItem><NavLink data-sveltekit-preload-data="tap" href="{base}/">About (TODO)</NavLink></NavItem>
+				<NavItem
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/browse">Browse</NavLink></NavItem
+				>
+				<NavItem
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/diff">Compare Versions</NavLink
+					></NavItem
+				>
+				<NavItem
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/">Interrupts (TODO)</NavLink
+					></NavItem
+				>
+				<NavItem
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/symbols">Symbols</NavLink
+					></NavItem
+				>
+				<NavItem
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/threads">Threads</NavLink
+					></NavItem
+				>
+				<NavItem
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/trends">Trends</NavLink></NavItem
+				>
+				<NavItem
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/">Settings (TODO)</NavLink
+					></NavItem
+				>
+				<NavItem
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/">About (TODO)</NavLink></NavItem
+				>
 			</Nav>
 		</Collapse>
 	</Navbar>

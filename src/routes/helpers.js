@@ -77,11 +77,11 @@ export let get_max_stack_sizes_of_thread = (allSymVersions, threadname) => {
 };
 
 export const callxrs_text_to_links = (base, symbol_version, callxrs_text) => {
-    return base+"/browse/" + symbol_version + "/" +  callxrs_text
+	return base + '/browse/' + symbol_version + '/' + callxrs_text;
 };
 
 export const callxrs_text_to_symname = (callxrs_text) => {
-    let callxrs_slugs = callxrs_text.split("/")
-    let sym_name = callxrs_slugs[ callxrs_slugs.length - 1 ]
-    return sym_name
+	let callxrs_slugs = callxrs_text.split('/');
+	let sym_name = callxrs_slugs[callxrs_slugs.length - 1];
+	return sym_name;
 };

@@ -73,7 +73,15 @@
 	};
 
 	const row2AHref = (row_data) => {
-		return base + "/browse/" + symbols.selected_version + "/" + row_data.file  + "/" + row_data.display_name
+		return (
+			base +
+			'/browse/' +
+			symbols.selected_version +
+			'/' +
+			row_data.file +
+			'/' +
+			row_data.display_name
+		);
 	};
 
 	onMount(async () => {
@@ -146,11 +154,14 @@
 					{#each function_table.rows as row (row.file + row.name)}
 						<tr>
 							{#each function_table.columns as column (column.name)}
-                                {#if column.key == "display_name"}
-                                    <td><a data-sveltekit-preload-data="tap" href="{row2AHref(row)}">{row[column.key]}</a></td>
-                                {:else}
-								    <td>{row[column.key]}</td>
-                                {/if}
+								{#if column.key == 'display_name'}
+									<td
+										><a data-sveltekit-preload-data="tap" href={row2AHref(row)}>{row[column.key]}</a
+										></td
+									>
+								{:else}
+									<td>{row[column.key]}</td>
+								{/if}
 							{/each}
 						</tr>
 					{/each}
