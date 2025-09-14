@@ -4,6 +4,7 @@
 	import { base } from '$app/paths';
 	import { symbols } from '../../../symbols.svelte.js';
 
+	import { Breadcrumb, BreadcrumbItem } from '@sveltestrap/sveltestrap';
 	import { Table } from '@sveltestrap/sveltestrap';
 	import Highlight from 'svelte-highlight';
 	import atomOneDark from 'svelte-highlight/styles/atom-one-dark';
@@ -17,6 +18,15 @@
 
 	let symbol_version = $derived(params.version);
 	let symbol_path_and_name = $derived(params.symbol_name);
+	let symbol_path_elements_and_parent_links = $derived(
+		symbol_path_and_name
+			.split('/')
+			.slice(0, -1)
+			.map((ele, index, arr) => {
+				return [ele, arr.slice(0, index + 1).join('/')];
+			})
+	);
+	let symbol_path_active = symbol_path_and_name.split('/').slice(-1);
 	let symbol_data = $derived(
 		symbols.symbols[symbol_version].symbols.find((e) => {
 			return symbol_path_and_name.includes(e.file);
@@ -46,9 +56,14 @@
 <div class="container">
 	<hr />
 
-	<!-- TODO make it real breadcrumbs with links working :) -->
-	{' / '}
-	{symbol_path_and_name.split('/').join(' / ')}
+	<Breadcrumb divider="/">
+		{#each symbol_path_elements_and_parent_links as path_element_and_parent_links}
+			<BreadcrumbItem>
+				<a href={path_element_and_parent_links[1]}>{path_element_and_parent_links[0]}</a>
+			</BreadcrumbItem>
+		{/each}
+		<BreadcrumbItem active>{symbol_path_active}</BreadcrumbItem>
+	</Breadcrumb>
 
 	<hr />
 
