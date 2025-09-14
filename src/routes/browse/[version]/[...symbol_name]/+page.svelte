@@ -23,15 +23,22 @@
 			.split('/')
 			.slice(0, -1)
 			.map((ele, index, arr) => {
-				return [ele, arr.slice(0, index + 1).join('/')];
+				let parent_path = arr.slice(0, index + 1).join('/');
+				let parent_link = helpers.callxrs_text_to_links(base, symbol_version, parent_path);
+				return [ele, parent_link];
 			})
 	);
-	let symbol_path_active = symbol_path_and_name.split('/').slice(-1);
+	let symbol_path_active = $derived(symbol_path_and_name.split('/').slice(-1));
 	let symbol_data = $derived(
 		symbols.symbols[symbol_version].symbols.find((e) => {
 			return symbol_path_and_name.includes(e.file);
 		})
 	);
+	const isChildToPath = (symbol) => symbol.file.includes(symbol_path_and_name);
+	let symbol_childs = $derived(
+		symbols.symbols[symbol_version].symbols.filter(isChildToPath).sort()
+	);
+
 	// to display
 	let asm_code_preview = $derived(symbol_data.asm.slice(0, 5).join('\n'));
 	let address = $derived(symbol_data.address);
@@ -67,107 +74,137 @@
 
 	<hr />
 
-	<Table hover bordered>
-		<tbody>
-			<tr>
-				<td><b>Address</b>:</td>
-				<td>
-					0x{address}
-				</td>
-			</tr>
+	{#if symbol_data}
+		<Table hover bordered>
+			<tbody>
+				<tr>
+					<td><b>Address</b>:</td>
+					<td>
+						0x{address}
+					</td>
+				</tr>
 
-			<tr>
-				<td><b>Function code size</b>:</td>
-				<td>
-					{code_size} bytes
-				</td>
-			</tr>
+				<tr>
+					<td><b>Function code size</b>:</td>
+					<td>
+						{code_size} bytes
+					</td>
+				</tr>
 
-			<tr>
-				<td><b>Callers </b> ({callers.length}):</td>
-				<td>
-					{#each callers as caller}
-						<a href={helpers.callxrs_text_to_links(base, symbol_version, caller)}>
-							<small>
-								{helpers.callxrs_text_to_symname(caller)}
-							</small>
-						</a>{', '}
-					{/each}
-				</td>
-			</tr>
-			<tr>
-				<td><b>Callees</b> ({callees.length}):</td>
-				<td>
-					{#each callees as callee}
-						<a href={helpers.callxrs_text_to_links(base, symbol_version, callee)}>
-							<small>
-								{helpers.callxrs_text_to_symname(callee)}
-							</small>
-						</a>{', '}
-					{/each}
-				</td>
-			</tr>
-		</tbody>
-	</Table>
+				<tr>
+					<td><b>Callers </b> ({callers.length}):</td>
+					<td>
+						{#each callers as caller}
+							<a href={helpers.callxrs_text_to_links(base, symbol_version, caller)}>
+								<small>
+									{helpers.callxrs_text_to_symname(caller)}
+								</small>
+							</a>{', '}
+						{/each}
+					</td>
+				</tr>
+				<tr>
+					<td><b>Callees</b> ({callees.length}):</td>
+					<td>
+						{#each callees as callee}
+							<a href={helpers.callxrs_text_to_links(base, symbol_version, callee)}>
+								<small>
+									{helpers.callxrs_text_to_symname(callee)}
+								</small>
+							</a>{', '}
+						{/each}
+					</td>
+				</tr>
+			</tbody>
+		</Table>
 
-	<h4>Disassembly</h4>
-	<!-- TODO figure out better export to highlight and diff... <Highlight language={armasm} {asm_code} /> -->
-	<pre>
+		<h4>Disassembly</h4>
+		<!-- TODO figure out better export to highlight and diff... <Highlight language={armasm} {asm_code} /> -->
+		<pre>
         {#if show_full_asm}
-			{asm_code}
-		{:else}
-			{asm_code_preview}
+				{asm_code}
+			{:else}
+				{asm_code_preview}
             ...
-		{/if}
+			{/if}
         <span class="center" onclick={() => (show_full_asm = !show_full_asm)}>
             {#if show_full_asm}↑ show less ↑{:else}↓ show more ↓{/if}
         </span>
     </pre>
 
-	<h4>Stack Worst-Case Scenarios</h4>
+		<h4>Stack Worst-Case Scenarios</h4>
 
-	<Table hover bordered>
-		<thead>
-			<tr>
-				<th>#</th>
-				<th>Name</th>
-				<th>Stack size</th>
-			</tr>
-		</thead>
-		<tbody>
-			{#each worst_call_stack() as caller, index}
+		<Table hover bordered>
+			<thead>
 				<tr>
-					<td>{index + ' '}</td>
-					<td>
-						<a href={helpers.callxrs_text_to_links(base, symbol_version, caller.full_symbol_path)}>
-							{#if symbol_path_and_name.includes(caller.full_symbol_path)}
-								<small>
-									<b>{helpers.callxrs_text_to_symname(caller.full_symbol_path)}</b> - (this function)
-								</small>
-							{:else}
-								<small>
-									{helpers.callxrs_text_to_symname(caller.full_symbol_path)}
-								</small>
-							{/if}
-						</a>
-					</td>
-					<td>
-						{caller.stack_size}
-					</td>
+					<th>#</th>
+					<th>Name</th>
+					<th>Stack size</th>
 				</tr>
-			{/each}
-		</tbody>
-		<tfoot>
-			<tr>
-				<td></td>
-				<td></td>
-				<td
-					><b>&sum; {symbol_data.deepest_callee_tree_size + symbol_data.deepest_caller_tree_size}</b
-					></td
-				>
-			</tr>
-		</tfoot>
-	</Table>
+			</thead>
+			<tbody>
+				{#each worst_call_stack() as caller, index}
+					<tr>
+						<td>{index + ' '}</td>
+						<td>
+							<a
+								href={helpers.callxrs_text_to_links(base, symbol_version, caller.full_symbol_path)}
+							>
+								{#if symbol_path_and_name.includes(caller.full_symbol_path)}
+									<small>
+										<b>{helpers.callxrs_text_to_symname(caller.full_symbol_path)}</b> - (this function)
+									</small>
+								{:else}
+									<small>
+										{helpers.callxrs_text_to_symname(caller.full_symbol_path)}
+									</small>
+								{/if}
+							</a>
+						</td>
+						<td>
+							{caller.stack_size}
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+			<tfoot>
+				<tr>
+					<td></td>
+					<td></td>
+					<td
+						><b
+							>&sum; {symbol_data.deepest_callee_tree_size +
+								symbol_data.deepest_caller_tree_size}</b
+						></td
+					>
+				</tr>
+			</tfoot>
+		</Table>
+	{:else if symbol_childs}
+		<div>
+			{symbol_childs.length} child symbols in this path.
+		</div>
+
+		<!-- TODO reuse table from symbol page -->
+		<Table hover bordered>
+			<tbody>
+				<tr>
+					<td><b>Symbol name</b>:</td>
+				</tr>
+				{#each symbol_childs as child}
+					<tr>
+						<td
+							><a href={helpers.callxrs_text_to_links(base, symbol_version, child.file)}>
+								/{child.file + ':' + child.display_name + ':' + child.line}
+							</a></td
+						>
+					</tr>
+				{/each}
+			</tbody>
+		</Table>
+	{:else}
+		404 - nonononon
+	{/if}
 </div>
 
 <style>
