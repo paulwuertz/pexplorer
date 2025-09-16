@@ -84,7 +84,8 @@
 					radius: [0, '90%'],
 					label: {
 						rotate: 'radial',
-						minAngle: 15
+						minAngle: 15,
+						formatter: '{b} - {c}'
 					}
 				}
 			};
@@ -106,7 +107,8 @@
 					radius: [0, '90%'],
 					label: {
 						rotate: 'radial',
-						minAngle: 15
+						minAngle: 15,
+						formatter: '{b} - {c}'
 					}
 				}
 			};
