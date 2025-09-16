@@ -85,3 +85,47 @@ export const callxrs_text_to_symname = (callxrs_text) => {
 	let sym_name = callxrs_slugs[callxrs_slugs.length - 1];
 	return sym_name;
 };
+
+export const symbols_total_size = (symbols) => {
+	let summed_size = 0;
+	symbols.forEach((element) => {
+		summed_size += element.size;
+	});
+	return summed_size;
+};
+
+let add_sym_to_object_tree = (symbol, path_array, data_tree, data_field) => {
+	let entry = {
+		name: symbol.display_name,
+		value: symbol[data_field]
+	};
+	let folder_name = path_array.shift();
+	let current_branch = data_tree;
+	while (folder_name) {
+		let sub_branch = current_branch.find((e) => e.name == folder_name);
+		if (!sub_branch) {
+			let new_branch = { name: folder_name, children: [] };
+			current_branch.push(new_branch);
+			current_branch = new_branch.children;
+			// console.log("added", folder_name);
+		} else {
+			current_branch = sub_branch.children;
+			// console.log("enter+found", folder_name);
+		}
+		// next sub-branch
+		folder_name = path_array.shift();
+	}
+	current_branch.push(entry);
+};
+
+export const symbols_to_sunburst_tree_data = (symbols, data_field) => {
+	let data = [];
+	for (const symbol of symbols) {
+		if (typeof symbol.file !== 'string') {
+			continue;
+		}
+		let path_elements = symbol.file.split('/');
+		add_sym_to_object_tree(symbol, path_elements, data, data_field);
+	}
+	return data;
+};
