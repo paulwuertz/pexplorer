@@ -21,6 +21,8 @@
 	import * as helpers from './helpers.js';
 
 	let CANNECTIVITY_SAMPLE_URL = 'https://p4w5.eu/report.json';
+	let ZEPHYR_HELLO_SAMPLE_URL = 'https://p4w5.eu/reportHelloWorld.json';
+	let ZEPHYR_MQTT_SAMPLE_URL = 'https://p4w5.eu/reportMQTTPublisher.json';
 	let { data } = $props();
 
 	let files = $state();
@@ -111,6 +113,14 @@
 		addFirmwareByLink(CANNECTIVITY_SAMPLE_URL);
 	}
 
+	function addZephyrSampleHELLO() {
+		addFirmwareByLink(ZEPHYR_HELLO_SAMPLE_URL);
+	}
+
+	function addZephyrSampleMQTT() {
+		addFirmwareByLink(ZEPHYR_MQTT_SAMPLE_URL);
+	}
+
 	function addLink() {
 		addFirmwareByLink(link_input_field);
 		link_input_field = null;
@@ -169,8 +179,8 @@
 				<CardText>Do not have any and just want to see a demo? Then load a sample :)</CardText>
 				<ButtonGroup>
 					<Button color="light" onclick={addCanncectifitySample}>cannectivity Releases</Button>
-					<Button color="light">Sample2 (TODO)</Button>
-					<Button color="light">Sample3 (TODO)</Button>
+					<Button color="light" onclick={addZephyrSampleHELLO}>zephyr "hello world"</Button>
+					<Button color="light" onclick={addZephyrSampleMQTT}>zephyr MQTT pub</Button>
 					<Button color="light" onclick={addLocalSample}>Local report.json sample</Button>
 				</ButtonGroup>
 			</CardBody>
