@@ -14,7 +14,7 @@
 	import * as echarts from 'echarts';
 	import * as helpers from '../../../helpers.js';
 
-	let { data, route, params } = $props();
+	let { route, params } = $props();
 
 	let show_full_asm = $state(false);
 
