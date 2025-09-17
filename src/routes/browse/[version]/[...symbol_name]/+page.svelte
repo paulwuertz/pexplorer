@@ -14,8 +14,9 @@
 	import * as echarts from 'echarts';
 	import * as helpers from '../../../helpers.js';
 
-	let { route, params } = $props();
-
+	let { route, data } = $props();
+	let params = data;
+	console.log('side return', route, params);
 	let show_full_asm = $state(false);
 
 	let symbol_version = $derived(params.version);

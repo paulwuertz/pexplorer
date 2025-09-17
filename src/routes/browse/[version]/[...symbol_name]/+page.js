@@ -14,5 +14,6 @@ export async function load({ route, params }) {
 		goto('/');
 		return;
 	}
+	console.log('load return', route, params);
 	return (route, params);
 }
