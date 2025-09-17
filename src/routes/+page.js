@@ -1,5 +1,10 @@
 import { symbols } from './symbols.svelte.js';
 
+export const trailingSlash = 'always';
+export const prerender = false;
+export const ssr = false;
+export const csr = true;
+
 export async function load({ fetch, url }) {
 	// load elf data
 	let componentData = {};
