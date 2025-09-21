@@ -72,18 +72,6 @@
 		updateSelectedSymbols();
 	};
 
-	const row2AHref = (row_data) => {
-		return (
-			base +
-			'/browse/' +
-			symbols.selected_version +
-			'/' +
-			row_data.file +
-			'/' +
-			row_data.display_name
-		);
-	};
-
 	onMount(async () => {
 		if (browser) {
 			// load elf data
@@ -155,9 +143,11 @@
 						<tr>
 							{#each function_table.columns as column (column.name)}
 								{#if column.key == 'display_name'}
-									<td
-										><a data-sveltekit-preload-data="tap" href={row2AHref(row)}>{row[column.key]}</a
-										></td
+									<td>
+                                        <a data-sveltekit-preload-data="tap" href={helpers.row2AHref(base, symbols.selected_version, row)}>
+                                            {row[column.key]}
+                                        </a>
+                                    </td
 									>
 								{:else}
 									<td>{row[column.key]}</td>

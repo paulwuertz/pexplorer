@@ -295,7 +295,7 @@
 				</ul>
 			{/key}
 
-			<h3>Function symbols changed</h3>
+			<h3>Function symbols changed ({function_table.rows.length})</h3>
 
 			<Table hover bordered>
 				<thead>
@@ -328,14 +328,22 @@
 					{#each function_table.rows as row (row.file + row.name)}
 						<tr>
 							{#each function_table.columns as column (column.name)}
-								<td>{row[column.key]}</td>
+                            	{#if column.name === 'Name'}
+                                    <td>
+                                        <a data-sveltekit-preload-data="tap" href={helpers.row2AHref(base, symbols.selected_version, row)}>
+                                            {row[column.key]}
+                                        </a>
+                                    </td>
+                                {:else}
+                                    <td>{row[column.key]}</td>
+                                {/if}
 							{/each}
 						</tr>
 					{/each}
 				</tbody>
 			</Table>
 
-			<h3>Variable symbols changed</h3>
+			<h3>Variable symbols changed ({variable_table.rows.length})</h3>
 
 			<Table hover bordered>
 				<thead>

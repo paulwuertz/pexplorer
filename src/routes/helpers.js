@@ -129,3 +129,15 @@ export const symbols_to_sunburst_tree_data = (symbols, data_field) => {
 	}
 	return data;
 };
+
+export const row2AHref = (base, selected_version, row_data) => {
+    return (
+        base +
+        '/browse/' +
+        selected_version +
+        '/' +
+        row_data.file +
+        '/' +
+        row_data.display_name
+    );
+};
