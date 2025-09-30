@@ -163,7 +163,7 @@
 
 				<br />
 
-				<CardSubtitle><b>By file (TODO enable again :):</b></CardSubtitle>
+				<CardSubtitle><b>By file:</b></CardSubtitle>
 				<CardText
 					>Uploading the symbol file is session based and is reset when refreshing or returning
 					later.</CardText
@@ -220,3 +220,9 @@
 		</Card>
 	</Container>
 </div>
+
+<style>
+    #content {
+        margin-top: 20px;
+    }
+</style>
