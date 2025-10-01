@@ -14,35 +14,23 @@
 		CardText,
 		CardTitle,
 		Input,
-		InputGroup
+		InputGroup,
+        Row
 	} from '@sveltestrap/sveltestrap';
 
 	import { symbols } from './symbols.svelte.js';
-	import * as helpers from './helpers.js';
 
 	let CANNECTIVITY_SAMPLE_URL = 'https://p4w5.eu/report.json';
 	let ZEPHYR_HELLO_SAMPLE_URL = 'https://p4w5.eu/reportHelloWorld.json';
 	let ZEPHYR_MQTT_SAMPLE_URL = 'https://p4w5.eu/reportMQTTPublisher.json';
-	let { data } = $props();
 
 	let files = $state();
 	let link_input_field = $state();
+	let symbol_map = $state(symbols.symbols);
 	let symbol_links = $state(symbols.symbolLinks);
-	let versions = $derived(Object.keys(symbols.symbols));
-	let selected_symbols = $state({});
-	let function_table_data = $state([]);
-	let variable_table_data = $state([]);
-
-	const updateSelectedSymbols = () => {
-		selected_symbols = helpers.symbolsToMap(symbols.symbols[symbols.selected_version]['symbols']);
-		function_table_data = helpers.symbolsToFunctionMap(selected_symbols);
-		variable_table_data = helpers.symbolsToVariableMap(selected_symbols);
-	};
-
-	const updateSelectedVersion = () => {
-		localStorage.selected_version = symbols.selected_version;
-		updateSelectedSymbols();
-	};
+	let versions = $derived(Object.keys(symbol_map));
+	let selected_primary_versions = $state(undefined);
+	let selected_secondary_versions = $state(undefined);
 
 	$effect(() => {
 		if (files) {
@@ -68,24 +56,9 @@
 				symbols.symbols = JSON.parse(reader.result);
 			};
 			reader.onerror = () => {
-				alert('Error reading the file. Please try again.', 'error');
+				alert('Error reading the file. Please try again.');
 			};
 			reader.readAsText(file);
-		}
-	});
-
-	onMount(async () => {
-		if (browser) {
-			// load elf data
-			if (symbols.symbols && Object.keys(symbols.symbols).length == 0) {
-				console.log('No ELF data URL passed or stored, please upload it as a file then :)');
-			} else {
-				if (symbols.selected_version && symbols.selected_versions_to_compare) {
-					updateSelectedSymbols();
-				} else {
-					console.log('ELF loaded, please select which version to show :)');
-				}
-			}
 		}
 	});
 
@@ -130,20 +103,46 @@
 		localStorage.removeItem('lastOpenElfURLs');
 		symbol_links = [];
 		versions = [];
-		selected_symbols = {};
 		symbols.symbols = {};
 		symbols.symbolLinks = [];
-		symbols.selected_version = null;
-		symbols.selected_versions_to_compare = null;
 		symbols.elfDataProvided = false;
+        selected_primary_versions = undefined;
+        selected_secondary_versions = undefined;
 	}
+
+    const reset_selected_versions = () => {
+        selected_primary_versions = undefined;
+        selected_secondary_versions = undefined;
+    };
+
+    const reset_secondary_versions = () => {
+        selected_secondary_versions = undefined;
+    };
+
+    const select_version = (version) => {
+        if(!selected_primary_versions){
+            selected_primary_versions = version
+        }
+        else if(!selected_secondary_versions) {
+            selected_secondary_versions = version
+        } else {
+            alert("Only one version to view and a 2nd to compare can be selected. \n" +
+                  "To view another one reset selection and select a new one.")
+        }
+        return ;
+    };
 </script>
 
 <div class="container" id="content">
 	<Container fluid>
 		<Card>
 			<CardHeader>
-				<CardTitle>Add your firmwares symbol files</CardTitle>
+				<CardTitle>
+                    Step 1: Add your firmwares symbol files
+                    {#if versions.length }
+                        ✅
+                    {/if}
+                </CardTitle>
 			</CardHeader>
 			<CardBody>
 				<CardSubtitle><b>By link:</b></CardSubtitle>
@@ -216,6 +215,63 @@
 				</ul>
 
 				<Button size="md" color="danger" onclick={resetLinks}>Clear all links and files</Button>
+			</CardFooter>
+		</Card>
+
+		<Card class="mt-3">
+			<CardHeader>
+				<CardTitle>
+                    Step 2: Select a version to explore (mandatory) +
+                    {#if selected_primary_versions }
+                        ✅
+                    {/if}
+                    Step 2: Select a second version to compare (optional)
+                    {#if selected_secondary_versions }
+                        ✅
+                    {/if}
+                </CardTitle>
+			</CardHeader>
+			<CardBody>
+                <Row cols={{ lg: 3, md: 2, sm: 1 }}>
+                        {#each versions as version ("verselbtns-"+version)}
+                            <div class="pb-3 px-3">
+                                <Card>
+                                    <CardHeader>
+                                        <CardTitle>{version}</CardTitle>
+                                    </CardHeader>
+                                    <CardBody>
+                                        <CardText>
+                                            <!-- TODO add source link symbol json -->
+                                            Buildtime: {symbols.symbols[version].timestamp}
+                                        </CardText>
+                                        {#if selected_primary_versions==version}
+                                            <Button color="success" onclick={reset_selected_versions}>
+                                                Selected to view
+                                            </Button>
+                                        {:else if selected_secondary_versions==version}
+                                            <Button color="primary"onclick={reset_secondary_versions}>
+                                                Selected to compare
+                                            </Button>
+                                        {:else if selected_primary_versions && selected_secondary_versions}
+                                            <Button onclick={() => select_version(version)}>
+                                                ---
+                                            </Button>
+                                        {:else}
+                                            <Button onclick={() => select_version(version)}>
+                                                Browse
+                                            </Button>
+                                        {/if}
+
+
+                                    </CardBody>
+                                </Card>
+                            </div>
+                        {/each}
+                </Row>
+			</CardBody>
+
+			<CardFooter>
+				<Button size="md" color="danger" onclick={reset_selected_versions}>Clear selected versions</Button>
 			</CardFooter>
 		</Card>
 	</Container>
