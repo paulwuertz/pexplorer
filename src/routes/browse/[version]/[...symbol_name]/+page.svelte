@@ -264,7 +264,10 @@
 				{#each symbol_childs as child}
 					<tr>
 						<td
-							><a data-sveltekit-preload-data="tap" href={helpers.row2AHref(base, symbol_version, child)}>
+							><a
+								data-sveltekit-preload-data="tap"
+								href={helpers.row2AHref(base, symbol_version, child)}
+							>
 								/{child.file + ':' + child.display_name + ':' + child.line}
 							</a></td
 						>

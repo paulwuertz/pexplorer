@@ -6,7 +6,17 @@
 	import { writable } from 'svelte/store';
 	// ui stuff
 	import { DataTable } from '@careswitch/svelte-data-table';
-	import { Badge, Button, Col, Container, Input, Row, Table } from '@sveltestrap/sveltestrap';
+	import {
+		Badge,
+		Button,
+		Col,
+		Container,
+		FormGroup,
+		Input,
+		Label,
+		Row,
+		Table
+	} from '@sveltestrap/sveltestrap';
 
 	import { symbols } from '../symbols.svelte.js';
 	import * as helpers from '../helpers.js';
@@ -19,7 +29,7 @@
 	let variable_table_data = $state([]);
 	let function_table = $derived(
 		new DataTable({
-			pageSize: 9999, // TODO
+			pageSize: 99999, // TODO
 			data: function_table_data,
 			columns: [
 				{ id: 'name', key: 'display_name', name: 'Name' },
@@ -100,6 +110,25 @@
 		</Col>
 	</Row>
 
+	<Row>
+		<Col>
+			Filter options:
+			<FormGroup>
+				<Input
+					type="text"
+					placeholder="Filter symbols by name"
+					class="md:m3-auto md:max-w-[500px]"
+					bind:value={function_table.globalFilter}
+				/>
+				<Label>
+					<p>
+						Showing {function_table.allRows.length} / {function_table.baseRows.length} functions
+					</p>
+				</Label>
+			</FormGroup>
+		</Col>
+	</Row>
+
 	<hr />
 
 	<Container fluid>
@@ -137,6 +166,21 @@
 							</th>
 						{/each}
 					</tr>
+					<tr>
+						{#each function_table.columns as column (column.name)}
+							<th>
+								{#if column.id == 'name'}
+									Sum of all selected symbols
+								{/if}
+								{#if column.id == 'size'}
+									&sum; = {function_table.allRows.reduce(
+										(accumulator, row) => accumulator + row.size,
+										0
+									)}
+								{/if}
+							</th>
+						{/each}
+					</tr>
 				</thead>
 				<tbody>
 					{#each function_table.rows as row (row.file + row.name)}
@@ -144,11 +188,13 @@
 							{#each function_table.columns as column (column.name)}
 								{#if column.key == 'display_name'}
 									<td>
-                                        <a data-sveltekit-preload-data="tap" href={helpers.row2AHref(base, symbols.selected_version, row)}>
-                                            {row[column.key]}
-                                        </a>
-                                    </td
-									>
+										<a
+											data-sveltekit-preload-data="tap"
+											href={helpers.row2AHref(base, symbols.selected_version, row)}
+										>
+											{row[column.key]}
+										</a>
+									</td>
 								{:else}
 									<td>{row[column.key]}</td>
 								{/if}

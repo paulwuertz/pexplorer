@@ -13,7 +13,7 @@ export async function load({ url, parent }) {
 	console.log('trends', symbols);
 
 	if (!symbols.elfDataProvided) {
-		goto(base+'/');
+		goto(base + '/');
 		return;
 	}
 	return componentData;

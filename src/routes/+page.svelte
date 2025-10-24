@@ -15,7 +15,7 @@
 		CardTitle,
 		Input,
 		InputGroup,
-        Row
+		Row
 	} from '@sveltestrap/sveltestrap';
 
 	import { symbols } from './symbols.svelte.js';
@@ -106,31 +106,32 @@
 		symbols.symbols = {};
 		symbols.symbolLinks = [];
 		symbols.elfDataProvided = false;
-        selected_primary_versions = undefined;
-        selected_secondary_versions = undefined;
+		selected_primary_versions = undefined;
+		selected_secondary_versions = undefined;
 	}
 
-    const reset_selected_versions = () => {
-        selected_primary_versions = undefined;
-        selected_secondary_versions = undefined;
-    };
+	const reset_selected_versions = () => {
+		selected_primary_versions = undefined;
+		selected_secondary_versions = undefined;
+	};
 
-    const reset_secondary_versions = () => {
-        selected_secondary_versions = undefined;
-    };
+	const reset_secondary_versions = () => {
+		selected_secondary_versions = undefined;
+	};
 
-    const select_version = (version) => {
-        if(!selected_primary_versions){
-            selected_primary_versions = version
-        }
-        else if(!selected_secondary_versions) {
-            selected_secondary_versions = version
-        } else {
-            alert("Only one version to view and a 2nd to compare can be selected. \n" +
-                  "To view another one reset selection and select a new one.")
-        }
-        return ;
-    };
+	const select_version = (version) => {
+		if (!selected_primary_versions) {
+			selected_primary_versions = version;
+		} else if (!selected_secondary_versions) {
+			selected_secondary_versions = version;
+		} else {
+			alert(
+				'Only one version to view and a 2nd to compare can be selected. \n' +
+					'To view another one reset selection and select a new one.'
+			);
+		}
+		return;
+	};
 </script>
 
 <div class="container" id="content">
@@ -138,11 +139,11 @@
 		<Card>
 			<CardHeader>
 				<CardTitle>
-                    Step 1: Add your firmwares symbol files
-                    {#if versions.length }
-                        ✅
-                    {/if}
-                </CardTitle>
+					Step 1: Add your firmwares symbol files
+					{#if versions.length}
+						✅
+					{/if}
+				</CardTitle>
 			</CardHeader>
 			<CardBody>
 				<CardSubtitle><b>By link:</b></CardSubtitle>

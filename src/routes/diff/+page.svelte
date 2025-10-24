@@ -328,15 +328,18 @@
 					{#each function_table.rows as row (row.file + row.name)}
 						<tr>
 							{#each function_table.columns as column (column.name)}
-                            	{#if column.name === 'Name'}
-                                    <td>
-                                        <a data-sveltekit-preload-data="tap" href={helpers.row2AHref(base, symbols.selected_version, row)}>
-                                            {row[column.key]}
-                                        </a>
-                                    </td>
-                                {:else}
-                                    <td>{row[column.key]}</td>
-                                {/if}
+								{#if column.name === 'Name'}
+									<td>
+										<a
+											data-sveltekit-preload-data="tap"
+											href={helpers.row2AHref(base, symbols.selected_version, row)}
+										>
+											{row[column.key]}
+										</a>
+									</td>
+								{:else}
+									<td>{row[column.key]}</td>
+								{/if}
 							{/each}
 						</tr>
 					{/each}

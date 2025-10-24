@@ -12,7 +12,7 @@ export async function load({ route, params }) {
 	console.log('sym', symbols);
 
 	if (!symbols.elfDataProvided) {
-		goto(base+'/');
+		goto(base + '/');
 		return;
 	}
 	console.log('load return', route, params);
