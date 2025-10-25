@@ -140,7 +140,7 @@
 		{:else}
 			<h3>Function symbols for {symbols.selected_version}</h3>
 
-			<Table hover bordered>
+			<Table hover bordered style="word-break: break-all;">
 				<thead>
 					<tr>
 						{#each function_table.columns as column (column.name)}
@@ -246,3 +246,9 @@
 		{/if}
 	</Container>
 </div>
+
+<style>
+	td {
+		min-width: 125px;
+	}
+</style>

@@ -219,67 +219,63 @@
 			</CardFooter>
 		</Card>
 
-		<Card class="mt-3">
+		<Card id="step2" class="mt-3">
 			<CardHeader>
 				<CardTitle>
-                    Step 2: Select a version to explore (mandatory) +
-                    {#if selected_primary_versions }
-                        ✅
-                    {/if}
-                    Step 2: Select a second version to compare (optional)
-                    {#if selected_secondary_versions }
-                        ✅
-                    {/if}
-                </CardTitle>
+					Step 2: Select a version to explore (mandatory) +
+					{#if selected_primary_versions}
+						✅
+					{/if}
+					Step 2: Select a second version to compare (optional)
+					{#if selected_secondary_versions}
+						✅
+					{/if}
+				</CardTitle>
 			</CardHeader>
 			<CardBody>
-                <Row cols={{ lg: 3, md: 2, sm: 1 }}>
-                        {#each versions as version ("verselbtns-"+version)}
-                            <div class="pb-3 px-3">
-                                <Card>
-                                    <CardHeader>
-                                        <CardTitle>{version}</CardTitle>
-                                    </CardHeader>
-                                    <CardBody>
-                                        <CardText>
-                                            <!-- TODO add source link symbol json -->
-                                            Buildtime: {symbols.symbols[version].timestamp}
-                                        </CardText>
-                                        {#if selected_primary_versions==version}
-                                            <Button color="success" onclick={reset_selected_versions}>
-                                                Selected to view
-                                            </Button>
-                                        {:else if selected_secondary_versions==version}
-                                            <Button color="primary"onclick={reset_secondary_versions}>
-                                                Selected to compare
-                                            </Button>
-                                        {:else if selected_primary_versions && selected_secondary_versions}
-                                            <Button onclick={() => select_version(version)}>
-                                                ---
-                                            </Button>
-                                        {:else}
-                                            <Button onclick={() => select_version(version)}>
-                                                Browse
-                                            </Button>
-                                        {/if}
-
-
-                                    </CardBody>
-                                </Card>
-                            </div>
-                        {/each}
-                </Row>
+				<Row cols={{ lg: 3, md: 2, sm: 1 }}>
+					{#each versions as version ('verselbtns-' + version)}
+						<div class="pb-3 px-3">
+							<Card>
+								<CardHeader>
+									<CardTitle>{version}</CardTitle>
+								</CardHeader>
+								<CardBody>
+									<CardText>
+										<!-- TODO add source link symbol json -->
+										Buildtime: {symbols.symbols[version].timestamp}
+									</CardText>
+									{#if selected_primary_versions == version}
+										<Button color="success" onclick={reset_selected_versions}>
+											Selected to view
+										</Button>
+									{:else if selected_secondary_versions == version}
+										<Button color="primary" onclick={reset_secondary_versions}>
+											Selected to compare
+										</Button>
+									{:else if selected_primary_versions && selected_secondary_versions}
+										<Button onclick={() => select_version(version)}>---</Button>
+									{:else}
+										<Button onclick={() => select_version(version)}>Browse</Button>
+									{/if}
+								</CardBody>
+							</Card>
+						</div>
+					{/each}
+				</Row>
 			</CardBody>
 
 			<CardFooter>
-				<Button size="md" color="danger" onclick={reset_selected_versions}>Clear selected versions</Button>
+				<Button size="md" color="danger" onclick={reset_selected_versions}
+					>Clear selected versions</Button
+				>
 			</CardFooter>
 		</Card>
 	</Container>
 </div>
 
 <style>
-    #content {
-        margin-top: 20px;
-    }
+	#content {
+		margin-top: 20px;
+	}
 </style>
