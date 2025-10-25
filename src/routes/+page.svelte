@@ -29,8 +29,8 @@
 	let symbol_map = $state(symbols.symbols);
 	let symbol_links = $state(symbols.symbolLinks);
 	let versions = $derived(Object.keys(symbol_map));
-	let selected_primary_versions = $state(undefined);
-	let selected_secondary_versions = $state(undefined);
+	let selected_primary_versions = $state(symbols.selected_version);
+	let selected_secondary_versions = $state(symbols.selected_versions_to_compare);
 
 	$effect(() => {
 		if (files) {
@@ -106,6 +106,10 @@
 		symbols.symbols = {};
 		symbols.symbolLinks = [];
 		symbols.elfDataProvided = false;
+		symbols.selected_version = undefined;
+		symbols.selected_versions_to_compare = undefined;
+		localStorage.removeItem('selected_version');
+		localStorage.removeItem('selected_versions_to_compare');
 		selected_primary_versions = undefined;
 		selected_secondary_versions = undefined;
 	}
@@ -113,17 +117,22 @@
 	const reset_selected_versions = () => {
 		selected_primary_versions = undefined;
 		selected_secondary_versions = undefined;
+		localStorage.removeItem('selected_version');
+		localStorage.removeItem('selected_versions_to_compare');
 	};
 
 	const reset_secondary_versions = () => {
 		selected_secondary_versions = undefined;
+		localStorage.removeItem('selected_versions_to_compare');
 	};
 
 	const select_version = (version) => {
 		if (!selected_primary_versions) {
 			selected_primary_versions = version;
+			localStorage.selected_version = version;
 		} else if (!selected_secondary_versions) {
 			selected_secondary_versions = version;
+			localStorage.selected_versions_to_compare = version;
 		} else {
 			alert(
 				'Only one version to view and a 2nd to compare can be selected. \n' +

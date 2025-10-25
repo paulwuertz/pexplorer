@@ -43,9 +43,10 @@
 	);
 
 	// to display
-	let asm_code_preview = $derived(symbol_data.asm.slice(0, 5).join('\n'));
+	let asm = $derived(Object.hasOwn(symbol_data, 'asm') ? symbol_data.asm : []);
+	let asm_code_preview = $derived(asm.slice(0, 5).join('\n'));
 	let address = $derived(symbol_data.address);
-	let asm_code = $derived(symbol_data.asm.join('\n'));
+	let asm_code = $derived(asm.join('\n'));
 	let callers = $derived(JSON.parse(symbol_data.callers));
 	let callees = $derived(JSON.parse(symbol_data.callees));
 	let deepest_callers_tree = $derived(JSON.parse(symbol_data.deepest_caller_tree || false));
@@ -137,7 +138,7 @@
 	<hr />
 
 	{#if symbol_data}
-		<Table hover bordered>
+		<Table style="word-break: break-all;" hover bordered>
 			<tbody>
 				<tr>
 					<td><b>Address</b>:</td>
@@ -196,7 +197,7 @@
 
 		<h4>Stack Worst-Case Scenarios</h4>
 
-		<Table hover bordered>
+		<Table style="word-break: break-all;" hover bordered>
 			<thead>
 				<tr>
 					<th>#</th>
@@ -256,7 +257,7 @@
 		{symbol_childs.length} child symbols in this path.
 
 		<!-- TODO reuse table from symbol page -->
-		<Table hover bordered>
+		<Table style="word-break: break-all;" hover bordered>
 			<tbody>
 				<tr>
 					<td><b>Symbol name</b>:</td>

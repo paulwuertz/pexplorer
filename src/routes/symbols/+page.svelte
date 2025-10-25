@@ -24,9 +24,14 @@
 	let { data } = $props();
 	let files = $state();
 	let versions = $derived(Object.keys(symbols.symbols));
-	let selected_symbols = $state({});
-	let function_table_data = $state([]);
-	let variable_table_data = $state([]);
+	let all_symbols = $derived(symbols.symbols);
+	let selected_version = $derived(symbols.selected_version);
+	let selected_symbol_array = $derived(
+		Object.hasOwn(all_symbols, selected_version) ? all_symbols[selected_version]['symbols'] : []
+	);
+	let selected_symbols = $derived(helpers.symbolsToMap($state.snapshot(selected_symbol_array)));
+	let function_table_data = $derived(helpers.symbolsToFunctionMap(selected_symbols));
+	let variable_table_data = $derived(helpers.symbolsToVariableMap(selected_symbols));
 	let function_table = $derived(
 		new DataTable({
 			pageSize: 99999, // TODO
@@ -52,9 +57,9 @@
 	);
 
 	const updateSelectedSymbols = () => {
-		selected_symbols = helpers.symbolsToMap(symbols.symbols[symbols.selected_version]['symbols']);
-		function_table_data = helpers.symbolsToFunctionMap(selected_symbols);
-		variable_table_data = helpers.symbolsToVariableMap(selected_symbols);
+		// selected_symbols =    ;
+		// function_table_data = ;
+		// variable_table_data = ;
 		//alert(function_table_data.length+" !! "+variable_table_data.length)
 		function_table = new DataTable({
 			pageSize: function_table_data.length,
@@ -88,7 +93,10 @@
 			if (Object.keys(symbols.symbols).length == 0) {
 				console.log('No ELF data URL passed or stored, please upload it as a file then :)');
 			} else {
-				if (symbols.selected_version && symbols.selected_versions_to_compare) {
+				const selected_version = localStorage.getItem('selected_version');
+				if (symbols.selected_version) {
+					updateSelectedSymbols();
+				} else if (selected_version) {
 					updateSelectedSymbols();
 				} else {
 					console.log('ELF loaded, please select which version to show :)');

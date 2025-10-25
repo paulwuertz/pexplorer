@@ -47,8 +47,10 @@ export async function load({ fetch, url }) {
 		const selected_version_param = url.searchParams.get('selected_version');
 		localStorage.selected_version = selected_version_param;
 		componentData.selected_version = selected_version_param;
+		symbols.selected_version = selected_version_param;
 	} else if (localStorage.getItem('selected_version')) {
 		componentData.selected_version = localStorage.getItem('selected_version');
+		symbols.selected_version = componentData.selected_version;
 	}
 
 	// version of the elf to compare to
@@ -57,10 +59,12 @@ export async function load({ fetch, url }) {
 		const selected_version_to_compare_param = url.searchParams.get('selected_versions_to_compare');
 		localStorage.selected_versions_to_compare = selected_version_to_compare_param;
 		componentData.selected_versions_to_compare = selected_version_to_compare_param;
+		symbols.selected_versions_to_compare = selected_version_to_compare_param;
 	} else if (localStorage.getItem('selected_versions_to_compare')) {
 		componentData.selected_versions_to_compare = localStorage.getItem(
 			'selected_versions_to_compare'
 		);
+		symbols.selected_versions_to_compare = componentData.selected_versions_to_compare;
 	}
 
 	// localstorage has 5-10 MB max so split TODO test compression...
