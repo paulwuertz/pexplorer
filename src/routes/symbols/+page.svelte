@@ -40,7 +40,8 @@
 				{ id: 'name', key: 'display_name', name: 'Name' },
 				{ id: 'remark', key: 'remark', name: 'Remarks' },
 				{ id: 'size', key: 'size', name: 'Code size' },
-				{ id: 'stack_size', key: 'stack_size', name: 'Stack size' }
+				{ id: 'stack_size', key: 'stack_size', name: 'Stack size' },
+				{ id: 'stack_qualifiers', key: 'stack_qualifiers', name: 'Stack size type' },
 			]
 		})
 	);
@@ -68,7 +69,8 @@
 				{ id: 'name', key: 'display_name', name: 'Name' },
 				{ id: 'remark', key: 'remark', name: 'Remarks' },
 				{ id: 'size', key: 'size', name: 'Code size' },
-				{ id: 'stack_size', key: 'stack_size', name: 'Stack size' }
+				{ id: 'stack_size', key: 'stack_size', name: 'Stack size' },
+				{ id: 'stack_qualifiers', key: 'stack_qualifiers', name: 'Stack size type' },
 			]
 		});
 		variable_table = new DataTable({
