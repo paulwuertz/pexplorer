@@ -15,8 +15,7 @@
 	import * as helpers from '../../../helpers.js';
 
 	let { route, data } = $props();
-	let params = data;
-	console.log('side return', route, params);
+	let params = $derived(data);
 	let show_full_asm = $state(false);
 
 	let symbol_version = $derived(params.version);
@@ -137,8 +136,9 @@
 
 	<hr />
 
+    {#key symbol_path_and_name}
 	{#if symbol_data}
-		<Table style="word-break: break-all;" hover bordered>
+        <Table style="word-break: break-all;" hover bordered>
 			<tbody>
 				<tr>
 					<td><b>Address</b>:</td>
@@ -279,6 +279,7 @@
 	{:else}
 		404 - nonononon
 	{/if}
+    {/key}
 </div>
 
 <style>
