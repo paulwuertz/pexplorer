@@ -12,6 +12,7 @@
 	import atomOneDark from 'svelte-highlight/styles/atom-one-dark';
 	import armasm from 'svelte-highlight/languages/armasm';
 	import * as echarts from 'echarts';
+	import FunctionSymbolTable from '../../../../components/FunctionSymbolTable.svelte';
 	import * as helpers from '../../../helpers.js';
 
 	let { route, data } = $props();
@@ -256,26 +257,11 @@
 		</Row>
 		{symbol_childs.length} child symbols in this path.
 
+        <FunctionSymbolTable
+            fnSymbols={symbol_childs}
+            selected_version={symbol_version}
+        />
 		<!-- TODO reuse table from symbol page -->
-		<Table style="word-break: break-all;" hover bordered>
-			<tbody>
-				<tr>
-					<td><b>Symbol name</b>:</td>
-				</tr>
-				{#each symbol_childs as child}
-					<tr>
-						<td
-							><a
-								data-sveltekit-preload-data="tap"
-								href={helpers.row2AHref(base, symbol_version, child)}
-							>
-								/{child.file + ':' + child.display_name + ':' + child.line}
-							</a></td
-						>
-					</tr>
-				{/each}
-			</tbody>
-		</Table>
 	{:else}
 		404 - nonononon
 	{/if}
