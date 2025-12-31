@@ -28,6 +28,8 @@
 	let asm = $derived(Object.hasOwn(symbol_data, 'asm') ? symbol_data.asm : []);
 	let asm_code_preview = $derived(asm.slice(0, 5).join('\n'));
 	let address = $derived(symbol_data.address);
+	let stack_size = $derived(symbol_data.stack_size);
+	let stack_qualifier = $derived(symbol_data.stack_qualifiers);
 	let asm_code = $derived(asm.join('\n'));
 	let callers = $derived(JSON.parse(symbol_data.callers));
 	let callees = $derived(JSON.parse(symbol_data.callees));
@@ -55,6 +57,13 @@
             <td><b>Function code size</b>:</td>
             <td>
                 {code_size} bytes
+            </td>
+        </tr>
+
+        <tr>
+            <td><b>Function stack size</b>:</td>
+            <td>
+                {stack_size} bytes - stack usage is '{stack_qualifier}' - TODO add info about qualifiers :)
             </td>
         </tr>
 
@@ -147,3 +156,11 @@
         </tr>
     </tfoot>
 </Table>
+
+<style>
+	pre {
+		background-color: #f5f5f5;
+		border: 1px solid #ccc;
+		border-radius: 4px;
+	}
+</style>
