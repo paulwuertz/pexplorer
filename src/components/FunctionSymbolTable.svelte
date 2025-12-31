@@ -33,29 +33,6 @@
 			]
 		})
 	);
-
-	const uploadFiles = async () => {
-		if (!fileInput) return;
-		fileInput.click();
-	};
-
-	const handleFileChange = (e) => {
-		if (!fileInput) return;
-		const oldLength = files.files.length;
-		files.add(fileInput.files);
-		if (oldLength !== files.files.length) goto("/convert");
-	};
-
-	// onMount(() => {
-	// 	const handler = (e) => {
-	// 		e.preventDefault();
-	// 		return false;
-	// 	};
-
-	// 	return () => {
-
-	// 	};
-	// });
 </script>
 
 <Row>
