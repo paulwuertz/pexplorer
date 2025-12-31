@@ -12,7 +12,7 @@
 	import atomOneDark from 'svelte-highlight/styles/atom-one-dark';
 	import armasm from 'svelte-highlight/languages/armasm';
 	import * as echarts from 'echarts';
-	import FunctionSymbolTable from '../../../../components/FunctionSymbolTable.svelte';
+	import SymbolTable from '../../../../components/SymbolTable.svelte';
 	import * as helpers from '../../../helpers.js';
 	import FunctionSymbolPage from '../../../../components/FunctionSymbolPage.svelte';
 
@@ -31,6 +31,7 @@
 				return [ele, parent_link];
 			})
 	);
+	let symbol_path = $derived(symbol_path_and_name.split('/').slice(0, -1).join('/'));
 	let symbol_path_active = $derived(symbol_path_and_name.split('/').slice(-1));
 	let symbol_data = $derived(
 		symbols.symbols[symbol_version].symbols.find((e) => {
@@ -134,9 +135,9 @@
 					<div id="sunburst_chart_ram" style="width: 100%;height:600px;"></div>
 				</div>
 			</Row>
-			{symbol_childs.length} child symbols in this path.
+			{symbol_childs.length} symbols in this path: '/{symbol_path}'
 
-			<FunctionSymbolTable fnSymbols={symbol_childs} selected_version={symbol_version} />
+			<SymbolTable fnSymbols={symbol_childs} selected_version={symbol_version} />
 		{:else}
 			404 - nonononon
 		{/if}

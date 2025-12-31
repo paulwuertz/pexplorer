@@ -34,7 +34,10 @@
 		<Collapse {isOpen} navbar expand="md" on:update={handleUpdate}>
 			<Nav class="ms-auto" navbar>
 				<NavItem
-					><NavLink data-sveltekit-preload-data="tap" href="{base}/browse">Browse</NavLink></NavItem
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/">Upload ELF / Report</NavLink></NavItem
+				>
+				<NavItem
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/browse">Browse symbols</NavLink></NavItem
 				>
 				<NavItem
 					><NavLink data-sveltekit-preload-data="tap" href="{base}/diff">Compare Versions</NavLink
@@ -51,7 +54,7 @@
 				<NavItem
 					><NavLink data-sveltekit-preload-data="tap" href="{base}/trends">Trends</NavLink></NavItem
 				>
-				<NavItem
+				<!-- <NavItem
 					><NavLink data-sveltekit-preload-data="tap" href="{base}/">Interrupts (TODO)</NavLink
 					></NavItem
 				>
@@ -60,8 +63,8 @@
 					></NavItem
 				>
 				<NavItem
-					><NavLink data-sveltekit-preload-data="tap" href="{base}/">About (TODO)</NavLink></NavItem
-				>
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/">About (TODO)</NavLink></NavItem>
+				-->
 			</Nav>
 		</Collapse>
 	</Navbar>

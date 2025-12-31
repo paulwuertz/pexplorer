@@ -19,15 +19,17 @@
 	import * as helpers from '../routes/helpers.js';
 
 	const { fnSymbols, selected_version } = $props();
-	let function_table_data = $derived(helpers.symbolsToFunctionMap(fnSymbols));
+	let function_table_data = $derived(fnSymbols);
 	let function_table = $derived(
 		new DataTable({
 			pageSize: 99999, // TODO
 			data: function_table_data,
 			columns: [
 				{ id: 'name', key: 'display_name', name: 'Name' },
-				{ id: 'remark', key: 'remark', name: 'Remarks' },
-				{ id: 'size', key: 'size', name: 'Code size' },
+				// { id: 'remark', key: 'remark', name: 'Remarks' }, TODO discuss removal?
+				{ id: 'type', key: 'type', name: 'Type' },
+				{ id: 'address', key: 'address', name: 'Address' },
+				{ id: 'size', key: 'size', name: 'Symbol size' },
 				{ id: 'stack_size', key: 'stack_size', name: 'Stack size' },
 				{ id: 'stack_qualifiers', key: 'stack_qualifiers', name: 'Stack size type' }
 			]
