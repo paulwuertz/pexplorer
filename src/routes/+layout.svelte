@@ -41,10 +41,6 @@
 					></NavItem
 				>
 				<NavItem
-					><NavLink data-sveltekit-preload-data="tap" href="{base}/">Interrupts (TODO)</NavLink
-					></NavItem
-				>
-				<NavItem
 					><NavLink data-sveltekit-preload-data="tap" href="{base}/symbols">Symbols</NavLink
 					></NavItem
 				>
@@ -54,6 +50,10 @@
 				>
 				<NavItem
 					><NavLink data-sveltekit-preload-data="tap" href="{base}/trends">Trends</NavLink></NavItem
+				>
+				<NavItem
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/">Interrupts (TODO)</NavLink
+					></NavItem
 				>
 				<NavItem
 					><NavLink data-sveltekit-preload-data="tap" href="{base}/">Settings (TODO)</NavLink

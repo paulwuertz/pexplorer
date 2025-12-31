@@ -120,31 +120,25 @@
 
 	<hr />
 
-    {#key symbol_path_and_name}
-	{#if symbol_data}
-        <FunctionSymbolPage
-            symbol_data={symbol_data}
-            symbol_version={symbol_version}
-        />
-    {:else if symbol_childs}
-		<Row cols={{ md: 2, sm: 1 }}>
-			<div>
-				<h3>Flash usage</h3>
-				<div id="sunburst_chart_rom" style="width: 100%;height:600px;"></div>
-			</div>
-			<div>
-				<h3>Static RAM usage</h3>
-				<div id="sunburst_chart_ram" style="width: 100%;height:600px;"></div>
-			</div>
-		</Row>
-		{symbol_childs.length} child symbols in this path.
+	{#key symbol_path_and_name}
+		{#if symbol_data}
+			<FunctionSymbolPage {symbol_data} {symbol_version} />
+		{:else if symbol_childs}
+			<Row cols={{ md: 2, sm: 1 }}>
+				<div>
+					<h3>Flash usage</h3>
+					<div id="sunburst_chart_rom" style="width: 100%;height:600px;"></div>
+				</div>
+				<div>
+					<h3>Static RAM usage</h3>
+					<div id="sunburst_chart_ram" style="width: 100%;height:600px;"></div>
+				</div>
+			</Row>
+			{symbol_childs.length} child symbols in this path.
 
-        <FunctionSymbolTable
-            fnSymbols={symbol_childs}
-            selected_version={symbol_version}
-        />
-	{:else}
-		404 - nonononon
-	{/if}
-    {/key}
+			<FunctionSymbolTable fnSymbols={symbol_childs} selected_version={symbol_version} />
+		{:else}
+			404 - nonononon
+		{/if}
+	{/key}
 </div>

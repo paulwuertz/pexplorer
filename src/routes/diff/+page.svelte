@@ -60,7 +60,7 @@
 
 		selected_symbols = helpers.symbolsToMap(symbols.symbols[symbols.selected_version]['symbols']);
 		selected_symbols_to_compare = helpers.symbolsToMap(
-			$state.snapshot(symbols.symbols[symbols.selected_versions_to_compare]['symbols'])
+			symbols.symbols[symbols.selected_versions_to_compare]['symbols']
 		);
 		selected_thread_stat = symbols.symbols[symbols.selected_version]['stack_reports'];
 		selected_thread_stat_to_compare =

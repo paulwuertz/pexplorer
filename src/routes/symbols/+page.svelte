@@ -19,7 +19,7 @@
 	} from '@sveltestrap/sveltestrap';
 
 	import { symbols } from '../symbols.svelte.js';
-    import * as helpers from '../helpers.js';
+	import * as helpers from '../helpers.js';
 	import FunctionSymbolTable from '../../components/FunctionSymbolTable.svelte';
 
 	let { data } = $props();
@@ -99,12 +99,9 @@
 		{:else if !symbols.selected_version}
 			<h3>Select a version to browse elf symbols :)</h3>
 		{:else}
-            <h3>Function symbols for {symbols.selected_version}</h3>
+			<h3>Function symbols for {symbols.selected_version}</h3>
 
-			<FunctionSymbolTable
-                fnSymbols={selected_symbols}
-                selected_version={selected_version}
-            />
+			<FunctionSymbolTable fnSymbols={selected_symbols} {selected_version} />
 
 			<h3>Variable symbols for {symbols.selected_version}</h3>
 

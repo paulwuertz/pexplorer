@@ -231,11 +231,11 @@
 		<Card id="step2" class="mt-3">
 			<CardHeader>
 				<CardTitle>
-					Step 2: Select a version to explore (mandatory) +
+					Step 2: Select a version to explore (mandatory)
 					{#if selected_primary_versions}
 						✅
 					{/if}
-					Step 2: Select a second version to compare (optional)
+					+ Select a second version to compare (optional)
 					{#if selected_secondary_versions}
 						✅
 					{/if}
