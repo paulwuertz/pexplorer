@@ -42,7 +42,19 @@
 	}
 
 	function loadReportFromELF(elfBinary) {
-		console.log(elfBinary);
+        console.log(elfBinary);
+        const go = new Go(); // Defined in wasm_exec.js
+        const WASM_URL = '/sELFperf.wasm';
+        var wasm;
+        fetch(WASM_URL).then(resp =>
+            resp.arrayBuffer()
+        ).then(bytes =>
+            WebAssembly.instantiate(bytes, go.importObject).then(function (obj) {
+                wasm = obj.instance;
+                go.run(wasm);
+                console.log(read_sections_as_json(elfBinary));
+            })
+        )
 	}
 
 	function handleFilesSelect(e) {
@@ -79,7 +91,7 @@
 				if (is_json) {
 					loadReportsfromJson(reader.result);
 				} else if (is_elf) {
-					loadReportFromELF(reader.result);
+					loadReportFromELF(new Uint8Array(reader.result));
 				} else {
 				}
 			};

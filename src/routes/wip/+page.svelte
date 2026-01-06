@@ -13,5 +13,19 @@
 
 	let { data } = $props();
 
-</script>
+    const go = new Go(); // Defined in wasm_exec.js
+    const WASM_URL = '/sELFperf.wasm';
 
+    var wasm;
+
+	onMount(async () => {
+        fetch(WASM_URL).then(resp =>
+            resp.arrayBuffer()
+        ).then(bytes =>
+            WebAssembly.instantiate(bytes, go.importObject).then(function (obj) {
+                wasm = obj.instance;
+                go.run(wasm);
+            })
+        )
+    })
+</script>
