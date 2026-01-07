@@ -4,6 +4,8 @@ package symbolextraction
 
 import (
 	"debug/elf"
+
+	"github.com/ianlancetaylor/demangle"
 )
 
 func extractFunctions(elfFile elf.File) []FunctionSymbol {
@@ -19,9 +21,14 @@ func extractFunctions(elfFile elf.File) []FunctionSymbol {
 			continue
 		}
 
+		name, err := demangle.ToString(sym.Name) // try to demangle
+		if err != nil {
+			name = sym.Name
+		}
+
 		address := sym.Value
 		functions = append(functions, FunctionSymbol{
-			Name:              sym.Name,
+			Name:              name,
 			UnmangledName:     "",
 			Address:           address,
 			FlashSize:         sym.Size,

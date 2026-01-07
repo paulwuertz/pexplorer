@@ -2,3 +2,5 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/go-delve/delve v1.25.2 h1:EI6EIWGKUEC7OVE5nfG2eQSv5xEgCRxO1+REB7FKCtE=
 github.com/go-delve/delve v1.25.2/go.mod h1:sBjdpmDVpQd8nIMFldtqJZkk0RpGXrf8AAp5HeRi0CM=
+github.com/ianlancetaylor/demangle v0.0.0-20251118225945-96ee0021ea0f h1:Fnl4pzx8SR7k7JuzyW8lEtSFH6EQ8xgcypgIn8pcGIE=
+github.com/ianlancetaylor/demangle v0.0.0-20251118225945-96ee0021ea0f/go.mod h1:gx7rwoVhcfuVKG5uya9Hs3Sxj7EIvldVofAWIUtGouw=
