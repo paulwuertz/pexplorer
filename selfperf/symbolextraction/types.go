@@ -1,0 +1,44 @@
+package symbolextraction
+
+type ElfSection struct {
+	Name    string `json:"name"`
+	Address uint64 `json:"address"`
+	Size    uint64 `json:"size"`
+}
+
+type FunctionSymbol struct {
+	Name              string           `json:"name"`
+	Address           uint64           `json:"address,omitempty,omitzero"`
+	FlashSize         uint64           `json:"size"`
+	FunctionStackSize uint64           `json:"stack_size,omitempty,omitzero"`
+	SourceFilePath    string           `json:"file,omitempty,omitzero"`
+	SourceFileLine    uint64           `json:"line,omitempty,omitzero"`
+	Variables         []VariableSymbol `json:"vars,omitempty,omitzero"`
+	Asm               string
+	// calls
+}
+
+type VariableSymbol struct {
+	Name           string
+	UnmangledName  string
+	Address        uint64
+	FlashSize      uint64
+	SourceFilePath string
+	SourceFileLine uint64
+	VariableType   string
+}
+
+// CompileUnit represents a compilation unit,
+// including a series of source files and function definitions
+type CompileUnit struct {
+	Source    []string
+	functions []FunctionSymbol
+	variables []VariableSymbol
+}
+
+type SElfReport struct {
+	srcFiles  []CompileUnit
+	sections  []ElfSection
+	functions []FunctionSymbol
+	variables []VariableSymbol
+}
