@@ -46,10 +46,6 @@
 					></NavItem
 				>
 				<NavItem
-					><NavLink data-sveltekit-preload-data="tap" href="{base}/symbols">Symbols</NavLink
-					></NavItem
-				>
-				<NavItem
 					><NavLink data-sveltekit-preload-data="tap" href="{base}/threads">Threads</NavLink
 					></NavItem
 				>
