@@ -21,13 +21,14 @@ type FunctionSymbol struct {
 }
 
 type VariableSymbol struct {
-	Name           string
-	UnmangledName  string
-	Address        uint64
-	FlashSize      uint64
-	SourceFilePath string
-	SourceFileLine uint64
-	VariableType   string
+	Name           string `json:"name"`
+	Address        uint64 `json:"address,omitempty,omitzero"`
+	FlashSize      uint64 `json:"size"`
+	SectionIndex   uint8  `json:"secidx"`
+	SourceFilePath string `json:"file,omitempty,omitzero"`
+	SourceFileLine uint64 `json:"line,omitempty,omitzero"`
+	VariableType   string `json:"type,omitempty,omitzero"`
+	Data           []byte `json:"byte,omitempty,omitzero"`
 }
 
 // CompileUnit represents a compilation unit,

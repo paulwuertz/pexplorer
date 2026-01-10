@@ -10,14 +10,15 @@ import (
 	"github.com/ianlancetaylor/demangle"
 )
 
-type FlashSectionMap map[string]*elf.Section
+type SectionMaps struct {
+	byName  map[string]*elf.Section
+	byIndex map[uint8]*elf.Section
+}
 
 func ExtractFunctions(elfFile elf.File) []FunctionSymbol {
 	functions := []FunctionSymbol{}
 	symData, _ := elfFile.Symbols()
 
-	// build a symbol map from the symbol section
-	// this should be always present...
 	for _, sym := range symData {
 		symType := elf.SymType(sym.Info & 0xf)
 		isFunc := (elf.STT_FUNC == symType)
@@ -47,9 +48,38 @@ func ExtractFunctions(elfFile elf.File) []FunctionSymbol {
 	return functions
 }
 
-func ExtractSections(elfFile elf.File) (sections []ElfSection, secRefs FlashSectionMap) {
+func ExtractVariables(elfFile elf.File) []VariableSymbol {
+	variables := []VariableSymbol{}
+	symData, _ := elfFile.Symbols()
+
+	for _, sym := range symData {
+		symType := elf.SymType(sym.Info & 0xf)
+		isVar := (elf.STT_OBJECT == symType)
+		if (!isVar) || sym.Size == 0 {
+			continue
+		}
+
+		name, err := demangle.ToString(sym.Name) // try to demangle
+		if err != nil {
+			name = sym.Name
+		}
+
+		address := sym.Value
+		variables = append(variables, VariableSymbol{
+			Name:         name,
+			Address:      address,
+			FlashSize:    sym.Size,
+			SectionIndex: uint8(sym.Section),
+		})
+		// fmt.Println(fmt.Sprintf("fun %s at %x", sym.Name, address), sym)
+	}
+	return variables
+}
+
+func ExtractSections(elfFile elf.File) (sections []ElfSection, secRefs SectionMaps) {
 	secData := elfFile.Sections
-	secRefs = make(FlashSectionMap)
+	secRefs.byName = make(map[string]*elf.Section)
+	secRefs.byIndex = make(map[uint8]*elf.Section)
 
 	// build a symbol map from the symbol section
 	// this should be always present...
@@ -60,29 +90,31 @@ func ExtractSections(elfFile elf.File) (sections []ElfSection, secRefs FlashSect
 			Size:    section.Size,
 			Index:   uint8(i),
 		})
-		if section.Addr != 0 {
-			secRefs[section.Name] = section
-		}
+		secRefs.byName[section.Name] = section
+		secRefs.byIndex[uint8(i)] = section
 		// fmt.Println(fmt.Sprintf("fun %s at %x", sym.Name, address), sym)
 	}
 	return
 }
 
-func (fm FlashSectionMap) getSectionByName(name string) (sec *elf.Section) {
-	sec, ok := fm[name]
+func (fm SectionMaps) getSectionByName(name string) (sec *elf.Section) {
+	sec, ok := fm.byName[name]
 	if !ok {
-		sec, ok = fm["."+name]
+		sec, ok = fm.byName["."+name]
 	}
 	return // might be nil anyway if section is not present...
 }
 
-func AddASMToFunctions(syms []FunctionSymbol, fm FlashSectionMap) {
+func (fm SectionMaps) getSectionByIndex(i uint8) (sec *elf.Section) {
+	sec = fm.byIndex[i]
+	return // might be nil anyway if section is not present...
+}
+
+func AddASMToFunctions(syms []FunctionSymbol, fm SectionMaps) {
 	sec := fm.getSectionByName("text")
 	sr := sec.Open()
 	textStartAddr := sec.Addr // todo addr or offset?
 	textEndAddr := sec.Addr + sec.Size
-	fmt.Println("sec ", sec)
-	fmt.Println("sec Size", sec.Size)
 	for i, _ := range syms {
 		sym := &syms[i]
 		addr, size := sym.Address, sym.FlashSize
@@ -99,6 +131,24 @@ func AddASMToFunctions(syms []FunctionSymbol, fm FlashSectionMap) {
 			// fmt.Println(fmt.Sprintf("%X", b))
 		} else {
 			fmt.Println(sym, " asm outside text section")
+		}
+	}
+}
+
+func AddDataToVar(syms []VariableSymbol, fm SectionMaps) {
+	for i, _ := range syms {
+		sym := &syms[i]
+		addr, size := sym.Address, sym.FlashSize
+		sec := fm.getSectionByIndex(sym.SectionIndex)
+		sr := sec.Open()
+		fmt.Println(addr, size, sym.SectionIndex)
+		symSecOffset := int64(addr - sec.Addr)
+		sr.Seek(symSecOffset, io.SeekStart)
+		// fmt.Println(sym, "@:", addr, "newPos ", newPos)
+		sym.Data = make([]byte, size)
+		nb, err := sr.Read(sym.Data)
+		if err != nil {
+			fmt.Println("error reading asm-bytes", nb, "/", size, err, sym)
 		}
 	}
 }
