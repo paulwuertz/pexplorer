@@ -88,24 +88,25 @@ func main() {
 	// fmt.Println("Go Web Assembly")
 	// js.Global().Set("read_sections_as_json", wasm_read_sections_as_json())
 	// <-make(chan struct{})
-	// elfFile, err := elf.Open("/home/paul/git/Prusa-Firmware-Buddy/build/mini_release_noboot/firmware")
-	elfFile, err := elf.Open("/home/paul/git/ztest/build_hello_world_frdm_k64f_42/zephyr/zephyr.elf")
+	elfFile, err := elf.Open("/home/paul/git/Prusa-Firmware-Buddy/build/mini_release_noboot/firmware")
+	// elfFile, err := elf.Open("/home/paul/git/cannecti/cannectivity/build_1.2/zephyr/zephyr.elf")
 
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	sections := symbolextraction.ExtractSections(*elfFile)
+	sectionInfo, sections := symbolextraction.ExtractSections(*elfFile)
 	// extractSections(*elfFile)
 	functions := symbolextraction.ExtractFunctions(*elfFile)
+	symbolextraction.AddASMToFunctions(functions, sections)
 	// variables := extractVariables(*elfFile)
 	// srcFiles := enhanceByDwarfDebugInfo(*elfFile, *functions, *variables)
 	// elfReport := SElfReport(srcFiles, sections, functions, variables)
 	fjs, _ := json.Marshal(functions)
-	sjs, _ := json.Marshal(sections)
+	sjs, _ := json.Marshal(sectionInfo)
 	fmt.Println("functions found:", string(fjs), "\n\n\n")
 	// fmt.Println("variables found:", variables)
-	fmt.Println("sections found:", string(sjs))
+	fmt.Println("sections found:", string(sjs), sections)
 	// fmt.Println(i, "symbols found", len(varSymByAddr))
 	// fmt.Println(i, "symbols found", len(fnSymByAddr))
 	// for key, value := range symByAddr {
