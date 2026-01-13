@@ -96,23 +96,21 @@ func main() {
 	}
 
 	sectionJsonInfo, sectionsRef := symbolextraction.ExtractSections(*elfFile)
-	// extractSections(*elfFile)
 	functions := symbolextraction.ExtractFunctions(*elfFile)
-	symbolextraction.AddASMToFunctions(functions, sectionsRef)
 	variables := symbolextraction.ExtractVariables(*elfFile)
-	symbolextraction.AddDataToVar(variables, sectionsRef)
-	// srcFiles := enhanceByDwarfDebugInfo(*elfFile, *functions, *variables)
-	// elfReport := SElfReport(srcFiles, sections, functions, variables)
-	// fjs, _ := json.Marshal(functions)
-	sjs, _ := json.Marshal(sectionJsonInfo)
-	vjs, _ := json.MarshalIndent(variables, "", "    ")
-	fmt.Println("functions found:", len(functions), "\n\n\n")
-	fmt.Println("variables found:", string(vjs))
-	fmt.Println("sections found:", len(sectionJsonInfo), string(sjs))
-	// fmt.Println(i, "symbols found", len(varSymByAddr))
-	// fmt.Println(i, "symbols found", len(fnSymByAddr))
-	// for key, value := range symByAddr {
-	// 	fmt.Println("Key:", fmt.Sprintf("%x", key), "Value:", value)
-	// }
 
+	symbolextraction.AddASMToFunctions(functions, sectionsRef)
+	symbolextraction.AddDataToVar(variables, sectionsRef)
+	symbolextraction.EnhanceByDwarfDebugInfo(elfFile, functions, variables)
+	elfReport := symbolextraction.SElfReport{
+		Sections:  sectionJsonInfo,
+		Functions: functions,
+		Variables: variables,
+	}
+	datajson, _ := json.MarshalIndent(elfReport, "", "    ")
+
+	fmt.Println("functions found:", string(datajson))
+	fmt.Println("functions found:", len(functions))
+	fmt.Println("variables found:", len(variables))
+	fmt.Println("sections found:", len(sectionJsonInfo))
 }

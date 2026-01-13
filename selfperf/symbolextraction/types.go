@@ -1,5 +1,7 @@
 package symbolextraction
 
+import "debug/dwarf"
+
 type ElfSection struct {
 	Name    string `json:"name"`
 	Address uint64 `json:"address"`
@@ -18,6 +20,9 @@ type FunctionSymbol struct {
 	Variables         []VariableSymbol `json:"vars,omitempty,omitzero"`
 	Asm               []byte
 	// calls
+	entry     *dwarf.Entry   `json:"-"`
+	variables []*dwarf.Entry `json:"-"`
+	cu        *CompileUnit   `json:"-"`
 }
 
 type VariableSymbol struct {
@@ -40,8 +45,8 @@ type CompileUnit struct {
 }
 
 type SElfReport struct {
-	srcFiles  []CompileUnit
-	sections  []ElfSection
-	functions []FunctionSymbol
-	variables []VariableSymbol
+	SrcFiles  []CompileUnit    `json:"-"`
+	Sections  []ElfSection     `json:"section"`
+	Functions []FunctionSymbol `json:"functions"`
+	Variables []VariableSymbol `json:"variables"`
 }

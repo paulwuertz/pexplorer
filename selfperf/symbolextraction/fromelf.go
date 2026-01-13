@@ -124,13 +124,13 @@ func AddASMToFunctions(syms []FunctionSymbol, fm SectionMaps) {
 			// fmt.Println(sym, "@:", addr, "newPos ", newPos)
 			sym.Asm = make([]byte, size)
 			nb, err := sr.Read(sym.Asm)
-			if err != nil {
-				fmt.Println("error reading asm-bytes", nb, "/", size, err, sym)
+			if err != nil || nb != int(size) {
+				// fmt.Println("error reading asm-bytes", nb, "/", size, err, sym)
 			}
 			// fmt.Println("bytes read", nb, "/", size, err)
 			// fmt.Println(fmt.Sprintf("%X", b))
 		} else {
-			fmt.Println(sym, " asm outside text section")
+			// fmt.Println(sym, " asm outside text section")
 		}
 	}
 }
@@ -147,8 +147,8 @@ func AddDataToVar(syms []VariableSymbol, fm SectionMaps) {
 		// fmt.Println(sym, "@:", addr, "newPos ", newPos)
 		sym.Data = make([]byte, size)
 		nb, err := sr.Read(sym.Data)
-		if err != nil {
-			fmt.Println("error reading asm-bytes", nb, "/", size, err, sym)
+		if err != nil || nb != int(size) {
+			// fmt.Println("error reading data-bytes", nb, "/", size, err, sym)
 		}
 	}
 }
