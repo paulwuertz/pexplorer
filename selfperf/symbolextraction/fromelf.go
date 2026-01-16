@@ -4,8 +4,8 @@ package symbolextraction
 
 import (
 	"debug/elf"
-	"fmt"
 	"io"
+	"sort"
 
 	"github.com/ianlancetaylor/demangle"
 )
@@ -45,6 +45,10 @@ func ExtractFunctions(elfFile elf.File) []FunctionSymbol {
 		})
 		// fmt.Println(fmt.Sprintf("fun %s at %x", sym.Name, address), sym)
 	}
+	// sort lowest address first
+	sort.Slice(functions, func(i, j int) bool {
+		return functions[i].Address < functions[j].Address
+	})
 	return functions
 }
 
@@ -141,7 +145,7 @@ func AddDataToVar(syms []VariableSymbol, fm SectionMaps) {
 		addr, size := sym.Address, sym.FlashSize
 		sec := fm.getSectionByIndex(sym.SectionIndex)
 		sr := sec.Open()
-		fmt.Println(addr, size, sym.SectionIndex)
+		// fmt.Println(addr, size, sym.SectionIndex)
 		symSecOffset := int64(addr - sec.Addr)
 		sr.Seek(symSecOffset, io.SeekStart)
 		// fmt.Println(sym, "@:", addr, "newPos ", newPos)
