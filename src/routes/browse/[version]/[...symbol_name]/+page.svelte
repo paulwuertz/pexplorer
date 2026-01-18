@@ -123,6 +123,7 @@
 
 	{#key symbol_path_and_name}
 		{#if symbol_data}
+            {console.log("symbol_data: ", $state.snapshot(symbol_data))}
 			<FunctionSymbolPage {symbol_data} {symbol_version} />
 		{:else if symbol_childs}
 			<Row cols={{ md: 2, sm: 1 }}>
