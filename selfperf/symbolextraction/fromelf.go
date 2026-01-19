@@ -77,6 +77,10 @@ func ExtractVariables(elfFile elf.File) []VariableSymbol {
 		})
 		// fmt.Println(fmt.Sprintf("fun %s at %x", sym.Name, address), sym)
 	}
+	// sort lowest address first
+	sort.Slice(variables, func(i, j int) bool {
+		return variables[i].Address < variables[j].Address
+	})
 	return variables
 }
 

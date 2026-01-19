@@ -1,6 +1,7 @@
 package symbolextraction
 
 import (
+	"debug/dwarf"
 	"debug/elf"
 	"encoding/binary"
 	"fmt"
@@ -67,8 +68,68 @@ func setLineInfo(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) {
 	}
 }
 
+func getVariableTypes(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) (srcFiles []string) {
+	dwarfData, _ := elf.DWARF()
+	rd := dwarfData.Reader()
+	var cache map[dwarf.Offset]godwarf.Type = make(map[dwarf.Offset]godwarf.Type, 0)
+	for idx := 0; ; idx++ {
+		entry, err := rd.Next()
+		if err != nil {
+			// return fmt.Errorf("iterate entry error: %v", err)
+		}
+		if entry == nil {
+			return nil
+		}
+		var varMap map[string]*VariableSymbol = make(map[string]*VariableSymbol, 0)
+		for i := 0; i < len(vars); i++ {
+			v := &vars[i]
+			varMap[v.Name] = v
+		}
+		// parse compilation unit
+		if entry.Tag == dwarf.TagVariable {
+			tree, err := godwarf.LoadTree(entry.Offset, dwarfData, 0)
+			atoff, ok := entry.Val(dwarf.AttrType).(dwarf.Offset)
+			// fmt.Println("tree -", tree.Val(dwarf.AttrName), tree.Val(dwarf.AttrType), err)
+			if ok && err == nil {
+				var varName string = ""
+				ty, _ := godwarf.ReadType(dwarfData, 0, atoff, cache)
+				varName, ok1 := tree.Val(dwarf.AttrName).(string)
+				v, ok2 := varMap[varName]
+				typeStr := ty.Common().Name
+				if ok1 && ok2 && typeStr != "" {
+					v.VariableType = ty.Common().Name
+					// fmt.Println("\t- type info found", v, entry.Tag.String())
+				} else {
+					// ?
+				}
+			} else {
+				// fmt.Println("\t- no type info found", entry.Tag.String())
+			}
+		}
+	}
+	return
+}
+
 func getStackUseDetails(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) (srcFiles []string) {
-	// open .gnu_debuglink executable
+	dwarfData, _ := elf.DWARF()
+	rd := dwarfData.Reader()
+	for idx := 0; ; idx++ {
+		entry, err := rd.Next()
+		if err != nil {
+			// return fmt.Errorf("iterate entry error: %v", err)
+		}
+		if entry == nil {
+			return nil
+		}
+
+		// parse compilation unit
+		if entry.Tag == dwarf.TagTypedef {
+			tree, err := godwarf.LoadTree(entry.Offset, dwarfData, 0)
+			fmt.Println("tree -", tree.Val(dwarf.AttrName), tree.Val(dwarf.AttrType), err)
+			ty, err := godwarf.ReadType(dwarfData, int(entry.Offset), 0, nil)
+			fmt.Println("\t-", ty, err)
+		}
+	}
 
 	framedata, _ := godwarf.GetDebugSectionElf(elf, "frame")
 	fe, err := frame.Parse(framedata, binary.LittleEndian, 0, 4, 0)
@@ -102,6 +163,7 @@ func getStackUseDetails(elf *elf.File, funcs []FunctionSymbol, vars []VariableSy
 }
 
 func EnhanceByDwarfDebugInfo(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) (srcFiles []string) {
+	getVariableTypes(elf, funcs, vars)
 	getStackUseDetails(elf, funcs, vars)
 	setLineInfo(elf, funcs, vars)
 	return
