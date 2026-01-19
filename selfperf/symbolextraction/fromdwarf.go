@@ -68,7 +68,8 @@ func setLineInfo(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) {
 	}
 }
 
-func getVariableTypes(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) (srcFiles []string) {
+func getVariableTypes(elf *elf.File, vars []VariableSymbol) (types map[string]Typedef) {
+	types = make(map[string]Typedef, 0)
 	dwarfData, _ := elf.DWARF()
 	rd := dwarfData.Reader()
 	var cache map[dwarf.Offset]godwarf.Type = make(map[dwarf.Offset]godwarf.Type, 0)
@@ -78,7 +79,7 @@ func getVariableTypes(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymb
 			// return fmt.Errorf("iterate entry error: %v", err)
 		}
 		if entry == nil {
-			return nil
+			break
 		}
 		var varMap map[string]*VariableSymbol = make(map[string]*VariableSymbol, 0)
 		for i := 0; i < len(vars); i++ {
@@ -93,10 +94,14 @@ func getVariableTypes(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymb
 			if ok && err == nil {
 				var varName string = ""
 				ty, _ := godwarf.ReadType(dwarfData, 0, atoff, cache)
-				varName, ok1 := tree.Val(dwarf.AttrName).(string)
-				v, ok2 := varMap[varName]
+				varName, ok := tree.Val(dwarf.AttrName).(string)
+				if !ok {
+					continue
+				}
 				typeStr := ty.Common().Name
-				if ok1 && ok2 && typeStr != "" {
+				types[typeStr] = Typedef{Name: typeStr, Size: uint64(ty.Common().ByteSize)}
+				v, ok := varMap[varName]
+				if ok && typeStr != "" {
 					v.VariableType = ty.Common().Name
 					// fmt.Println("\t- type info found", v, entry.Tag.String())
 				} else {
@@ -162,9 +167,9 @@ func getStackUseDetails(elf *elf.File, funcs []FunctionSymbol, vars []VariableSy
 	return
 }
 
-func EnhanceByDwarfDebugInfo(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) (srcFiles []string) {
-	getVariableTypes(elf, funcs, vars)
-	getStackUseDetails(elf, funcs, vars)
-	setLineInfo(elf, funcs, vars)
+func EnhanceByDwarfDebugInfo(s *SElfReport) (srcFiles []string) {
+	s.Types = getVariableTypes(s.Elf, s.Variables)
+	getStackUseDetails(s.Elf, s.Functions, s.Variables)
+	setLineInfo(s.Elf, s.Functions, s.Variables)
 	return
 }

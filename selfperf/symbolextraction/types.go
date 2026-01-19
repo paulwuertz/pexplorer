@@ -1,6 +1,9 @@
 package symbolextraction
 
-import "debug/dwarf"
+import (
+	"debug/dwarf"
+	"debug/elf"
+)
 
 type ElfSection struct {
 	Name    string `json:"name"`
@@ -36,6 +39,12 @@ type VariableSymbol struct {
 	Data           []byte `json:"byte,omitempty,omitzero"`
 }
 
+type Typedef struct {
+	Name    string    `json:"-"`
+	Size    uint64    `json:"size"`
+	Members []Typedef `json:"members,omitempty,omitzero"`
+}
+
 // CompileUnit represents a compilation unit,
 // including a series of source files and function definitions
 type CompileUnit struct {
@@ -45,8 +54,10 @@ type CompileUnit struct {
 }
 
 type SElfReport struct {
-	SrcFiles  []CompileUnit    `json:"-"`
-	Sections  []ElfSection     `json:"section"`
-	Functions []FunctionSymbol `json:"functions"`
-	Variables []VariableSymbol `json:"variables"`
+	Elf       *elf.File          `json:"-"`
+	SrcFiles  []CompileUnit      `json:"-"`
+	Sections  []ElfSection       `json:"section"`
+	Functions []FunctionSymbol   `json:"functions"`
+	Variables []VariableSymbol   `json:"variables"`
+	Types     map[string]Typedef `json:"types,omitempty,omitzero"`
 }

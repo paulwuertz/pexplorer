@@ -101,12 +101,13 @@ func main() {
 
 	symbolextraction.AddASMToFunctions(functions, sectionsRef)
 	symbolextraction.AddDataToVar(variables, sectionsRef)
-	symbolextraction.EnhanceByDwarfDebugInfo(elfFile, functions, variables)
 	elfReport := symbolextraction.SElfReport{
+		Elf:       elfFile,
 		Sections:  sectionJsonInfo,
 		Functions: functions,
 		Variables: variables,
 	}
+	symbolextraction.EnhanceByDwarfDebugInfo(&elfReport)
 	datajson, _ := json.MarshalIndent(elfReport, "", "    ")
 
 	fmt.Println("functions found:", string(datajson))
