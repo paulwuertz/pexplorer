@@ -1,7 +1,5 @@
 package symbolextraction
 
-// import "symbolextraction/types"
-
 import (
 	"debug/elf"
 	"io"

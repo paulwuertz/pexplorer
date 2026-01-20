@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/paul/elf/symbolextraction"
+	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
 // func enhanceByDwarfDebugInfo(elfFile elf.File, functions []FunctionSymbol, variables []VariableSymbol) {
