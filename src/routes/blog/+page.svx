@@ -1,0 +1,95 @@
+<script>
+	import { onMount } from 'svelte';
+	import { base } from '$app/paths';
+	import { page } from '$app/stores';
+    import { Container, Row, Col } from '@sveltestrap/sveltestrap';
+</script>
+
+<Container>
+
+<article class="article">
+
+<h3 id="motivation">
+Motivation - No free RAM vs stack overflows and manual measurment
+</h3>
+
+<p>January 8, 2026 by <a href="p4w5.eu/blog">paul</a></p>
+
+Over the years and project I often found myself on some microcontroller with limited RAM, thst was near full. The stack's of the real-time operating system tasks often are among the bigggest chunks filling the RAM. In this kind of situation the question then often arises:
+
+`Does this network task really need 4kB of stack?`
+
+`Can we get away on our use-case with two or even 1kB?`
+
+So the teadious way of assuring so is to measure stack consumption in run-time. Trying to trigger the condition that gets the firmware in the worst case code path for stack consumption is not always easy though. If there is more then one MCU the firmware is build for this work has to be repeated for every processor. And setting the minimum stack size means you must not forget to reevaluate, otherwise some new changes increase the stack size and with the previous limit you controller could crash with a stack overflow.
+
+So there is a problem: to know an ideal stack size
+
+* for every task you run (N)
+* on every MCU you target (M)
+* for every firmware deployment (O)
+    1. N x M x O can get very big for real product series, manual checks - impossible, potential that a stack overflow gets rolled-out - high...
+
+If not the ideal stack size, at least a monitoring that to confirm the size configured is still safe for all cases. If you have an elaborate CI and hardware-in-the-loop setup you maybe can automate the on-device runtime measurement. But some time ago I found some tools which can help you to get even faster feedback as a developer at build time.
+
+[puncover](https://github.com/HBehrens/puncover/) analyses your build artifacts for flash, RAM and stack size. It does so by consulting your ELF file with some binutils like nm, objdump, c++filt and parsing [.su files](https://www.adacore.com/papers/compile-time-stack-requirements-analysis-with-gcc) emited by GCC. Then it retreives static function calls by searching every functions disassembly for instructions, that target another functions address. The user get's a browsable website as a result that includes a overview by folder of all variables and functions and their flash and static RAM size in a given directory or single function or variable.
+
+
+<Row>
+<Col md="8" sm="12">
+
+That's pretty useful already, and gives much more intuition to me than grep-ing around map files for flash sizes and we get some call tree analysis, very neat!
+
+Well, it is useful to me as a single dev to manually analyse one build.
+
+So there starts my wishlist and some more ideas are als there:
+
+1. I want to share findings from puncover with collegues.
+    1. -> Can we make the browsing experience run in the browser?
+    1. -> Can we make it sharable via a link?
+    1. -> Or even run the analysis of the firmware?
+1. The analysis of my firmware takes a loooong time.
+    -> Can we speed things up?
+1. I want automate that into my CI pipeline
+    1. -> Is there a file format so only view the results and not to run the analysis?
+    1. -> Can we get warnings and errors passing certain stack sizes in the pipelin?
+1. Worst-case stack usage is quite a claim, that suggest confidence.
+    1. -> Are the results even correct? Is there any test confirming the analysis?
+1. My firmware uses dynamic callback functions a lot.
+    1. -> Dynamic calls stay undetected, right? Can I add them, I know the possible callbacks :)
+1. I have many builds. Any way to compare how new features impact memory and see some trends??
+    1. -> Can we get a diff view of two builds?
+    1. -> What about trends over a series of build?
+1. I use an RTOS.
+    1. -> Can puncover consider that?
+1. What about execution times?
+    1. -> Can we get the WCET of a thread and do some rough CPU time budgeting?
+
+    <p>And some other ideas.</p>
+
+1. I want...
+    1. ..to browse not only one but many folder levels at once like the [mbed-os-linker-report](https://armmbed.github.io/mbed-os-linker-report/)
+    1. ...a good page view for variables as well.
+    1. ...get a view like a map file of everything on my flash memory.
+
+</Col>
+<Col md="4" sm="12">
+
+<img src="img/puncoverWCSS.png" alt="Worst case stack estimation in puncover" width="100%">
+
+<hr>
+
+<small>
+    View of a function puncover offers you ootb with "Worst"(?) case stack estimation.
+</small>
+
+</Col>
+</Row>
+
+So that is quite a whishlist. `pexplorer` is my intend of realizing some points from my whishes. Also the opportunity I saw for myself to learn svelte as another framework I know to react and golang to get a faster alternative to python with cool tooling around it.
+
+Next articles will try to answer these questions I had from my whishlist and discuss possible solutions. If you are interested keep om reading :)
+
+</article>
+
+</Container>
