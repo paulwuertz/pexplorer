@@ -49,7 +49,7 @@ So there starts my wishlist and some more ideas are als there:
     1. -> Can we make it sharable via a link?
     1. -> Or even run the analysis of the firmware?
 1. The analysis of my firmware takes a loooong time.
-    -> Can we speed things up?
+    1. -> Can we speed things up?
 1. I want automate that into my CI pipeline
     1. -> Is there a file format so only view the results and not to run the analysis?
     1. -> Can we get warnings and errors passing certain stack sizes in the pipelin?
@@ -75,7 +75,7 @@ So there starts my wishlist and some more ideas are als there:
 </Col>
 <Col md="4" sm="12">
 
-<img src="img/puncoverWCSS.png" alt="Worst case stack estimation in puncover" width="100%">
+<img src="{base}/img/puncoverWCSS.png" alt="Worst case stack estimation in puncover" width="100%">
 
 <hr>
 
@@ -93,3 +93,8 @@ Next articles will try to answer these questions I had from my whishlist and dis
 </article>
 
 </Container>
+
+<style type="text/css">
+    ol ol { list-style-type: upper-alpha; }
+    ol p { margin: 10px; }
+</style>
