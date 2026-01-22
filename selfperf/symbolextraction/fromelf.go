@@ -125,7 +125,7 @@ func AddASMToFunctions(syms []FunctionSymbol, fm SectionMaps) {
 		sym := &syms[i]
 		addr, size := sym.Address, sym.FlashSize
 		if addr >= textStartAddr && addr <= textEndAddr {
-			symSecOffset := int64(addr - textStartAddr)
+			symSecOffset := int64(addr - textStartAddr - 1)
 			sr.Seek(symSecOffset, io.SeekStart)
 			// fmt.Println(sym, "@:", addr, "newPos ", newPos)
 			sym.Asm = make([]byte, size)
