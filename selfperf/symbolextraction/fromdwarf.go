@@ -6,6 +6,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"log"
+	"maps"
 	"slices"
 	"sort"
 
@@ -68,8 +69,8 @@ func setLineInfo(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) {
 	}
 }
 
-func getVariableTypes(elf *elf.File, vars []VariableSymbol) (types map[string]Typedef) {
-	types = make(map[string]Typedef, 0)
+func getVariableTypes(elf *elf.File, vars []VariableSymbol) []Typedef {
+	typeMap := make(map[string]Typedef, 0)
 	dwarfData, _ := elf.DWARF()
 	rd := dwarfData.Reader()
 	var cache map[dwarf.Offset]godwarf.Type = make(map[dwarf.Offset]godwarf.Type, 0)
@@ -99,7 +100,7 @@ func getVariableTypes(elf *elf.File, vars []VariableSymbol) (types map[string]Ty
 					continue
 				}
 				typeStr := ty.Common().Name
-				types[typeStr] = Typedef{Name: typeStr, Size: uint64(ty.Common().ByteSize)}
+				typeMap[typeStr] = Typedef{Name: typeStr, Size: uint64(ty.Common().ByteSize)}
 				v, ok := varMap[varName]
 				if ok && typeStr != "" {
 					v.VariableType = ty.Common().Name
@@ -112,7 +113,7 @@ func getVariableTypes(elf *elf.File, vars []VariableSymbol) (types map[string]Ty
 			}
 		}
 	}
-	return
+	return slices.Collect(maps.Values(typeMap))
 }
 
 func getStackUseDetails(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) (srcFiles []string) {

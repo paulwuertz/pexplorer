@@ -21,7 +21,7 @@ type FunctionSymbol struct {
 	SourceFilePath    string           `json:"file,omitempty,omitzero"`
 	SourceFileLine    uint64           `json:"line,omitempty,omitzero"`
 	Variables         []VariableSymbol `json:"vars,omitempty,omitzero"`
-	Asm               []byte
+	Asm               []byte           `json:"asm,omitempty,omitzero"`
 	// calls
 	entry     *dwarf.Entry   `json:"-"`
 	variables []*dwarf.Entry `json:"-"`
@@ -40,7 +40,7 @@ type VariableSymbol struct {
 }
 
 type Typedef struct {
-	Name    string    `json:"-"`
+	Name    string    `json:"name"`
 	Size    uint64    `json:"size"`
 	Members []Typedef `json:"members,omitempty,omitzero"`
 }
@@ -54,10 +54,10 @@ type CompileUnit struct {
 }
 
 type SElfReport struct {
-	Elf       *elf.File          `json:"-"`
-	SrcFiles  []CompileUnit      `json:"-"`
-	Sections  []ElfSection       `json:"section"`
-	Functions []FunctionSymbol   `json:"functions"`
-	Variables []VariableSymbol   `json:"variables"`
-	Types     map[string]Typedef `json:"types,omitempty,omitzero"`
+	Elf       *elf.File        `json:"-"`
+	SrcFiles  []CompileUnit    `json:"-"`
+	Sections  []ElfSection     `json:"section"`
+	Functions []FunctionSymbol `json:"functions"`
+	Variables []VariableSymbol `json:"variables"`
+	Types     []Typedef        `json:"types,omitempty,omitzero"`
 }

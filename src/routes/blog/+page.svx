@@ -13,7 +13,7 @@
 Motivation - No free RAM vs stack overflows and manual measurment
 </h3>
 
-<p>January 8, 2026 by <a href="p4w5.eu/blog">paul</a></p>
+<p>January 8, 2026 by <a href="https://p4w5.eu/blog">paul</a></p>
 
 Over the years and project I often found myself on some microcontroller with limited RAM, thst was near full. The stack's of the real-time operating system tasks often are among the bigggest chunks filling the RAM. In this kind of situation the question then often arises:
 
