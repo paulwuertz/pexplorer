@@ -36,7 +36,7 @@ type VariableSymbol struct {
 	SourceFilePath string `json:"file,omitempty,omitzero"`
 	SourceFileLine uint64 `json:"line,omitempty,omitzero"`
 	VariableType   string `json:"type,omitempty,omitzero"`
-	Data           []byte `json:"byte,omitempty,omitzero"`
+	Data           []byte `json:"staticInitData,omitempty,omitzero"`
 }
 
 type Typedef struct {

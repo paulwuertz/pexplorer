@@ -1,0 +1,150 @@
+{
+  "$schema": "https://json-schema.org/2020-12/schema",
+  "$id": "https://example.com/schemas/generated-schema.json",
+  "title": "Generated Schema",
+  "description": "Schema generated from JSON data",
+  "type": "object",
+  "properties": {
+    "section": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name"
+          },
+          "address": {
+            "type": "integer",
+            "title": "Address"
+          },
+          "size": {
+            "type": "integer",
+            "title": "Size"
+          },
+          "index": {
+            "type": "integer",
+            "title": "Index"
+          }
+        },
+        "required": [
+          "name",
+          "address",
+          "size",
+          "index"
+        ]
+      },
+      "title": "Section"
+    },
+    "functions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name"
+          },
+          "address": {
+            "type": "integer",
+            "title": "Address"
+          },
+          "size": {
+            "type": "integer",
+            "title": "Size"
+          },
+          "secidx": {
+            "type": "integer",
+            "title": "SectionID"
+          },
+          "file": {
+            "type": "string",
+            "minLength": 1,
+            "title": "File"
+          },
+          "line": {
+            "type": "integer",
+            "title": "Line"
+          },
+          "asm": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Assembly"
+          }
+        },
+        "required": [
+          "name",
+          "address",
+          "size",
+          "secidx"
+        ]
+      },
+      "title": "Functions"
+    },
+    "variables": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name"
+          },
+          "address": {
+            "type": "integer",
+            "title": "Address"
+          },
+          "size": {
+            "type": "integer",
+            "title": "Size"
+          },
+          "secidx": {
+            "type": "integer",
+            "title": "SectionID"
+          },
+          "staticInitData": {
+            "type": "string",
+            "minLength": 1,
+            "title": "StaticInitData"
+          }
+        },
+        "required": [
+          "name",
+          "address",
+          "size",
+          "secidx"
+        ]
+      },
+      "title": "Variables"
+    },
+    "types": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Name"
+          },
+          "size": {
+            "type": "integer",
+            "title": "Size"
+          }
+        },
+        "required": [
+          "name",
+          "size"
+        ]
+      },
+      "title": "Types"
+    }
+  },
+  "required": [
+    "section",
+    "functions",
+    "variables"
+  ]
+}
