@@ -76,8 +76,7 @@
         "required": [
           "name",
           "address",
-          "size",
-          "secidx"
+          "size"
         ]
       },
       "title": "Functions"
@@ -113,8 +112,7 @@
         "required": [
           "name",
           "address",
-          "size",
-          "secidx"
+          "size"
         ]
       },
       "title": "Variables"

@@ -54,10 +54,12 @@ type CompileUnit struct {
 }
 
 type SElfReport struct {
-	Elf       *elf.File        `json:"-"`
-	SrcFiles  []CompileUnit    `json:"-"`
-	Sections  []ElfSection     `json:"section"`
-	Functions []FunctionSymbol `json:"functions"`
-	Variables []VariableSymbol `json:"variables"`
-	Types     []Typedef        `json:"types,omitempty,omitzero"`
+	SingleFirmware     bool             `json:"singlefirmware"`
+	FirmwareIdentifier string           `json:"firmwareID"`
+	Elf                *elf.File        `json:"-"`
+	SrcFiles           []CompileUnit    `json:"-"`
+	Sections           []ElfSection     `json:"section"`
+	Functions          []FunctionSymbol `json:"functions"`
+	Variables          []VariableSymbol `json:"variables"`
+	Types              []Typedef        `json:"types,omitempty,omitzero"`
 }

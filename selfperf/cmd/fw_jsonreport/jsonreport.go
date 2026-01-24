@@ -30,6 +30,9 @@ func main() {
 	}
 
 	elfReport := symbolextraction.GetFWReport(elfFile)
+	elfReport.SingleFirmware = true
+	elfReport.FirmwareIdentifier = "unspecified"
+
 	var datajson []byte
 	if *pretty {
 		datajson, _ = json.MarshalIndent(elfReport, "", "    ")

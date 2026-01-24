@@ -50,7 +50,7 @@ func setLineInfo(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) {
 		}
 		// fmt.Println("\tfile ", dbl.FileNames[0], len(addresses), addresses)
 	}
-	// create a searchable address map
+	// create a searchable address to source map
 	keys := make([]uint64, 0, len(addr2fileMap))
 	for k := range addr2fileMap {
 		keys = append(keys, k)
@@ -60,6 +60,9 @@ func setLineInfo(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) {
 	for i := 0; i < len(funcs); i++ {
 		function := &funcs[i]
 		pos, _ := slices.BinarySearch(keys, function.Address) // exact
+		if pos == len(keys) {
+			pos = len(funcs) - 1
+		}
 		closest_addr := keys[pos]
 		dbl := addr2fileMap[closest_addr]
 		fn, ln := dbl.PCToLine(function.Address, function.Address)
