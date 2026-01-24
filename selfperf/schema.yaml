@@ -143,7 +143,6 @@
     }
   },
   "required": [
-    "section",
     "functions",
     "variables"
   ]

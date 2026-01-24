@@ -74,6 +74,11 @@ func getVariableTypes(elf *elf.File, vars []VariableSymbol) []Typedef {
 	dwarfData, _ := elf.DWARF()
 	rd := dwarfData.Reader()
 	var cache map[dwarf.Offset]godwarf.Type = make(map[dwarf.Offset]godwarf.Type, 0)
+	var varMap map[string]*VariableSymbol = make(map[string]*VariableSymbol, len(vars))
+	for i := 0; i < len(vars); i++ {
+		v := &vars[i]
+		varMap[v.Name] = v
+	}
 	for idx := 0; ; idx++ {
 		entry, err := rd.Next()
 		if err != nil {
@@ -81,11 +86,6 @@ func getVariableTypes(elf *elf.File, vars []VariableSymbol) []Typedef {
 		}
 		if entry == nil {
 			break
-		}
-		var varMap map[string]*VariableSymbol = make(map[string]*VariableSymbol, len(vars))
-		for i := 0; i < len(vars); i++ {
-			v := &vars[i]
-			varMap[v.Name] = v
 		}
 		// parse compilation unit
 		if entry.Tag == dwarf.TagVariable {
