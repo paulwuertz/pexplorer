@@ -82,7 +82,7 @@ func getVariableTypes(elf *elf.File, vars []VariableSymbol) []Typedef {
 		if entry == nil {
 			break
 		}
-		var varMap map[string]*VariableSymbol = make(map[string]*VariableSymbol, 0)
+		var varMap map[string]*VariableSymbol = make(map[string]*VariableSymbol, len(vars))
 		for i := 0; i < len(vars); i++ {
 			v := &vars[i]
 			varMap[v.Name] = v
