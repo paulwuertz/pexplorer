@@ -46,7 +46,7 @@
 							<!-- TODO add source link symbol json -->
 							Buildtime: {symbols.symbols[version].timestamp}
 						</CardText>
-						<Button href={version}>Browse</Button>
+						<Button href={base+"/browse/"+version}>Browse</Button>
 					</CardBody>
 				</Card>
 			</div>

@@ -24,23 +24,23 @@
 	let show_full_asm = $state(false);
 
 	// to display
-	let symbol_path_and_name = $derived(symbol_data.file + symbol_data.display_name);
-	let asm = $derived(Object.hasOwn(symbol_data, 'asm') ? symbol_data.asm : []);
+	let symbol_path_and_name = $derived(symbol_data.file + symbol_data.name);
+	// let asm = $derived(Object.hasOwn(symbol_data, 'asm') ? symbol_data.asm : []);
+    let asm = [];
 	let asm_code_preview = $derived(asm.slice(0, 5).join('\n'));
 	let address = $derived(symbol_data.address);
 	let stack_size = $derived(symbol_data.stack_size);
 	let stack_qualifier = $derived(symbol_data.stack_qualifiers);
 	let asm_code = $derived(asm.join('\n'));
-	let callers = $derived(JSON.parse(symbol_data.callers));
-	let callees = $derived(JSON.parse(symbol_data.callees));
-	let deepest_callers_tree = $derived(JSON.parse(symbol_data.deepest_caller_tree || false));
-	let deepest_callees_tree = $derived(JSON.parse(symbol_data.deepest_callee_tree || false));
+	let callers = $derived(symbol_data.callers || []);
+	let callees = $derived(symbol_data.callees || []);
 	let code_size = $derived(symbol_data.size);
 
 	const worst_call_stack = () => {
-		let my_symbol = { full_symbol_path: symbol_path_and_name, stack_size: symbol_data.stack_size };
-		let stack_down = deepest_callees_tree.concat([my_symbol]);
-		return stack_down.concat(deepest_callers_tree);
+		// let my_symbol = { full_symbol_path: symbol_path_and_name, stack_size: symbol_data.stack_size };
+		// let stack_down = deepest_callees_tree.concat([my_symbol]);
+		// return stack_down.concat(deepest_callers_tree);
+        return []
 	};
 </script>
 
@@ -49,7 +49,7 @@
 		<tr>
 			<td><b>Address</b>:</td>
 			<td>
-				0x{address}
+				0x{address.toString(16)}
 			</td>
 		</tr>
 

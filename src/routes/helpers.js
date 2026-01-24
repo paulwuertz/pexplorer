@@ -4,7 +4,7 @@ export let symbolsToMap = (syms) => {
 		sym.remark = sym.called_from_other_file ? 'linked-from-library' : '';
 		sym.newSymbols = false;
 		sym.deletedSymbols = false;
-		symMap[sym.file + sym.display_name] = sym;
+		symMap[sym.file + sym.name] = sym;
 	}
 	return symMap;
 };
@@ -96,7 +96,7 @@ export const symbols_total_size = (symbols) => {
 
 let add_sym_to_object_tree = (symbol, path_array, data_tree, data_field) => {
 	let entry = {
-		name: symbol.display_name,
+		name: symbol.name,
 		value: symbol[data_field]
 	};
 	let folder_name = path_array.shift();
@@ -124,12 +124,12 @@ export const symbols_to_sunburst_tree_data = (symbols, data_field) => {
 		if (typeof symbol.file !== 'string') {
 			continue;
 		}
-		let path_elements = symbol.file.split('/');
+		let path_elements = symbol.file ? symbol.file.split('/').slice(1) : ["unlocatable"];
 		add_sym_to_object_tree(symbol, path_elements, data, data_field);
 	}
 	return data;
 };
 
 export const row2AHref = (base, selected_version, row_data) => {
-	return base + '/browse/' + selected_version + '/' + row_data.file + '/' + row_data.display_name;
+	return base + '/browse/' + selected_version + '/' + row_data.file + '/' + row_data.name;
 };

@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
 	// ui stuff
 	import {
 		Button,
@@ -22,6 +20,7 @@
 
 	import { symbols } from './symbols.svelte.js';
 	import { base } from '$app/paths';
+	import { json } from '@sveltejs/kit';
 
 	let CANNECTIVITY_SAMPLE_URL = 'https://p4w5.eu/report.json';
 	let ZEPHYR_HELLO_SAMPLE_URL = 'https://p4w5.eu/reportHelloWorld.json';
@@ -53,7 +52,16 @@
             WebAssembly.instantiate(bytes, go.importObject).then(function (obj) {
                 wasm = obj.instance;
                 go.run(wasm);
-                console.log(get_elf_report(elfBinary));
+                let reportJSONstr = get_elf_report(elfBinary);
+                let reportJSON = JSON.parse(reportJSONstr);
+                console.log(reportJSON);
+                if (reportJSON.hasOwnProperty("singlefirmware")) {
+                    let identifier = reportJSON["firmwareID"];
+                    symbols.symbols[identifier] = reportJSON;
+                    symbols.elfDataProvided = true;
+                } else {
+
+                }
             })
         )
 	}

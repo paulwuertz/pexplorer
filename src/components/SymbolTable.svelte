@@ -25,7 +25,7 @@
 			pageSize: 99999, // TODO
 			data: function_table_data,
 			columns: [
-				{ id: 'name', key: 'display_name', name: 'Name' },
+				{ id: 'name', key: 'name', name: 'Name' },
 				// { id: 'remark', key: 'remark', name: 'Remarks' }, TODO discuss removal?
 				{ id: 'type', key: 'type', name: 'Type' },
 				{ id: 'address', key: 'address', name: 'Address' },
@@ -96,10 +96,10 @@
 		</tr>
 	</thead>
 	<tbody>
-		{#each function_table.rows as row (row.file + row.name)}
+		{#each function_table.rows as row, i (row.file + row.name + i)}
 			<tr>
 				{#each function_table.columns as column (column.name)}
-					{#if column.key == 'display_name'}
+					{#if column.key == 'name'}
 						<td>
 							<a
 								data-sveltekit-preload-data="tap"
@@ -108,6 +108,8 @@
 								{row[column.key]}
 							</a>
 						</td>
+					{:else if column.key == 'address'}
+						<td>0x{row[column.key].toString(16)}</td>
 					{:else}
 						<td>{row[column.key]}</td>
 					{/if}

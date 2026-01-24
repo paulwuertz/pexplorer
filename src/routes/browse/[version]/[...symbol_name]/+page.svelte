@@ -34,17 +34,20 @@
 	let symbol_path = $derived(symbol_path_and_name.split('/').slice(0, -1).join('/'));
 	let symbol_path_active = $derived(symbol_path_and_name.split('/').slice(-1));
 	let symbol_data = $derived(
-		symbols.symbols[symbol_version].symbols.find((e) => {
+		symbols.symbols[symbol_version].functions.find((e) => {
 			return symbol_path_and_name.includes(e.file);
 		})
 	);
 	const isChildToPath = (symbol) => symbol.file.includes(symbol_path_and_name);
-	let symbol_childs = $derived(
-		symbols.symbols[symbol_version].symbols.filter(isChildToPath).sort()
+	let fn_childs = $derived(
+		symbols.symbols[symbol_version].functions.filter(isChildToPath).sort()
+	);
+	let var_childs = $derived(
+		symbols.symbols[symbol_version].variables.filter(isChildToPath).sort()
 	);
 
 	onMount(async () => {
-		if (browser && symbol_childs) {
+		if (browser && fn_childs) {
 			var romChartDom = document.getElementById('sunburst_chart_rom');
 			var romChart = echarts.init(romChartDom);
 			var ramChartDom = document.getElementById('sunburst_chart_ram');
@@ -52,9 +55,10 @@
 			var option;
 
 			// TODO rm hack - think about how to distinguish better memory regions for all controller types...
-			let rom_syms = symbol_childs.filter(
-				(e) => e.address.startsWith(0) || e.address.startsWith(8)
-			);
+			let rom_syms = fn_childs.filter((e) => ! (
+                e.address.toString(16).startsWith(2) && // not 0x2... in RAM
+                e.address >= 0x20000000
+            ));
 			var sunburst_data = helpers.symbols_to_sunburst_tree_data(rom_syms, 'size');
 			console.log('sunburst_data', sunburst_data);
 			option = {
@@ -77,7 +81,10 @@
 			};
 			option && romChart.setOption(option);
 
-			let ram_syms = symbol_childs.filter((e) => e.address.startsWith(2));
+			let ram_syms = var_childs.filter((e) => {
+                return e.address.toString(16).startsWith(2) && // 0x2... in RAM
+                        e.address >= 0x20000000;
+            });
 			var sunburst_data = helpers.symbols_to_sunburst_tree_data(ram_syms, 'size');
 			console.log('sunburst_data', sunburst_data);
 			option = {
@@ -125,7 +132,7 @@
 		{#if symbol_data}
             {console.log("symbol_data: ", $state.snapshot(symbol_data))}
 			<FunctionSymbolPage {symbol_data} {symbol_version} />
-		{:else if symbol_childs}
+		{:else if fn_childs}
 			<Row cols={{ md: 2, sm: 1 }}>
 				<div>
 					<h3>Flash usage</h3>
@@ -136,9 +143,9 @@
 					<div id="sunburst_chart_ram" style="width: 100%;height:600px;"></div>
 				</div>
 			</Row>
-			{symbol_childs.length} symbols in this path: '/{symbol_path}'
+			{fn_childs.length} function and {var_childs.length} variable symbols in this path: '/{symbol_path}'
 
-			<SymbolTable fnSymbols={symbol_childs} selected_version={symbol_version} />
+			<SymbolTable fnSymbols={fn_childs} selected_version={symbol_version} />
 		{:else}
 			404 - nonononon
 		{/if}
