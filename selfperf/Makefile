@@ -3,5 +3,5 @@
 .PHONY: ../static/sELFperf.wasm
 
 ../static/sELFperf.wasm: main.go
-	GOOS=js GOARCH=wasm tinygo build -o ../static/sELFperf.wasm ./wasm/jsonreport.go
+	GOOS=js GOARCH=wasm tinygo build -no-debug -size full -o ../static/sELFperf.wasm ./wasm/jsonreport.go
 #PATH="/home/paul/opt/go24/bin/:$PATH" make

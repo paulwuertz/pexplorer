@@ -21,6 +21,7 @@
 	import Dropzone from 'svelte-file-dropzone';
 
 	import { symbols } from './symbols.svelte.js';
+	import { base } from '$app/paths';
 
 	let CANNECTIVITY_SAMPLE_URL = 'https://p4w5.eu/report.json';
 	let ZEPHYR_HELLO_SAMPLE_URL = 'https://p4w5.eu/reportHelloWorld.json';
@@ -44,7 +45,7 @@
 	function loadReportFromELF(elfBinary) {
         console.log(elfBinary);
         const go = new Go(); // Defined in wasm_exec.js
-        const WASM_URL = '/sELFperf.wasm';
+        const WASM_URL = base+'/sELFperf.wasm';
         var wasm;
         fetch(WASM_URL).then(resp =>
             resp.arrayBuffer()
@@ -52,7 +53,7 @@
             WebAssembly.instantiate(bytes, go.importObject).then(function (obj) {
                 wasm = obj.instance;
                 go.run(wasm);
-                console.log(read_sections_as_json(elfBinary));
+                console.log(get_elf_report(elfBinary));
             })
         )
 	}
