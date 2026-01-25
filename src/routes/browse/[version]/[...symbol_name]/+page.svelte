@@ -38,7 +38,7 @@
 			return symbol_path_and_name.includes(e.file);
 		})
 	);
-	const isChildToPath = (symbol) => symbol.file.includes(symbol_path_and_name);
+	const isChildToPath = (symbol) => symbol.file && symbol.file.includes(symbol_path_and_name);
 	let fn_childs = $derived(
 		symbols.symbols[symbol_version].functions.filter(isChildToPath).sort()
 	);
