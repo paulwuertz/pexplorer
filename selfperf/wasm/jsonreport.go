@@ -32,6 +32,10 @@ func wasm_get_elf_report() js.Func {
 		elfFile, _ := elf.NewFile(r)
 
 		elfReport := symbolextraction.GetFWReport(elfFile)
+		elfReport.SingleFirmware = true
+		elfReport.FirmwareIdentifier = "unspecified"
+		elfReport.Timestamp = "dood"
+
 		datajson, _ := json.Marshal(elfReport)
 		return string(datajson)
 	})

@@ -4,6 +4,7 @@ import (
 	"debug/elf"
 	"io"
 	"sort"
+	"strings"
 
 	"github.com/ianlancetaylor/demangle"
 )
@@ -18,7 +19,7 @@ func ExtractFunctions(elfFile elf.File) []FunctionSymbol {
 	symData, _ := elfFile.Symbols()
 
 	for _, sym := range symData {
-		symType := elf.SymType(sym.Info & 0xf)
+		symType := elf.ST_TYPE(sym.Info)
 		isFunc := (elf.STT_FUNC == symType)
 		if (!isFunc) || sym.Size == 0 {
 			continue
@@ -55,7 +56,7 @@ func ExtractVariables(elfFile elf.File) []VariableSymbol {
 	symData, _ := elfFile.Symbols()
 
 	for _, sym := range symData {
-		symType := elf.SymType(sym.Info & 0xf)
+		symType := elf.ST_TYPE(sym.Info)
 		isVar := (elf.STT_OBJECT == symType)
 		if (!isVar) || sym.Size == 0 {
 			continue
@@ -146,6 +147,9 @@ func AddDataToVar(syms []VariableSymbol, fm SectionMaps) {
 		sym := &syms[i]
 		addr, size := sym.Address, sym.FlashSize
 		sec := fm.getSectionByIndex(sym.SectionIndex)
+		if strings.Contains(sec.Name, "bss") {
+			continue // will be zero data anyway...
+		}
 		sr := sec.Open()
 		// fmt.Println(addr, size, sym.SectionIndex)
 		symSecOffset := int64(addr - sec.Addr)

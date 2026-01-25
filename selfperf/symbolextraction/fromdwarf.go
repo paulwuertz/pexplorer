@@ -13,6 +13,7 @@ import (
 	"github.com/go-delve/delve/pkg/dwarf/frame"
 	"github.com/go-delve/delve/pkg/dwarf/godwarf"
 	"github.com/go-delve/delve/pkg/dwarf/line"
+	"github.com/go-delve/delve/pkg/dwarf/reader"
 )
 
 var RegRuleEnum2String = map[frame.Rule]string{
@@ -70,18 +71,46 @@ func setLineInfo(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) {
 		function.SourceFileLine = uint64(ln)
 		// fmt.Println("\tfile ", exact, fn, ln, function.Address, closest_addr, "diff", int64(function.Address)-int64(closest_addr), function.Name)
 	}
+
+	// rangesdata, _ := godwarf.GetDebugSectionElf(elf, "aranges")
+	// // find the closest addr for each function and set it
+	// for i := 0; i < len(vars); i++ {
+	// 	function := &funcs[i]
+	// 	pos, _ := slices.BinarySearch(keys, function.Address) // exact
+	// 	if pos == len(keys) {
+	// 		pos = len(funcs) - 1
+	// 	}
+	// 	closest_addr := keys[pos]
+	// 	dbl := addr2fileMap[closest_addr]
+	// 	fn, ln := dbl.PCToLine(function.Address, function.Address)
+	// 	function.SourceFilePath = fn
+	// 	function.SourceFileLine = uint64(ln)
+	// 	// fmt.Println("\tfile ", exact, fn, ln, function.Address, closest_addr, "diff", int64(function.Address)-int64(closest_addr), function.Name)
+	// }
 }
 
-func getVariableTypes(elf *elf.File, vars []VariableSymbol) []Typedef {
-	typeMap := make(map[string]Typedef, 0)
-	dwarfData, _ := elf.DWARF()
-	rd := dwarfData.Reader()
+func getVariableTypes(s *SElfReport) []Typedef {
+
+	var dwarfData, _ = s.Elf.DWARF()
+	var rd = dwarfData.Reader()
+	var delveReader = reader.New(dwarfData)
+	var funcs = s.Functions
+	var vars = s.Variables
 	var cache map[dwarf.Offset]godwarf.Type = make(map[dwarf.Offset]godwarf.Type, 0)
-	var varMap map[string]*VariableSymbol = make(map[string]*VariableSymbol, len(vars))
+	var varMap map[uint64]*VariableSymbol = make(map[uint64]*VariableSymbol, len(vars))
+	var fnMap map[uint64]*FunctionSymbol = make(map[uint64]*FunctionSymbol, len(vars))
+	var typeMap = make(map[string]Typedef, 0)
+	var curCompileUnit *CompileUnit
+	var curFunction *FunctionSymbol
+
+	// create maps by address
 	for i := 0; i < len(vars); i++ {
-		v := &vars[i]
-		varMap[v.Name] = v
+		varMap[vars[i].Address] = &vars[i]
 	}
+	for i := 0; i < len(funcs); i++ {
+		fnMap[funcs[i].Address] = &funcs[i]
+	}
+	// iterate over debug data
 	for idx := 0; ; idx++ {
 		entry, err := rd.Next()
 		if err != nil {
@@ -91,23 +120,107 @@ func getVariableTypes(elf *elf.File, vars []VariableSymbol) []Typedef {
 			break
 		}
 		// parse compilation unit
+		if entry.Tag == dwarf.TagCompileUnit {
+			lrd, err := dwarfData.LineReader(entry)
+			if err != nil {
+				log.Fatal("no lrd")
+			}
+
+			cu := CompileUnit{}
+			curCompileUnit = &cu
+			cu.Source = make([]string, len(lrd.Files()))
+
+			// record the files contained in this compilation unit
+			for i, v := range lrd.Files() {
+				if v == nil {
+					continue
+				}
+				cu.Source[i] = v.Name
+			}
+			s.CompileUnits = append(s.CompileUnits, cu)
+		}
+
+		var filename string = ""
+		cuFileIndex, fileNameFound := entry.Val(dwarf.AttrDeclFile).(int64)
+		cuFileLine, _ := entry.Val(dwarf.AttrDeclLine).(int64)
+		name, isNameOk := entry.Val(dwarf.AttrName).(string)
+		if fileNameFound {
+			filename = curCompileUnit.Source[cuFileIndex-1]
+		}
+
+		// pare subprogram
+		if entry.Tag == dwarf.TagSubprogram {
+			addr, ok := entry.Val(dwarf.AttrLowpc).(uint64)
+			fn, ok := fnMap[addr]
+			if !ok {
+				if addr == 0 || !isNameOk {
+					// might be a virtual fn, ignore for now...
+					// TODO any reason to export them as well?
+					continue
+				} else {
+					// TODO sym in dwarf is offset by 1 in addr - why
+					// and are there syms exclusivly in dwarf or elf?
+					addrBegin, ok1 := entry.Val(dwarf.AttrLowpc).(uint64)
+					addrEnd, ok2 := entry.Val(dwarf.AttrHighpc).(int64)
+					if ok1 && ok2 {
+						size := int64(addrBegin) + addrEnd + 1
+						funcs = append(funcs, FunctionSymbol{
+							Name:              name,
+							Address:           addrBegin,
+							FlashSize:         uint64(size),
+							FunctionStackSize: 0,
+							SourceFilePath:    filename,
+							SourceFileLine:    uint64(cuFileLine),
+							// SectionIndex:      uint8(sym.Section),
+							// asm
+						})
+						continue
+					}
+					log.Fatal(name, "could not get mapped to fn:", entry, "at addr", addr)
+				}
+			}
+			fn.SourceFilePath = filename
+			curFunction = fn
+			curCompileUnit.Functions = append(curCompileUnit.Functions, fn)
+		} else {
+			curFunction = nil
+		}
+
+		// parse variable
 		if entry.Tag == dwarf.TagVariable {
-			tree, err := godwarf.LoadTree(entry.Offset, dwarfData, 0)
+			var varRef *VariableSymbol
+			var found bool
+			// get var addr by name and at file info
+			if isNameOk {
+				addr, err := delveReader.AddrFor(name, 0, 4)
+				if err == nil && addr != 0 {
+					varRef, found = varMap[addr]
+					if found {
+						varRef.SourceFilePath = filename
+						varRef.SourceFileLine = uint64(cuFileLine)
+					}
+				}
+			}
+			// get type info
 			atoff, ok := entry.Val(dwarf.AttrType).(dwarf.Offset)
-			// fmt.Println("tree -", tree.Val(dwarf.AttrName), tree.Val(dwarf.AttrType), err)
 			if ok && err == nil {
-				var varName string = ""
-				ty, _ := godwarf.ReadType(dwarfData, 0, atoff, cache)
-				varName, ok := tree.Val(dwarf.AttrName).(string)
+				typeRef, _ := godwarf.ReadType(dwarfData, 0, atoff, cache)
 				if !ok {
 					continue
 				}
-				typeStr := ty.Common().Name
-				typeMap[typeStr] = Typedef{Name: typeStr, Size: uint64(ty.Common().ByteSize)}
-				v, ok := varMap[varName]
+				typeStr := typeRef.Common().Name
+				typeMap[typeStr] = Typedef{Name: typeStr, Size: uint64(typeRef.Common().ByteSize)}
+				// try to get the type
 				if ok && typeStr != "" {
-					v.VariableType = ty.Common().Name
-					// fmt.Println("\t- type info found", v, entry.Tag.String())
+					if varRef != nil {
+						varRef.VariableType = typeRef.Common().Name
+						if curFunction != nil {
+							curFunction.Variables = append(curFunction.Variables, varRef)
+						} else {
+							// cu
+							fmt.Println("entry var withot fn", entry)
+						}
+					}
 				} else {
 					// ?
 				}
@@ -172,7 +285,7 @@ func getStackUseDetails(elf *elf.File, funcs []FunctionSymbol, vars []VariableSy
 }
 
 func EnhanceByDwarfDebugInfo(s *SElfReport) (srcFiles []string) {
-	s.Types = getVariableTypes(s.Elf, s.Variables)
+	s.Types = getVariableTypes(s)
 	getStackUseDetails(s.Elf, s.Functions, s.Variables)
 	setLineInfo(s.Elf, s.Functions, s.Variables)
 	return
