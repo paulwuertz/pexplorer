@@ -20,7 +20,6 @@
 
 	import { symbols } from './symbols.svelte.js';
 	import { base } from '$app/paths';
-	import { json } from '@sveltejs/kit';
 
 	let CANNECTIVITY_SAMPLE_URL = 'https://p4w5.eu/report.json';
 	let ZEPHYR_HELLO_SAMPLE_URL = 'https://p4w5.eu/reportHelloWorld.json';

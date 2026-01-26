@@ -16,28 +16,30 @@
 		Row,
 		Table
 	} from '@sveltestrap/sveltestrap';
-	import * as helpers from '../routes/helpers.js';
+    import * as helpers from '../routes/helpers.js';
 
 	const { symbol_data, symbol_version } = $props();
 
+	let sym_data = $derived(symbol_data);
 	// settings
 	let show_full_asm = $state(false);
-
+    $inspect(sym_data)
 	// to display
-	let symbol_path_and_name = $derived(symbol_data.file + symbol_data.name);
-	// let asm = $derived(Object.hasOwn(symbol_data, 'asm') ? symbol_data.asm : []);
-    let asm = [];
-	let asm_code_preview = $derived(asm.slice(0, 5).join('\n'));
-	let address = $derived(symbol_data.address);
-	let stack_size = $derived(symbol_data.stack_size);
-	let stack_qualifier = $derived(symbol_data.stack_qualifiers);
+	let symbol_path_and_name = $derived(sym_data.file + sym_data.name);
+	let asm = $derived(sym_data.asm ? helpers.csBase64ToASMText(sym_data.asm, sym_data.address) : undefined);
+    // let asm = [];
+	// let asm_code_preview = $derived(asm.slice(0, 5).join('\n'));
+	let asm_code_preview = $derived(asm);
+    let address = $derived(sym_data.address);
+	let stack_size = $derived(sym_data.stack_size);
+	let stack_qualifier = $derived(sym_data.stack_qualifiers);
 	let asm_code = $derived(asm.join('\n'));
-	let callers = $derived(symbol_data.callers || []);
-	let callees = $derived(symbol_data.callees || []);
-	let code_size = $derived(symbol_data.size);
+	let callers = $derived(sym_data.callers || []);
+	let callees = $derived(sym_data.callees || []);
+	let code_size = $derived(sym_data.size);
 
 	const worst_call_stack = () => {
-		// let my_symbol = { full_symbol_path: symbol_path_and_name, stack_size: symbol_data.stack_size };
+		// let my_symbol = { full_symbol_path: symbol_path_and_name, stack_size: sym_data.stack_size };
 		// let stack_down = deepest_callees_tree.concat([my_symbol]);
 		// return stack_down.concat(deepest_callers_tree);
         return []
@@ -146,7 +148,7 @@
 			<td></td>
 			<td></td>
 			<td
-				><b>&sum; {symbol_data.deepest_callee_tree_size + symbol_data.deepest_caller_tree_size}</b
+				><b>&sum; {sym_data.deepest_callee_tree_size + sym_data.deepest_caller_tree_size}</b
 				></td
 			>
 		</tr>

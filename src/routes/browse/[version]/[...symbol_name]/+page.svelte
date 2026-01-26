@@ -35,7 +35,7 @@
 	let symbol_path_active = $derived(symbol_path_and_name.split('/').slice(-1));
 	let symbol_data = $derived(
 		symbols.symbols[symbol_version].functions.find((e) => {
-			return symbol_path_and_name.includes(e.file);
+			return symbol_path_and_name === e.file + "/" + e.name + "/" ;
 		})
 	);
 	const isChildToPath = (symbol) => symbol.file && symbol.file.includes(symbol_path_and_name);

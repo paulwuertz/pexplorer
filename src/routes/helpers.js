@@ -1,3 +1,5 @@
+import * as cs from "@alexaltea/capstone-js/dist/capstone.min.js"
+
 export let symbolsToMap = (syms) => {
 	let symMap = {};
 	for (const sym of syms) {
@@ -133,3 +135,22 @@ export const symbols_to_sunburst_tree_data = (symbols, data_field) => {
 export const row2AHref = (base, selected_version, row_data) => {
 	return base + '/browse/' + selected_version + '/' + row_data.file + '/' + row_data.name;
 };
+
+var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_THUMB+cs.MODE_MCLASS);
+
+export const csBase64ToASMText = (base64text, baseAddr) =>  {
+    let ASM = Uint8Array.fromBase64(base64text)
+    console.log("ASM: "+ASM, base64text);
+    let disasmData = d.disasm(ASM, baseAddr)
+    console.log(JSON.stringify(disasmData, null, 4));
+    // Display results;
+    let result = "";
+    disasmData.forEach(function (instr) {
+        result += "0x" + instr.address.toString(16) + ":\t" + instr.mnemonic + "\t" + instr.op_str + "\n\t"
+    });
+    console.log(result, null, 4);
+
+    // Delete decoder
+    // d.close();
+    return result
+}
