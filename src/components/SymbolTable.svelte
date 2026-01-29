@@ -43,27 +43,40 @@
 
 <Row>
 	<Col>
-		Filter options:
+		<Row>Filter options:</Row>
+	</Col>
+</Row>
+<Row>
+	<Col sm="12" md={4}>Filter symbols by text:</Col>
+	<Col sm="12" md={4}>Show file column:</Col>
+</Row>
+<Row>
+	<Col sm="12" md={4}>
 		<FormGroup>
 			<Input
 				type="text"
-				placeholder="Filter symbols by name"
+				placeholder="Enter a filter string"
 				class="md:m3-auto md:max-w-[500px]"
 				bind:value={function_table.globalFilter}
 			/>
-			<Label>
-				<p>
-					Showing {function_table.allRows.length} / {function_table.baseRows.length} functions
-				</p>
-			</Label>
 		</FormGroup>
 	</Col>
+
+	<Col sm="12" md={4}>
+        {#each ['None', 'Filename only', 'Full filepath'] as value}
+            <Input type="radio" bind:group={show_filepath} {value} label={value.charAt(0).toUpperCase() + value.slice(1)} />
+        {/each}
+    </Col>
+    <Row><Col><p>
+        Showing {function_table.allRows.length} / {function_table.baseRows.length} symbols
+    </p></Col></Row>
 </Row>
 
 <Table hover bordered style="word-break: break-all;">
 	<thead>
 		<tr>
 			{#each function_table.columns as column (column.name)}
+                {#if column.id != 'file' || show_filepath != 'None'}
 				<th>
 					{column.name}
 					<button
@@ -84,18 +97,22 @@
 						{/if}
 					</button>
 				</th>
+                {/if}
 			{/each}
 		</tr>
 		<tr>
 			{#each function_table.columns as column (column.name)}
+                {#if column.id != 'file' || show_filepath != 'None'}
 				<th>
 					{#if column.id == 'name'}
 						Sum of all selected symbols
 					{/if}
 					{#if column.id == 'size'}
+                        <!-- TODO add split in ROM/FLash + RAM for vars in .bss and .data -->
 						&sum; = {function_table.allRows.reduce((accumulator, row) => accumulator + row.size, 0)}
 					{/if}
 				</th>
+                {/if}
 			{/each}
 		</tr>
 	</thead>
@@ -114,18 +131,24 @@
 						</td>
 					{:else if column.key == 'address'}
 						<td>0x{row[column.key].toString(16)}</td>
-					{:else if column.id == 'type'}
+					{:else if column.key == 'file'}
                         {#if show_filepath != 'None'}
+                            <td>
+                            {#if show_filepath == 'Filename only'}
+                                    {row[column.key].substring(row[column.key].lastIndexOf("/") + 1)}
+                            {:else}
+                                    {row[column.key]}
+                            {/if}
+                            </td>
+                        {/if}
+					{:else if column.id == 'type'}
 						<td style="min-width: 0px;">
                             {#if row[column.key] === 'var'}
                             <img src="{base}/icons/Method_16x.svg" width="16px" title="Type variable">
                             {:else if row[column.key] === 'fn'}
                             <img src="{base}/icons/Field_16x.svg" width="16px" title="Type variable">
-                            {:else}
-                            ↕
-                            {/if}
+					        {/if}
                         </td>
-					    {/if}
                     {:else}
 						<td>{row[column.key]}</td>
 					{/if}
