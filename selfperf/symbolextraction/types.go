@@ -61,7 +61,7 @@ type SElfReport struct {
 	Timestamp          string           `json:"timestamp"`
 	Elf                *elf.File        `json:"-"`
 	CompileUnits       []CompileUnit    `json:"compile_units"`
-	Sections           []ElfSection     `json:"section"`
+	Sections           []ElfSection     `json:"sections"`
 	Functions          []FunctionSymbol `json:"functions"`
 	Variables          []VariableSymbol `json:"variables"`
 	Types              []Typedef        `json:"types,omitempty,omitzero"`

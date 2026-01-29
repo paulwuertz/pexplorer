@@ -12,15 +12,17 @@
 		Container,
 		FormGroup,
 		Input,
+		InputGroup,
 		Label,
 		Row,
 		Table
 	} from '@sveltestrap/sveltestrap';
 	import * as helpers from '../routes/helpers.js';
 
-	const { fnSymbols, varSymbols, selected_version } = $props();
+	const { fnSymbols, varSymbols, selected_version, sections } = $props();
 	let fnSymbolsT  = ([...fnSymbols].map(e => {e["type"]="fn"; return e;}));
 	let varSymbolsT = ([...varSymbols].map(e => {e["type"]="var"; return e;}));
+	let show_sections = $state(true);
 	let show_filepath = $state("Full filepath");
 	let function_table_data = $derived([...fnSymbolsT , ...varSymbolsT]);
 	let function_table = $derived(
@@ -32,6 +34,7 @@
 				{ id: 'file', key: 'file', name: 'Filepath' },
 				{ id: 'name', key: 'name', name: 'Name' },
 				// { id: 'remark', key: 'remark', name: 'Remarks' }, TODO discuss removal?
+				{ id: 'secidx', key: 'secidx', name: 'Section' },
 				{ id: 'address', key: 'address', name: 'Address' },
 				{ id: 'size', key: 'size', name: 'Symbol size' },
 				{ id: 'stack_size', key: 'stack_size', name: 'Stack size' },
@@ -40,6 +43,8 @@
 		})
 	);
 </script>
+
+<hr>
 
 <Row>
 	<Col>
@@ -52,31 +57,35 @@
 </Row>
 <Row>
 	<Col sm="12" md={4}>
-		<FormGroup>
-			<Input
-				type="text"
-				placeholder="Enter a filter string"
-				class="md:m3-auto md:max-w-[500px]"
-				bind:value={function_table.globalFilter}
-			/>
-		</FormGroup>
+        <Input
+            type="text"
+            placeholder="Enter a filter string"
+            class="md:m3-auto md:max-w-[500px]"
+            bind:value={function_table.globalFilter}
+            style={"margin-top: 10px;"}
+        />
 	</Col>
 
 	<Col sm="12" md={4}>
+        <InputGroup>
         {#each ['None', 'Filename only', 'Full filepath'] as value}
-            <Input type="radio" bind:group={show_filepath} {value} label={value.charAt(0).toUpperCase() + value.slice(1)} />
+            <Input type="radio" bind:group={show_filepath} {value} label={value} style="padding-right: 10px;" />
         {/each}
+        </InputGroup>
+        <Input bind:checked={show_sections} type="switch" label="Show section column:" />
     </Col>
-    <Row><Col><p>
-        Showing {function_table.allRows.length} / {function_table.baseRows.length} symbols
-    </p></Col></Row>
+</Row>
+<Row>
+    <Col>
+        <p>Showing {function_table.allRows.length} / {function_table.baseRows.length} symbols</p>
+    </Col>
 </Row>
 
 <Table hover bordered style="word-break: break-all;">
 	<thead>
 		<tr>
 			{#each function_table.columns as column (column.name)}
-                {#if column.id != 'file' || show_filepath != 'None'}
+                {#if (column.id != 'file' && column.id != 'secidx') || column.id == 'file' && show_filepath != 'None' || column.id == 'secidx' && show_sections }
 				<th>
 					{column.name}
 					<button
@@ -102,7 +111,7 @@
 		</tr>
 		<tr>
 			{#each function_table.columns as column (column.name)}
-                {#if column.id != 'file' || show_filepath != 'None'}
+                {#if  (column.id != 'file' && column.id != 'secidx') || column.id == 'file' && show_filepath != 'None' || column.id == 'secidx' && show_sections }
 				<th>
 					{#if column.id == 'name'}
 						Sum of all selected symbols
@@ -129,6 +138,10 @@
 								{row[column.key]}
 							</a>
 						</td>
+					{:else if column.key == 'secidx'}
+                        {#if show_sections}
+						<td>{sections[row[column.key]].name}</td>
+                        {/if}
 					{:else if column.key == 'address'}
 						<td>0x{row[column.key].toString(16)}</td>
 					{:else if column.key == 'file'}

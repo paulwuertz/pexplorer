@@ -44,6 +44,7 @@
         else
             return !!symbol_path_and_name || symbol.file && symbol.file.includes(symbol_path_and_name);
     }
+	let sections = $derived(symbols.symbols[symbol_version].sections);
 	let fn_childs = $derived(
 		symbols.symbols[symbol_version].functions.filter(isChildToPath).sort()
 	);
@@ -150,7 +151,7 @@
 			</Row>
 			{fn_childs.length} function and {var_childs.length} variable symbols in this path: '/{symbol_path}'
 
-			<SymbolTable fnSymbols={fn_childs} varSymbols={var_childs} selected_version={symbol_version} />
+			<SymbolTable fnSymbols={fn_childs} varSymbols={var_childs} selected_version={symbol_version} sections={sections} />
 		{:else}
 			404 - nonononon
 		{/if}
