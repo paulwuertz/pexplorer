@@ -18,16 +18,20 @@
 	} from '@sveltestrap/sveltestrap';
 	import * as helpers from '../routes/helpers.js';
 
-	const { fnSymbols, selected_version } = $props();
-	let function_table_data = $derived(fnSymbols);
+	const { fnSymbols, varSymbols, selected_version } = $props();
+	let fnSymbolsT  = ([...fnSymbols].map(e => {e["type"]="fn"; return e;}));
+	let varSymbolsT = ([...varSymbols].map(e => {e["type"]="var"; return e;}));
+	let show_filepath = $state("Full filepath");
+	let function_table_data = $derived([...fnSymbolsT , ...varSymbolsT]);
 	let function_table = $derived(
 		new DataTable({
 			pageSize: 99999, // TODO
 			data: function_table_data,
 			columns: [
+				{ id: 'type', key: 'type', name: 'Type' },
+				{ id: 'file', key: 'file', name: 'Filepath' },
 				{ id: 'name', key: 'name', name: 'Name' },
 				// { id: 'remark', key: 'remark', name: 'Remarks' }, TODO discuss removal?
-				{ id: 'type', key: 'type', name: 'Type' },
 				{ id: 'address', key: 'address', name: 'Address' },
 				{ id: 'size', key: 'size', name: 'Symbol size' },
 				{ id: 'stack_size', key: 'stack_size', name: 'Stack size' },
@@ -110,7 +114,19 @@
 						</td>
 					{:else if column.key == 'address'}
 						<td>0x{row[column.key].toString(16)}</td>
-					{:else}
+					{:else if column.id == 'type'}
+                        {#if show_filepath != 'None'}
+						<td style="min-width: 0px;">
+                            {#if row[column.key] === 'var'}
+                            <img src="{base}/icons/Method_16x.svg" width="16px" title="Type variable">
+                            {:else if row[column.key] === 'fn'}
+                            <img src="{base}/icons/Field_16x.svg" width="16px" title="Type variable">
+                            {:else}
+                            ↕
+                            {/if}
+                        </td>
+					    {/if}
+                    {:else}
 						<td>{row[column.key]}</td>
 					{/if}
 				{/each}
@@ -118,3 +134,12 @@
 		{/each}
 	</tbody>
 </Table>
+
+<style>
+    td {
+        min-width: 130px;
+        font-size: 14px;
+        padding-top: 0.25rem;
+        padding-bottom: 0.25rem;
+    }
+</style>

@@ -144,9 +144,9 @@ export const csBase64ToASMText = (base64text, baseAddr) =>  {
     let disasmData = d.disasm(ASM, baseAddr)
     console.log(JSON.stringify(disasmData, null, 4));
     // Display results;
-    let result = "";
+    let result = "\tAddr\tINSTR\tOP\n";
     disasmData.forEach(function (instr) {
-        result += "0x" + instr.address.toString(16) + ":\t" + instr.mnemonic + "\t" + instr.op_str + "\n\t"
+        result += "\t0x" + instr.address.toString(16) + ":\t" + instr.mnemonic + "\t" + instr.op_str + "\n"
     });
     console.log(result, null, 4);
 

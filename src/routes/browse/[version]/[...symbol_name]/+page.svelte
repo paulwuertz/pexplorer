@@ -38,7 +38,12 @@
 			return symbol_path_and_name === e.file + "/" + e.name + "/" ;
 		})
 	);
-	const isChildToPath = (symbol) => symbol.file && symbol.file.includes(symbol_path_and_name);
+	const isChildToPath = (symbol) => {
+        if (symbol_path_and_name === "/")
+            return true;
+        else
+            return !!symbol_path_and_name || symbol.file && symbol.file.includes(symbol_path_and_name);
+    }
 	let fn_childs = $derived(
 		symbols.symbols[symbol_version].functions.filter(isChildToPath).sort()
 	);
@@ -145,7 +150,7 @@
 			</Row>
 			{fn_childs.length} function and {var_childs.length} variable symbols in this path: '/{symbol_path}'
 
-			<SymbolTable fnSymbols={fn_childs} selected_version={symbol_version} />
+			<SymbolTable fnSymbols={fn_childs} varSymbols={var_childs} selected_version={symbol_version} />
 		{:else}
 			404 - nonononon
 		{/if}

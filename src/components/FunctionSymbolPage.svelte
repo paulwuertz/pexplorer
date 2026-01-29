@@ -23,7 +23,6 @@
 	let sym_data = $derived(symbol_data);
 	// settings
 	let show_full_asm = $state(false);
-    $inspect(sym_data)
 	// to display
 	let symbol_path_and_name = $derived(sym_data.file + sym_data.name);
 	let asm = $derived(sym_data.asm ? helpers.csBase64ToASMText(sym_data.asm, sym_data.address) : undefined);
@@ -100,11 +99,11 @@
 <!-- TODO figure out better export to highlight and diff... <Highlight language={armasm} {asm_code} /> -->
 <pre>
 {#if show_full_asm}
-		{asm_code}
-	{:else}
-		{asm_code_preview}
-    ...
-	{/if}
+{asm_code}
+{:else}
+{asm_code_preview}
+...
+{/if}
 <span class="center" onclick={() => (show_full_asm = !show_full_asm)}>
     {#if show_full_asm}↑ show less ↑{:else}↓ show more ↓{/if}
 </span>

@@ -196,7 +196,9 @@ func getVariableTypes(s *SElfReport) []Typedef {
 				if err == nil && addr != 0 {
 					varRef, found = varMap[addr]
 					if found {
-						varRef.SourceFilePath = filename
+						// Variables do not come with an file attribute
+						// so use the current compilation units main file
+						varRef.SourceFilePath = curCompileUnit.Source[1]
 						varRef.SourceFileLine = uint64(cuFileLine)
 					}
 				}
