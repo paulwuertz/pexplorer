@@ -9,6 +9,7 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/paulwuertz/pexplorer/selfperf/callgraphextraction"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
@@ -88,9 +89,9 @@ func main() {
 	// fmt.Println("Go Web Assembly")
 	// js.Global().Set("read_sections_as_json", wasm_read_sections_as_json())
 	// <-make(chan struct{})
-	// elfFile, err := elf.Open("/home/paul/git/Prusa-Firmware-Buddy/build/mini_release_noboot/firmware")
+	elfFile, err := elf.Open("/home/paul/git/Prusa-Firmware-Buddy/build/mini_release_noboot/firmware")
 	// elfFile, err := elf.Open("/home/paul/git/cannecti/cannectivity/build_1.2/zephyr/zephyr.elf")
-	elfFile, err := elf.Open("/home/paul/git//ztest/build_mqtt_publisher_frdm_k64f_42/zephyr/zephyr.elf")
+	// elfFile, err := elf.Open("/home/paul/git//ztest/build_mqtt_publisher_frdm_k64f_42/zephyr/zephyr.elf")
 
 	if err != nil {
 		log.Fatal(err)
@@ -111,6 +112,7 @@ func main() {
 		Addr2FnMap: map[uint64]*symbolextraction.FunctionSymbol{},
 	}
 	symbolextraction.EnhanceByDwarfDebugInfo(&elfReport)
+	callgraphextraction.EnhanceByDisasm(&elfReport)
 	datajson, _ := json.MarshalIndent(elfReport, "", "    ")
 
 	fmt.Println("functions found:", string(datajson))

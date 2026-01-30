@@ -8,6 +8,7 @@ import (
 	"log"
 	"os"
 
+	"github.com/paulwuertz/pexplorer/selfperf/callgraphextraction"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
@@ -30,6 +31,7 @@ func main() {
 	}
 
 	elfReport := symbolextraction.GetFWReport(elfFile)
+	callgraphextraction.EnhanceByDisasm(&elfReport)
 	elfReport.SingleFirmware = true
 	elfReport.FirmwareIdentifier = "unspecified"
 
