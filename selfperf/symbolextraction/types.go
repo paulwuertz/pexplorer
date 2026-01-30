@@ -22,10 +22,18 @@ type FunctionSymbol struct {
 	SourceFileLine    uint64            `json:"line,omitempty,omitzero"`
 	Variables         []*VariableSymbol `json:"vars,omitempty,omitzero"`
 	Asm               []byte            `json:"asm,omitempty,omitzero"`
+	Callees           []FunctionCall    `json:"calees,omitempty,omitzero"`
+	Callers           []FunctionCall    `json:"calers,omitempty,omitzero"`
 	// calls
 	entry     *dwarf.Entry      `json:"-"`
 	variables []*VariableSymbol `json:"-"`
 	cu        *CompileUnit      `json:"-"`
+}
+
+type FunctionCall struct {
+	CallFrom    uint64 `json:"from,omitempty,omitzero"`
+	CallTo      uint64 `json:"to,omitempty,omitzero"`
+	DynamicCall bool   `json:"dynamic"`
 }
 
 type VariableSymbol struct {
@@ -66,4 +74,6 @@ type SElfReport struct {
 	Variables          []VariableSymbol `json:"variables"`
 	Types              []Typedef        `json:"types,omitempty,omitzero"`
 	Info               []string         `json:"info"`
+	// lookup
+	Addr2FnMap map[uint64]*FunctionSymbol
 }

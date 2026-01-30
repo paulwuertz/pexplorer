@@ -40,10 +40,9 @@ func ExtractFunctions(elfFile elf.File) []FunctionSymbol {
 			SourceFilePath:    "",
 			SourceFileLine:    0,
 			SectionIndex:      uint8(sym.Section),
-			// section
-			// asm
+			Callees:           make([]FunctionCall, 0),
+			Callers:           make([]FunctionCall, 0),
 		})
-		// fmt.Println(fmt.Sprintf("fun %s at %x", sym.Name, address), sym)
 	}
 	// sort lowest address first
 	sort.Slice(functions, func(i, j int) bool {
