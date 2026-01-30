@@ -99,8 +99,9 @@ func main() {
 	functions := symbolextraction.ExtractFunctions(*elfFile)
 	variables := symbolextraction.ExtractVariables(*elfFile)
 
-	symbolextraction.AddASMToFunctions(functions, sectionsRef)
-	symbolextraction.AddDataToVar(variables, sectionsRef)
+	info := make([]string, 0)
+	symbolextraction.AddASMToFunctions(functions, sectionsRef, info)
+	symbolextraction.AddDataToVar(variables, sectionsRef, info)
 	elfReport := symbolextraction.SElfReport{
 		Elf:       elfFile,
 		Sections:  sectionJsonInfo,

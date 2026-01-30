@@ -106,10 +106,6 @@ func main() {
 	var dwarfData, _ = elfFile.DWARF()
 	var rd = dwarfData.Reader()
 
-	rg := elfFile.Section(".debug_aranges")
-	godwarf.ParseAddr()
-	fmt.Printf("rg: %v\n", rg)
-
 	// iterate over debug data
 	for idx := 0; ; idx++ {
 		entry, err := rd.Next()

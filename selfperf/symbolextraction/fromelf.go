@@ -2,6 +2,7 @@ package symbolextraction
 
 import (
 	"debug/elf"
+	"fmt"
 	"io"
 	"sort"
 	"strings"
@@ -117,7 +118,7 @@ func (fm SectionMaps) getSectionByIndex(i uint8) (sec *elf.Section) {
 	return // might be nil anyway if section is not present...
 }
 
-func AddASMToFunctions(syms []FunctionSymbol, fm SectionMaps) {
+func AddASMToFunctions(syms []FunctionSymbol, fm SectionMaps, info []string) {
 	sec := fm.getSectionByName("text")
 	sr := sec.Open()
 	textStartAddr := sec.Addr // todo addr or offset?
@@ -132,17 +133,17 @@ func AddASMToFunctions(syms []FunctionSymbol, fm SectionMaps) {
 			sym.Asm = make([]byte, size)
 			nb, err := sr.Read(sym.Asm)
 			if err != nil || nb != int(size) {
-				// fmt.Println("error reading asm-bytes", nb, "/", size, err, sym)
+				msg := fmt.Sprintf("error reading asm for '%s' at %X, reading %d/%d", sym.Name, sym.Address, nb, size)
+				info = append(info, msg)
 			}
-			// fmt.Println("bytes read", nb, "/", size, err)
-			// fmt.Println(fmt.Sprintf("%X", b))
 		} else {
-			// fmt.Println(sym, " asm outside text section")
+			msg := fmt.Sprintf("asm for '%s' outside text section at %X", sym.Name, sym.Address)
+			info = append(info, msg)
 		}
 	}
 }
 
-func AddDataToVar(syms []VariableSymbol, fm SectionMaps) {
+func AddDataToVar(syms []VariableSymbol, fm SectionMaps, info []string) {
 	for i, _ := range syms {
 		sym := &syms[i]
 		addr, size := sym.Address, sym.FlashSize

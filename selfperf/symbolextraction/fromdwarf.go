@@ -205,7 +205,7 @@ func getVariableTypes(s *SElfReport) []Typedef {
 			}
 			// get type info
 			atoff, ok := entry.Val(dwarf.AttrType).(dwarf.Offset)
-			if ok && err == nil {
+			if ok {
 				typeRef, _ := godwarf.ReadType(dwarfData, 0, atoff, cache)
 				if !ok {
 					continue

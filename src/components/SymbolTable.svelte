@@ -47,11 +47,6 @@
 <hr>
 
 <Row>
-	<Col>
-		<Row>Filter options:</Row>
-	</Col>
-</Row>
-<Row>
 	<Col sm="12" md={4}>Filter symbols by text:</Col>
 	<Col sm="12" md={4}>Show file column:</Col>
 </Row>
@@ -69,12 +64,15 @@
 	<Col sm="12" md={4}>
         <InputGroup>
         {#each ['None', 'Filename only', 'Full filepath'] as value}
-            <Input type="radio" bind:group={show_filepath} {value} label={value} style="padding-right: 10px;" />
+            <Input type="radio" bind:group={show_filepath} {value} label={value} />
         {/each}
         </InputGroup>
         <Input bind:checked={show_sections} type="switch" label="Show section column:" />
     </Col>
 </Row>
+
+<hr>
+
 <Row>
     <Col>
         <p>Showing {function_table.allRows.length} / {function_table.baseRows.length} symbols</p>
@@ -178,4 +176,10 @@
         padding-top: 0.25rem;
         padding-bottom: 0.25rem;
     }
+
+    /* purgecss start ignore */
+    :global(.form-check) {
+        margin-right: 15px;
+    }
+    /* purgecss end ignore */
 </style>

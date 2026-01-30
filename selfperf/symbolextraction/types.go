@@ -65,4 +65,5 @@ type SElfReport struct {
 	Functions          []FunctionSymbol `json:"functions"`
 	Variables          []VariableSymbol `json:"variables"`
 	Types              []Typedef        `json:"types,omitempty,omitzero"`
+	Info               []string         `json:"info"`
 }
