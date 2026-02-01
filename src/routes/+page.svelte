@@ -19,6 +19,7 @@
 	import Dropzone from 'svelte-file-dropzone';
 
 	import { symbols } from './symbols.svelte.js';
+	import * as helpers from './helpers.js';
 	import { base } from '$app/paths';
 
 	let CANNECTIVITY_SAMPLE_URL = 'https://p4w5.eu/report.json';
@@ -55,6 +56,8 @@
                 let reportJSON = JSON.parse(reportJSONstr);
                 console.log(reportJSON);
                 if (reportJSON.hasOwnProperty("singlefirmware")) {
+					let disasmFnMap = helpers.getDisasmFnMap(reportJSON);
+					let reportJSONstr = get_fn_calls_from_disasm(elfBinary);
                     let identifier = reportJSON["firmwareID"];
                     symbols.symbols[identifier] = reportJSON;
                     symbols.elfDataProvided = true;

@@ -154,3 +154,32 @@ export const csBase64ToASMText = (base64text, baseAddr) =>  {
     // d.close();
     return result
 }
+
+export const getDisasmFnMap = (asmReport) => {
+	let fn2Disasm = {}
+	for (let i= 0; i < asmReport["functions"].length; i++) {
+		const f = asmReport["functions"][i];
+		if (!Object.hasOwn(f, "asm") || !Object.hasOwn(f, "name")) {
+			console.log(f, "has no asm for getting its calltree...");
+			continue;
+		}
+		let fName = f["name"]
+		let baseAddr = f["address"]
+		let fFile = f["file"] || ""
+		let ASM = Uint8Array.fromBase64(f["asm"])
+		let disasm = [];
+		console.log(fName+fFile+" ASM: "+ASM);
+		let disasmData = d.disasm(ASM, baseAddr)
+		// Display results;
+		disasmData.forEach(function (instr) {
+			fn2Disasm[baseAddr] = {
+				"addr": instr.address, 
+				"instruction": instr.mnemonic, 
+				"opstr": instr.op_str,
+				"insBytes": instr.bytes
+			}
+		});
+	}
+	console.log(fn2Disasm, JSON.stringify(fn2Disasm, null, 4));
+	return fn2Disasm
+}

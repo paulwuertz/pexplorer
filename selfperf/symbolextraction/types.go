@@ -24,16 +24,24 @@ type FunctionSymbol struct {
 	Asm               []byte            `json:"asm,omitempty,omitzero"`
 	Callees           []FunctionCall    `json:"calees,omitempty,omitzero"`
 	Callers           []FunctionCall    `json:"calers,omitempty,omitzero"`
-	// calls
+	// calls + refs
 	entry     *dwarf.Entry      `json:"-"`
 	variables []*VariableSymbol `json:"-"`
 	cu        *CompileUnit      `json:"-"`
+	DisAsm    []DisAsm          `json:"-"` // smaller to store just asm
 }
 
 type FunctionCall struct {
 	CallFrom    uint64 `json:"from,omitempty,omitzero"`
 	CallTo      uint64 `json:"to,omitempty,omitzero"`
 	DynamicCall bool   `json:"dynamic"`
+}
+
+type DisAsm struct {
+	Addr        uint64 `json:"addr"`
+	Instruction string `json:"instruction"`
+	Opstr       string `json:"opstr"`
+	InsBytes    []byte `json:"insBytes"`
 }
 
 type VariableSymbol struct {

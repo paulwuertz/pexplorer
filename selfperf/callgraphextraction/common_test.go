@@ -66,7 +66,7 @@ func Test_isFnCallInstr(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := isFnCallInstr(tt.instr)
+			got := IsFnCallInstr(tt.instr)
 			// TODO: update the condition below to compare got with tt.want.
 			if tt.want != got {
 				t.Errorf("isFnCallInstr() = %v, want %v", got, tt.want)

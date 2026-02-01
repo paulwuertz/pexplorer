@@ -13,6 +13,8 @@ import (
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
+var elfReport symbolextraction.SElfReport
+
 func wasm_get_elf_report() js.Func {
 
 	jsonFunc := js.FuncOf(func(this js.Value, args []js.Value) any {
@@ -31,7 +33,7 @@ func wasm_get_elf_report() js.Func {
 		r := bytes.NewReader(elf_binary)
 		elfFile, _ := elf.NewFile(r)
 
-		elfReport := symbolextraction.GetFWReport(elfFile)
+		elfReport = symbolextraction.GetFWReport(elfFile)
 		elfReport.SingleFirmware = true
 		elfReport.FirmwareIdentifier = "unspecified"
 		elfReport.Timestamp = "just now"
@@ -42,8 +44,30 @@ func wasm_get_elf_report() js.Func {
 	return jsonFunc
 }
 
+func wasm_get_fn_calls_from_disasm() js.Func {
+
+	jsonFunc := js.FuncOf(func(this js.Value, args []js.Value) any {
+		if len(args) != 1 {
+			return "Invalid no of arguments passed"
+		}
+		// elf_bin_js := args[0]
+		// elf_size := elf_bin_js.Length()
+		// elf_binary := make([]byte, elf_size)
+
+		fmt.Printf("args # %d\n", len(args))
+		// fmt.Printf("input %d\n", elf_size)
+
+		datajson, _ := json.Marshal(elfReport)
+		fmt.Printf("afta %s bytes\n", string(datajson))
+
+		return string("gffgc")
+	})
+	return jsonFunc
+}
+
 func main() {
 	fmt.Println("Go Web Assembly")
 	js.Global().Set("get_elf_report", wasm_get_elf_report())
+	js.Global().Set("get_fn_calls_from_disasm", wasm_get_fn_calls_from_disasm())
 	<-make(chan struct{})
 }
