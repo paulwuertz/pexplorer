@@ -20,6 +20,8 @@
 	let params = $derived(data);
 
 	let symbol_version = $derived(params.version);
+	let SymPathByAddr = $derived(symbols.symbols[symbol_version]["SymPathByAddr"])
+	let SymPathByName = $derived(symbols.symbols[symbol_version]["symPathByName"])
 	let symbol_path_and_name = $derived(params.symbol_name);
 	let symbol_path_elements_and_parent_links = $derived(
 		symbol_path_and_name
@@ -27,17 +29,13 @@
 			.slice(0, -1)
 			.map((ele, index, arr) => {
 				let parent_path = arr.slice(0, index + 1).join('/');
-				let parent_link = helpers.callxrs_text_to_links(base, symbol_version, parent_path);
+				let parent_link = helpers.sympath_to_link(base, symbol_version, parent_path);
 				return [ele, parent_link];
 			})
 	);
 	let symbol_path = $derived(symbol_path_and_name.split('/').slice(0, -1).join('/'));
 	let symbol_path_active = $derived(symbol_path_and_name.split('/').slice(-1));
-	let symbol_data = $derived(
-		symbols.symbols[symbol_version].functions.find((e) => {
-			return symbol_path_and_name === e.file + "/" + e.name + "/" ;
-		})
-	);
+	let symbol_data = $derived(SymPathByName["/"+symbol_path_and_name]);
 	const isChildToPath = (symbol) => {
         if (symbol_path_and_name === "/")
             return true;
@@ -137,7 +135,7 @@
 	{#key symbol_path_and_name}
 		{#if symbol_data}
             {console.log("symbol_data: ", $state.snapshot(symbol_data))}
-			<FunctionSymbolPage {symbol_data} {symbol_version} />
+			<FunctionSymbolPage {symbol_data} {symbol_version} {SymPathByAddr}/>
 		{:else if fn_childs}
 			<Row cols={{ md: 2, sm: 1 }}>
 				<div>

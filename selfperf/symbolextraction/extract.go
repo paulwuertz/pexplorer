@@ -19,6 +19,10 @@ func GetFWReport(elfFile *elf.File) SElfReport {
 		Info:       info,
 		Addr2FnMap: map[uint64]*FunctionSymbol{},
 	}
+	for i := 0; i < len(elfReport.Functions); i++ {
+		f := &elfReport.Functions[i]
+		elfReport.Addr2FnMap[f.Address] = f
+	}
 	EnhanceByDwarfDebugInfo(&elfReport)
 	return elfReport
 }

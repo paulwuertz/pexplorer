@@ -78,11 +78,24 @@ export let get_max_stack_sizes_of_thread = (allSymVersions, threadname) => {
 	return threads;
 };
 
-export const callxrs_text_to_links = (base, symbol_version, callxrs_text) => {
+export const sympath_to_link = (base, symbol_version, callxrs_text) => {
 	return base + '/browse/' + symbol_version + '/' + callxrs_text;
 };
 
-export const callxrs_text_to_symname = (callxrs_text) => {
+export const callxrs_text_to_links = (base, symbol_version, callxrs, sym_path_by_addr, isCaller) => {
+	let direction = isCaller ? "from" : "to"
+	let callxrs_addr = callxrs[direction]
+	let callxrs_text = sym_path_by_addr[callxrs_addr]
+	return base + '/browse/' + symbol_version + '/' + callxrs_text;
+};
+
+export const callxrs_text_to_symname = (callxrs, sym_path_by_addr, isCaller) => {
+	let direction = isCaller ? "from" : "to"
+	if(direction == "to" && !Object.hasOwn(callxrs, "to") && callxrs["dynamic"]){
+		return "Unresolved dynamic call from addr "+callxrs["from"]+", "
+	}
+	let callxrs_addr = callxrs[direction]
+	let callxrs_text = sym_path_by_addr[callxrs_addr]
 	let callxrs_slugs = callxrs_text.split('/');
 	let sym_name = callxrs_slugs[callxrs_slugs.length - 1];
 	return sym_name;
@@ -133,22 +146,23 @@ export const symbols_to_sunburst_tree_data = (symbols, data_field) => {
 };
 
 export const row2AHref = (base, selected_version, row_data) => {
-	return base + '/browse/' + selected_version + '/' + row_data.file + '/' + row_data.name;
+	return base + '/browse/' + selected_version + row_data.file + '/' + row_data.name;
 };
 
 var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_THUMB+cs.MODE_MCLASS);
 
-export const csBase64ToASMText = (base64text, baseAddr) =>  {
+export const csBase64ToASMText = (base64text, baseAddr, show_full_asm) =>  {
     let ASM = Uint8Array.fromBase64(base64text)
     console.log("ASM: "+ASM, base64text);
     let disasmData = d.disasm(ASM, baseAddr)
     console.log(JSON.stringify(disasmData, null, 4));
     // Display results;
-    let result = "\tAddr\tINSTR\tOP\n";
+    let result = "\tAddr\t\tINSTR bytes     mnemonic\tOP\n";
+	if(!show_full_asm) disasmData = disasmData.slice(0, 10);
     disasmData.forEach(function (instr) {
-        result += "\t0x" + instr.address.toString(16) + ":\t" + instr.mnemonic + "\t" + instr.op_str + "\n"
+        result += "\t0x" + instr.address.toString(16) + ":\t" + instr.bytes.map(e => e.toString(16)).join("").padEnd(15, " ")  + "\t" + instr.mnemonic + "\t\t" + instr.op_str + "\n"
     });
-    console.log(result, null, 4);
+	if(!show_full_asm) result += "..."
 
     // Delete decoder
     // d.close();
@@ -171,14 +185,16 @@ export const getDisasmFnMap = (asmReport) => {
 		console.log(fName+fFile+" ASM: "+ASM);
 		let disasmData = d.disasm(ASM, baseAddr)
 		// Display results;
+		let fnInstr = []
 		disasmData.forEach(function (instr) {
-			fn2Disasm[baseAddr] = {
+			 fnInstr.push({
 				"addr": instr.address, 
 				"instruction": instr.mnemonic, 
 				"opstr": instr.op_str,
 				"insBytes": instr.bytes
-			}
+			})
 		});
+		fn2Disasm[baseAddr] = fnInstr;
 	}
 	console.log(fn2Disasm, JSON.stringify(fn2Disasm, null, 4));
 	return fn2Disasm

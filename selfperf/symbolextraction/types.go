@@ -22,8 +22,8 @@ type FunctionSymbol struct {
 	SourceFileLine    uint64            `json:"line,omitempty,omitzero"`
 	Variables         []*VariableSymbol `json:"vars,omitempty,omitzero"`
 	Asm               []byte            `json:"asm,omitempty,omitzero"`
-	Callees           []FunctionCall    `json:"calees,omitempty,omitzero"`
-	Callers           []FunctionCall    `json:"calers,omitempty,omitzero"`
+	Callees           []FunctionCall    `json:"callees,omitempty,omitzero"`
+	Callers           []FunctionCall    `json:"callers,omitempty,omitzero"`
 	// calls + refs
 	entry     *dwarf.Entry      `json:"-"`
 	variables []*VariableSymbol `json:"-"`

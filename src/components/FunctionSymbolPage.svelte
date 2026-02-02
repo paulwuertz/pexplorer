@@ -18,21 +18,18 @@
 	} from '@sveltestrap/sveltestrap';
     import * as helpers from '../routes/helpers.js';
 
-	const { symbol_data, symbol_version } = $props();
+	const { symbol_data, symbol_version, SymPathByAddr } = $props();
 
 	let sym_data = $derived(symbol_data);
+	let sym_path_by_addr = $derived(SymPathByAddr);
 	// settings
 	let show_full_asm = $state(false);
 	// to display
 	let symbol_path_and_name = $derived(sym_data.file + sym_data.name);
-	let asm = $derived(sym_data.asm ? helpers.csBase64ToASMText(sym_data.asm, sym_data.address) : undefined);
-    // let asm = [];
-	// let asm_code_preview = $derived(asm.slice(0, 5).join('\n'));
-	let asm_code_preview = $derived(asm);
-    let address = $derived(sym_data.address);
+	let asm_code = $derived(sym_data.asm ? helpers.csBase64ToASMText(sym_data.asm, sym_data.address, show_full_asm) : undefined);
+	let address = $derived(sym_data.address);
 	let stack_size = $derived(sym_data.stack_size);
 	let stack_qualifier = $derived(sym_data.stack_qualifiers);
-	let asm_code = $derived(asm.join('\n'));
 	let callers = $derived(sym_data.callers || []);
 	let callees = $derived(sym_data.callees || []);
 	let code_size = $derived(sym_data.size);
@@ -72,11 +69,17 @@
 			<td><b>Callers </b> ({callers.length}):</td>
 			<td>
 				{#each callers as caller}
-					<a href={helpers.callxrs_text_to_links(base, symbol_version, caller)}>
+					{#if caller.from }
+						<a href={helpers.callxrs_text_to_links(base, symbol_version, caller, sym_path_by_addr, true)}>
+							<small>
+								{helpers.callxrs_text_to_symname(caller, sym_path_by_addr, true)}
+							</small>
+						</a>
+					{:else}
 						<small>
-							{helpers.callxrs_text_to_symname(caller)}
+							{helpers.callxrs_text_to_symname(caller, sym_path_by_addr, true)}
 						</small>
-					</a>{', '}
+					{/if}{', '}
 				{/each}
 			</td>
 		</tr>
@@ -84,11 +87,17 @@
 			<td><b>Callees</b> ({callees.length}):</td>
 			<td>
 				{#each callees as callee}
-					<a href={helpers.callxrs_text_to_links(base, symbol_version, callee)}>
+					{#if callee.to }
+						<a href={helpers.callxrs_text_to_links(base, symbol_version, callee, sym_path_by_addr, false)}>
+							<small>
+								{helpers.callxrs_text_to_symname(callee, sym_path_by_addr, false)}
+							</small>
+						</a>{', '}
+					{:else}
 						<small>
-							{helpers.callxrs_text_to_symname(callee)}
+							{helpers.callxrs_text_to_symname(callee, sym_path_by_addr, false)}
 						</small>
-					</a>{', '}
+					{/if}
 				{/each}
 			</td>
 		</tr>
@@ -98,12 +107,7 @@
 <h4>Disassembly</h4>
 <!-- TODO figure out better export to highlight and diff... <Highlight language={armasm} {asm_code} /> -->
 <pre>
-{#if show_full_asm}
 {asm_code}
-{:else}
-{asm_code_preview}
-...
-{/if}
 <span class="center" onclick={() => (show_full_asm = !show_full_asm)}>
     {#if show_full_asm}↑ show less ↑{:else}↓ show more ↓{/if}
 </span>
@@ -124,17 +128,14 @@
 			<tr>
 				<td>{index + ' '}</td>
 				<td>
-					<a href={helpers.callxrs_text_to_links(base, symbol_version, caller.full_symbol_path)}>
-						{#if symbol_path_and_name.includes(caller.full_symbol_path)}
+					<!-- <a href={helpers.callxrs_text_to_links(base, symbol_version, caller, sym_path_by_addr)}>
+						{#if symbol_path_and_name.includes(caller)}
 							<small>
-								<b>{helpers.callxrs_text_to_symname(caller.full_symbol_path)}</b> - (this function)
+								<b>{helpers.callxrs_text_to_symname(caller, sym_path_by_addr)}</b> - (this function)
 							</small>
 						{:else}
-							<small>
-								{helpers.callxrs_text_to_symname(caller.full_symbol_path)}
-							</small>
-						{/if}
-					</a>
+						{/if} 
+					</a>-->
 				</td>
 				<td>
 					{caller.stack_size}

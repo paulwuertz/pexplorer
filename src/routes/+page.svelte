@@ -55,9 +55,27 @@
                 let reportJSONstr = get_elf_report(elfBinary);
                 let reportJSON = JSON.parse(reportJSONstr);
                 console.log(reportJSON);
+				// end TODO :)
                 if (reportJSON.hasOwnProperty("singlefirmware")) {
 					let disasmFnMap = helpers.getDisasmFnMap(reportJSON);
-					let reportJSONstr = get_fn_calls_from_disasm(elfBinary);
+					let disasmFnMapArg = Uint8Array.fromBase64(btoa(JSON.stringify(disasmFnMap)))
+					reportJSONstr = add_fn_calls_from_disasm(disasmFnMapArg);
+					reportJSON = JSON.parse(reportJSONstr);
+					// Todo mv somewhere better
+					let symPathByAddr = {}
+					let symPathByName = {}
+					let reportFns = reportJSON["functions"]
+					for(let i =0; i < reportFns.length; i++){
+						let addr = reportFns[i]["address"]
+						// TODO what about syms with unknown path - can they be eliminated ^^?
+						let urlPath = reportFns[i]["file"] + "/" + reportFns[i]["name"]
+						symPathByAddr[addr] = urlPath
+						symPathByAddr[urlPath] = reportFns[i]
+					}
+					reportJSON["SymPathByAddr"] = symPathByAddr
+					reportJSON["symPathByName"] = symPathByAddr
+					// TODO how much space saving it pre-calculated?
+					console.log(reportJSON);
                     let identifier = reportJSON["firmwareID"];
                     symbols.symbols[identifier] = reportJSON;
                     symbols.elfDataProvided = true;

@@ -47,6 +47,7 @@
 <hr>
 
 <Row>
+	<!-- TODO add filter for fn, var or both :) -->
 	<Col sm="12" md={4}>Filter symbols by text:</Col>
 	<Col sm="12" md={4}>Show file column:</Col>
 </Row>
