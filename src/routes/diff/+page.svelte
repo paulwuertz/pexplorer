@@ -14,10 +14,15 @@
 	let { data } = $props();
 	let files = $state();
 	let versions = $derived(Object.keys(symbols.symbols));
+	let bss_section = $derived(symbols.symbols[symbols.selected_version].sections.find(
+		e => e.name == "bss" || e.name == "bss" 
+	) || {}); 
+	// TODO assumes sections did not change 
+	let bss_section_id = $derived(bss_section.index);
 	let selected_symbols = $state({});
-	let selected_thread_stat = $state({});
 	let selected_symbols_to_compare = $state({});
-	let selected_thread_stat_to_compare = $state({});
+	// let selected_thread_stat = $state({});
+	// let selected_thread_stat_to_compare = $state({});
 	let symbols_to_show = $state({});
 	let function_table_data = $state([]);
 	let variable_table_data = $state([]);
@@ -26,8 +31,8 @@
 			pageSize: 999999, // TODO
 			data: function_table_data,
 			columns: [
-				{ id: 'name', key: 'display_name', name: 'Name' },
-				{ id: 'base_file', key: 'base_file', name: 'Defined in' },
+				{ id: 'name', key: 'name', name: 'Name' },
+				{ id: 'file', key: 'file', name: 'Defined in' },
 				{ id: 'remark', key: 'remark', name: 'Remarks' },
 				{ id: 'size', key: 'size', name: 'Code size' },
 				{ id: 'd_size', key: 'd_size', name: 'Δ size' },
@@ -58,13 +63,13 @@
 			return;
 		}
 
-		selected_symbols = helpers.symbolsToMap(symbols.symbols[symbols.selected_version]['symbols']);
+		selected_symbols = helpers.symbolsToMap(symbols.symbols[symbols.selected_version]['functions']);
 		selected_symbols_to_compare = helpers.symbolsToMap(
-			symbols.symbols[symbols.selected_versions_to_compare]['symbols']
+			symbols.symbols[symbols.selected_versions_to_compare]['functions']
 		);
-		selected_thread_stat = symbols.symbols[symbols.selected_version]['stack_reports'];
-		selected_thread_stat_to_compare =
-			symbols.symbols[symbols.selected_versions_to_compare]['stack_reports'];
+		// selected_thread_stat = symbols.symbols[symbols.selected_version]['stack_reports'];
+		// selected_thread_stat_to_compare =
+		// 	symbols.symbols[symbols.selected_versions_to_compare]['stack_reports'];
 
 		let symKey = helpers.symMapToSymNameSet(selected_symbols);
 		let symKey_ref = helpers.symMapToSymNameSet(selected_symbols_to_compare);
@@ -125,7 +130,7 @@
 			pageSize: function_table_data.length,
 			data: function_table_data,
 			columns: [
-				{ id: 'name', key: 'display_name', name: 'Name' },
+				{ id: 'name', key: 'name', name: 'Name' },
 				{ id: 'remark', key: 'remark', name: 'Remarks' },
 				{ id: 'size', key: 'size', name: 'Code size' },
 				{ id: 'd_size', key: 'd_size', name: 'Δ size' },
@@ -249,14 +254,14 @@
 				<li>
 					...flash/code size is {Object.values(symbols_to_show)
 						.filter((e) => {
-							return e['d_size'] && e['type'] === 'function';
+							return e['d_size'] && (e['type'] === 'fn' || e['secidx'] === bss_section_id);
 						})
 						.reduce((acc, b) => acc + b['d_size'], 0)} bytes
 				</li>
 				<li>
 					...static RAM size is {Object.values(symbols_to_show)
 						.filter((e) => {
-							return e['d_size'] && e['type'] === 'variable';
+							return e['d_size'] && e['type'] === 'var' && e['secidx'] !== bss_section_id;
 						})
 						.reduce((acc, b) => acc + b['d_size'], 0)} bytes
 				</li>
@@ -269,14 +274,14 @@
 				</li>
 			</ul>
 
-			{#key selected_thread_stat}
-				<h3>Thread stats and total size change</h3>
+			<!-- {#key selected_thread_stat} -->
+			<h3>Thread stats and total size change</h3>
 
-				<p>
-					From {symbols.selected_version} to {symbols.selected_versions_to_compare} the change in...
-				</p>
-				<ul>
-					{#each Object.keys(selected_thread_stat) as thread_name (thread_name)}
+			<p>
+				From {symbols.selected_version} to {symbols.selected_versions_to_compare} the change in...
+			</p>
+			<ul>
+				<!-- {#each Object.keys(selected_thread_stat) as thread_name (thread_name)}
 						{@const stackDiff =
 							selected_thread_stat[thread_name].max_static_stack_size -
 							selected_thread_stat_to_compare[thread_name].max_static_stack_size}
@@ -291,13 +296,13 @@
 							{stackDiff} bytes - now at {selected_thread_stat[thread_name].max_static_stack_size} /
 							{selected_thread_stat[thread_name].max_stack_size}
 						</li>
-					{/each}
-				</ul>
-			{/key}
+					{/each} -->
+			</ul>
+			<!-- {/key} -->
 
 			<h3>Function symbols changed ({function_table.rows.length})</h3>
 
-			<Table hover bordered>
+			<Table hover bordered style="word-break: break-all;">
 				<thead>
 					<tr>
 						{#each function_table.columns as column (column.name)}
@@ -330,6 +335,7 @@
 							{#each function_table.columns as column (column.name)}
 								{#if column.name === 'Name'}
 									<td>
+										<!-- {row["file"]} -->
 										<a
 											data-sveltekit-preload-data="tap"
 											href={helpers.row2AHref(base, symbols.selected_version, row)}
@@ -348,7 +354,7 @@
 
 			<h3>Variable symbols changed ({variable_table.rows.length})</h3>
 
-			<Table hover bordered>
+			<Table hover bordered style="word-break: break-all;">
 				<thead>
 					<tr>
 						{#each variable_table.columns as column (column.name)}
@@ -388,3 +394,18 @@
 		{/if}
 	</Container>
 </div>
+
+<style>
+	td {
+		min-width: 130px;
+		font-size: 14px;
+		padding-top: 0.25rem;
+		padding-bottom: 0.25rem;
+	}
+
+	/* purgecss start ignore */
+	:global(.form-check) {
+		margin-right: 15px;
+	}
+	/* purgecss end ignore */
+</style>

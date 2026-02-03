@@ -20,17 +20,9 @@
 	import * as helpers from '../routes/helpers.js';
 
 	const { fnSymbols, varSymbols, selected_version, sections } = $props();
-	let fnSymbolsT = [...fnSymbols].map((e) => {
-		e['type'] = 'fn';
-		return e;
-	});
-	let varSymbolsT = [...varSymbols].map((e) => {
-		e['type'] = 'var';
-		return e;
-	});
 	let show_sections = $state(true);
 	let show_filepath = $state('Full filepath');
-	let function_table_data = $derived([...fnSymbolsT, ...varSymbolsT]);
+	let function_table_data = $derived([...fnSymbols, ...varSymbols]);
 	let function_table = $derived(
 		new DataTable({
 			pageSize: 99999, // TODO
@@ -167,7 +159,7 @@
 							{#if row[column.key] === 'var'}
 								<img src="{base}/icons/Method_16x.svg" width="16px" title="Type variable" />
 							{:else if row[column.key] === 'fn'}
-								<img src="{base}/icons/Field_16x.svg" width="16px" title="Type variable" />
+								<img src="{base}/icons/Field_16x.svg" width="16px" title="Type function" />
 							{/if}
 						</td>
 					{:else}

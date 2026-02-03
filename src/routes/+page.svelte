@@ -66,18 +66,24 @@
 						let symPathByAddr = {};
 						let symPathByName = {};
 						let reportFns = reportJSON['functions'];
+						let reportVars = reportJSON['variables'];
 						for (let i = 0; i < reportFns.length; i++) {
 							let addr = reportFns[i]['address'];
 							// TODO what about syms with unknown path - can they be eliminated ^^?
 							let urlPath = reportFns[i]['file'] + '/' + reportFns[i]['name'];
+							reportFns[i]['type'] = 'fn';
 							symPathByAddr[addr] = urlPath;
 							symPathByAddr[urlPath] = reportFns[i];
+						}
+						for (let i = 0; i < reportVars.length; i++) {
+							reportVars[i]['type'] = 'var';
 						}
 						reportJSON['SymPathByAddr'] = symPathByAddr;
 						reportJSON['symPathByName'] = symPathByAddr;
 						// TODO how much space saving it pre-calculated?
 						console.log(reportJSON);
-						let identifier = files.accepted[files.accepted.length-1].name+"_"+nr_versions_provided;
+						let identifier =
+							files.accepted[files.accepted.length - 1].name + '_' + nr_versions_provided;
 						symbols.symbols[identifier] = reportJSON;
 						symbols.elfDataProvided = true;
 					} else {

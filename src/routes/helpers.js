@@ -13,13 +13,13 @@ export let symbolsToMap = (syms) => {
 
 export let symbolsToFunctionMap = (symMap) => {
 	return Object.values(symMap).filter((e) => {
-		return e['type'] === 'function';
+		return e['type'] === 'fn';
 	});
 };
 
 export let symbolsToVariableMap = (symMap) => {
 	return Object.values(symMap).filter((e) => {
-		return e['type'] === 'variable';
+		return e['type'] === 'var';
 	});
 };
 
@@ -159,9 +159,9 @@ var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_THUMB + cs.MODE_MCLASS);
 
 export const csBase64ToASMText = (base64text, baseAddr, show_full_asm) => {
 	let ASM = Uint8Array.fromBase64(base64text);
-	console.log('ASM: ' + ASM, base64text);
+	// console.log('ASM: ' + ASM, base64text);
 	let disasmData = d.disasm(ASM, baseAddr);
-	console.log(JSON.stringify(disasmData, null, 4));
+	// console.log(JSON.stringify(disasmData, null, 4));
 	// Display results;
 	let result = '\tAddr\t\tINSTR bytes     mnemonic\tOP\n';
 	if (!show_full_asm) disasmData = disasmData.slice(0, 10);
@@ -200,7 +200,7 @@ export const getDisasmFnMap = (asmReport) => {
 		let fFile = f['file'] || '';
 		let ASM = Uint8Array.fromBase64(f['asm']);
 		let disasm = [];
-		console.log(fName + fFile + ' ASM: ' + ASM);
+		// console.log(fName + fFile + ' ASM: ' + ASM);
 		let disasmData = d.disasm(ASM, baseAddr);
 		// Display results;
 		let fnInstr = [];
@@ -214,6 +214,6 @@ export const getDisasmFnMap = (asmReport) => {
 		});
 		fn2Disasm[baseAddr] = fnInstr;
 	}
-	console.log(fn2Disasm, JSON.stringify(fn2Disasm, null, 4));
+	// console.log(fn2Disasm, JSON.stringify(fn2Disasm, null, 4));
 	return fn2Disasm;
 };
