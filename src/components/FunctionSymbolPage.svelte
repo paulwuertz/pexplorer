@@ -16,17 +16,21 @@
 		Row,
 		Table
 	} from '@sveltestrap/sveltestrap';
-    import * as helpers from '../routes/helpers.js';
+	import * as helpers from '../routes/helpers.js';
 
-	const { symbol_data, symbol_version, SymPathByAddr } = $props();
+	const { fn_childs, symbol_version, SymPathByAddr } = $props();
 
-	let sym_data = $derived(symbol_data);
+	let sym_data = $derived(fn_childs[0]);
 	let sym_path_by_addr = $derived(SymPathByAddr);
 	// settings
 	let show_full_asm = $state(false);
 	// to display
 	let symbol_path_and_name = $derived(sym_data.file + sym_data.name);
-	let asm_code = $derived(sym_data.asm ? helpers.csBase64ToASMText(sym_data.asm, sym_data.address, show_full_asm) : undefined);
+	let asm_code = $derived(
+		sym_data.asm
+			? helpers.csBase64ToASMText(sym_data.asm, sym_data.address, show_full_asm)
+			: undefined
+	);
 	let address = $derived(sym_data.address);
 	let stack_size = $derived(sym_data.stack_size);
 	let stack_qualifier = $derived(sym_data.stack_qualifiers);
@@ -38,7 +42,7 @@
 		// let my_symbol = { full_symbol_path: symbol_path_and_name, stack_size: sym_data.stack_size };
 		// let stack_down = deepest_callees_tree.concat([my_symbol]);
 		// return stack_down.concat(deepest_callers_tree);
-        return []
+		return [];
 	};
 </script>
 
@@ -69,8 +73,16 @@
 			<td><b>Callers </b> ({callers.length}):</td>
 			<td>
 				{#each callers as caller}
-					{#if caller.from }
-						<a href={helpers.callxrs_text_to_links(base, symbol_version, caller, sym_path_by_addr, true)}>
+					{#if caller.from}
+						<a
+							href={helpers.callxrs_text_to_links(
+								base,
+								symbol_version,
+								caller,
+								sym_path_by_addr,
+								true
+							)}
+						>
 							<small>
 								{helpers.callxrs_text_to_symname(caller, sym_path_by_addr, true)}
 							</small>
@@ -87,8 +99,16 @@
 			<td><b>Callees</b> ({callees.length}):</td>
 			<td>
 				{#each callees as callee}
-					{#if callee.to }
-						<a href={helpers.callxrs_text_to_links(base, symbol_version, callee, sym_path_by_addr, false)}>
+					{#if callee.to}
+						<a
+							href={helpers.callxrs_text_to_links(
+								base,
+								symbol_version,
+								callee,
+								sym_path_by_addr,
+								false
+							)}
+						>
 							<small>
 								{helpers.callxrs_text_to_symname(callee, sym_path_by_addr, false)}
 							</small>
@@ -147,10 +167,7 @@
 		<tr>
 			<td></td>
 			<td></td>
-			<td
-				><b>&sum; {sym_data.deepest_callee_tree_size + sym_data.deepest_caller_tree_size}</b
-				></td
-			>
+			<td><b>&sum; {sym_data.deepest_callee_tree_size + sym_data.deepest_caller_tree_size}</b></td>
 		</tr>
 	</tfoot>
 </Table>

@@ -20,8 +20,8 @@
 	let params = $derived(data);
 
 	let symbol_version = $derived(params.version);
-	let SymPathByAddr = $derived(symbols.symbols[symbol_version]["SymPathByAddr"])
-	let SymPathByName = $derived(symbols.symbols[symbol_version]["symPathByName"])
+	let SymPathByAddr = $derived(symbols.symbols[symbol_version]['SymPathByAddr']);
+	let SymPathByName = $derived(symbols.symbols[symbol_version]['symPathByName']);
 	let symbol_path_and_name = $derived(params.symbol_name);
 	let symbol_path_elements_and_parent_links = $derived(
 		symbol_path_and_name
@@ -35,21 +35,20 @@
 	);
 	let symbol_path = $derived(symbol_path_and_name.split('/').slice(0, -1).join('/'));
 	let symbol_path_active = $derived(symbol_path_and_name.split('/').slice(-1));
-	let symbol_data = $derived(SymPathByName["/"+symbol_path_and_name]);
+	let symbol_data = $derived(SymPathByName['/' + symbol_path_and_name]);
 	const isChildToPath = (symbol) => {
-        if (symbol_path_and_name === "/")
-            return true;
-        else
-            return !!symbol_path_and_name || symbol.file && symbol.file.includes(symbol_path_and_name);
-    }
+		if (symbol_path_and_name === '/' || symbol_path_and_name === '') return true;
+		else {
+			let routePath = symbol_path_and_name;
+			if (!routePath.startsWith('/')) routePath = '/' + routePath;
+			let symPath = symbol.file + '/' + symbol.name + '/';
+			return symbol.file && symPath.includes(routePath);
+		}
+	};
 	let sections = $derived(symbols.symbols[symbol_version].sections);
-	let fn_childs = $derived(
-		symbols.symbols[symbol_version].functions.filter(isChildToPath).sort()
-	);
-	let var_childs = $derived(
-		symbols.symbols[symbol_version].variables.filter(isChildToPath).sort()
-	);
-
+	let fn_childs = $derived(symbols.symbols[symbol_version].functions.filter(isChildToPath).sort());
+	let var_childs = $derived(symbols.symbols[symbol_version].variables.filter(isChildToPath).sort());
+	$inspect(symbol_path_and_name, fn_childs, var_childs);
 	onMount(async () => {
 		if (browser && fn_childs) {
 			var romChartDom = document.getElementById('sunburst_chart_rom');
@@ -59,10 +58,13 @@
 			var option;
 
 			// TODO rm hack - think about how to distinguish better memory regions for all controller types...
-			let rom_syms = fn_childs.filter((e) => ! (
-                e.address.toString(16).startsWith(2) && // not 0x2... in RAM
-                e.address >= 0x20000000
-            ));
+			let rom_syms = fn_childs.filter(
+				(e) =>
+					!(
+						e.address.toString(16).startsWith(2) && // not 0x2... in RAM
+						e.address >= 0x20000000
+					)
+			);
 			var sunburst_data = helpers.symbols_to_sunburst_tree_data(rom_syms, 'size');
 			console.log('sunburst_data', sunburst_data);
 			option = {
@@ -86,9 +88,11 @@
 			option && romChart.setOption(option);
 
 			let ram_syms = var_childs.filter((e) => {
-                return e.address.toString(16).startsWith(2) && // 0x2... in RAM
-                        e.address >= 0x20000000;
-            });
+				return (
+					e.address.toString(16).startsWith(2) && // 0x2... in RAM
+					e.address >= 0x20000000
+				);
+			});
 			var sunburst_data = helpers.symbols_to_sunburst_tree_data(ram_syms, 'size');
 			console.log('sunburst_data', sunburst_data);
 			option = {
@@ -133,9 +137,9 @@
 	<hr />
 
 	{#key symbol_path_and_name}
-		{#if symbol_data}
-            {console.log("symbol_data: ", $state.snapshot(symbol_data))}
-			<FunctionSymbolPage {symbol_data} {symbol_version} {SymPathByAddr}/>
+		{#if var_childs.length == 0 && fn_childs.length == 1}
+			{console.log('symbol_data: ', $state.snapshot(var_childs[0]))}
+			<FunctionSymbolPage {fn_childs} {symbol_version} {SymPathByAddr} />
 		{:else if fn_childs}
 			<Row cols={{ md: 2, sm: 1 }}>
 				<div>
@@ -149,7 +153,12 @@
 			</Row>
 			{fn_childs.length} function and {var_childs.length} variable symbols in this path: '/{symbol_path}'
 
-			<SymbolTable fnSymbols={fn_childs} varSymbols={var_childs} selected_version={symbol_version} sections={sections} />
+			<SymbolTable
+				fnSymbols={fn_childs}
+				varSymbols={var_childs}
+				selected_version={symbol_version}
+				{sections}
+			/>
 		{:else}
 			404 - nonononon
 		{/if}
