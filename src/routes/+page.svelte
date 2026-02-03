@@ -238,51 +238,56 @@
 			</CardHeader>
 			<CardBody>
 				<Row>
-					<Col sm="12" md={4}>
-						<CardSubtitle><b>...by link:</b></CardSubtitle>
-						<CardText
-							>Adding the symbol via links saves them in your browsers local storage so you can
-							continue browsing the same file when you come back.</CardText
-						>
-						<InputGroup>
-							<Input
-								type="url"
-								bind:value={link_input_field}
-								placeholder="enter a link to your firmwares symbol json..."
-							/>
-							<Button size="md" color="success" onclick={addLink}>Download symbols</Button>
-						</InputGroup>
-					</Col>
-					<Col sm="12" md={4}>
-						<CardSubtitle><b>...by file:</b></CardSubtitle>
+					<Col sm="12" md={8}>
+						<CardSubtitle><b>...by file (easiest):</b></CardSubtitle>
 						<CardText>
 							<div class="uploadfield">
 								<div>
-									Uploading the symbol file is session based and is reset when refreshing or
-									returning later.
+									Uploaded files never leave your browser, processing happens locally. Refreshing
+									the site resets everything.
 								</div>
-								<div>Any uploads are only processed locally in your browser!</div>
 
 								<br />
 
-								<Dropzone on:drop={handleFilesSelect} accept=".json,.elf">
-									<p>Drag 'n' drop JSON-report or ELF files here, or click to select files</p>
+								<Dropzone on:drop={handleFilesSelect} accept=".json,.elf" style="min-height:200px">
+									<p>Drag 'n' drop ELF files or JSON-report here, or click to select files.</p>
+									<p>ELF files must be build with debug info (-g) to get best results.</p>
 								</Dropzone>
 							</div>
 						</CardText>
 					</Col>
 					<Col sm="12" md={4}>
-						<CardSubtitle><b>...OR by loading a sample:</b></CardSubtitle>
-						<CardText
-							>Do not have any and just want to see a demo? <br /> Then load a sample to see some features
-							:)</CardText
-						>
-						<div>
-							<Button color="light" onclick={addCanncectifitySample}>cannectivity Releases</Button>
-							<Button color="light" onclick={addZephyrSampleHELLO}>zephyr "hello world"</Button>
-							<Button color="light" onclick={addZephyrSampleMQTT}>zephyr MQTT pub</Button>
-							<Button color="light" onclick={addLocalSample}>Local report.json sample</Button>
-						</div>
+						<Row>
+							<CardSubtitle><b>...by link:</b></CardSubtitle>
+							<CardText
+								>Adding the symbol via links saves them in your browsers local storage so you can
+								continue browsing the same file when you come back.</CardText
+							>
+							<InputGroup>
+								<Input
+									type="url"
+									bind:value={link_input_field}
+									placeholder="enter a link to your firmwares symbol json..."
+								/>
+								<Button size="md" color="success" onclick={addLink}>Download symbols</Button>
+							</InputGroup>
+						</Row>
+						<Row>
+							<CardSubtitle style="margin-top:10px;"><b>...OR by loading a sample:</b></CardSubtitle
+							>
+							<CardText
+								>Do not have any and just want to see a demo? <br /> Then load a sample to see some features
+								:)</CardText
+							>
+							<div>
+								<Button color="light">Temporarily Disabled...</Button>
+								<Button color="light">...need to rebuild them :)</Button>
+								<!-- <Button color="light" onclick={addCanncectifitySample}>cannectivity Releases</Button> -->
+								<!-- <Button color="light" onclick={addZephyrSampleHELLO}>zephyr "hello world"</Button>
+								<Button color="light" onclick={addZephyrSampleMQTT}>zephyr MQTT pub</Button>
+								<Button color="light" onclick={addLocalSample}>Local report.json sample</Button> -->
+							</div>
+						</Row>
 					</Col>
 				</Row>
 			</CardBody>
