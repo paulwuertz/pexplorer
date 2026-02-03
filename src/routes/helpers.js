@@ -13,13 +13,13 @@ export let symbolsToMap = (syms) => {
 
 export let symbolsToFunctionMap = (symMap) => {
 	return Object.values(symMap).filter((e) => {
-		return e['type'] === 'fn';
+		return e['symtype'] === 'fn';
 	});
 };
 
 export let symbolsToVariableMap = (symMap) => {
 	return Object.values(symMap).filter((e) => {
-		return e['type'] === 'var';
+		return e['symtype'] === 'var';
 	});
 };
 

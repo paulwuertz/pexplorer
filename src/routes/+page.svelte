@@ -71,12 +71,12 @@
 							let addr = reportFns[i]['address'];
 							// TODO what about syms with unknown path - can they be eliminated ^^?
 							let urlPath = reportFns[i]['file'] + '/' + reportFns[i]['name'];
-							reportFns[i]['type'] = 'fn';
+							reportFns[i]['symtype'] = 'fn';
 							symPathByAddr[addr] = urlPath;
 							symPathByAddr[urlPath] = reportFns[i];
 						}
 						for (let i = 0; i < reportVars.length; i++) {
-							reportVars[i]['type'] = 'var';
+							reportVars[i]['symtype'] = 'var';
 						}
 						reportJSON['SymPathByAddr'] = symPathByAddr;
 						reportJSON['symPathByName'] = symPathByAddr;

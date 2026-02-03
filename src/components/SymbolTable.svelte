@@ -28,7 +28,7 @@
 			pageSize: 99999, // TODO
 			data: function_table_data,
 			columns: [
-				{ id: 'type', key: 'type', name: 'Type' },
+				{ id: 'symtype', key: 'symtype', name: 'Type' },
 				{ id: 'file', key: 'file', name: 'Filepath' },
 				{ id: 'name', key: 'name', name: 'Name' },
 				// { id: 'remark', key: 'remark', name: 'Remarks' }, TODO discuss removal?
@@ -154,7 +154,7 @@
 								{/if}
 							</td>
 						{/if}
-					{:else if column.id == 'type'}
+					{:else if column.id == 'symtype'}
 						<td style="min-width: 0px;">
 							{#if row[column.key] === 'var'}
 								<img src="{base}/icons/Method_16x.svg" width="16px" title="Type variable" />

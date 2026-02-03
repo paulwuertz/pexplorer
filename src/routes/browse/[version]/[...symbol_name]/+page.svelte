@@ -15,6 +15,7 @@
 	import SymbolTable from '../../../../components/SymbolTable.svelte';
 	import * as helpers from '../../../helpers.js';
 	import FunctionSymbolPage from '../../../../components/FunctionSymbolPage.svelte';
+	import VariableSymbolPage from '../../../../components/VariableSymbolPage.svelte';
 
 	let { route, data } = $props();
 	let params = $derived(data);
@@ -138,8 +139,11 @@
 
 	{#key symbol_path_and_name}
 		{#if var_childs.length == 0 && fn_childs.length == 1}
-			{console.log('symbol_data: ', $state.snapshot(var_childs[0]))}
+			{console.log('symbol_data: ', $state.snapshot(fn_childs[0]))}
 			<FunctionSymbolPage {fn_childs} {symbol_version} {SymPathByAddr} />
+		{:else if var_childs.length == 1 && fn_childs.length == 0}
+			{console.log('symbol_data: ', $state.snapshot(var_childs[0]))}
+			<VariableSymbolPage {var_childs} {symbol_version} {SymPathByAddr} />
 		{:else if fn_childs}
 			<Row cols={{ md: 2, sm: 1 }}>
 				<div>

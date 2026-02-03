@@ -260,14 +260,14 @@
 				<li>
 					...flash/code size is {Object.values(symbols_to_show)
 						.filter((e) => {
-							return e['d_size'] && (e['type'] === 'fn' || e['secidx'] === bss_section_id);
+							return e['d_size'] && (e['symtype'] === 'fn' || e['secidx'] === bss_section_id);
 						})
 						.reduce((acc, b) => acc + b['d_size'], 0)} bytes
 				</li>
 				<li>
 					...static RAM size is {Object.values(symbols_to_show)
 						.filter((e) => {
-							return e['d_size'] && e['type'] === 'var' && e['secidx'] !== bss_section_id;
+							return e['d_size'] && e['symtype'] === 'var' && e['secidx'] !== bss_section_id;
 						})
 						.reduce((acc, b) => acc + b['d_size'], 0)} bytes
 				</li>
