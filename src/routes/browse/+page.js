@@ -10,15 +10,15 @@ export const csr = true;
 export async function load({ url, parent }) {
 	// load elf data
 	let componentData = await parent();
-	
-	let versions = Object.keys(symbols.symbols)
+
+	let versions = Object.keys(symbols.symbols);
 	console.log('browse', symbols, versions, versions.length);
 	if (versions.length == 1) {
-		let selVers = versions[0]
-		symbols.elfDataProvided = true
-		symbols.selected_version = selVers
-		goto(base + '/browse/' + selVers + "/");
-	}else if (!symbols.elfDataProvided) {
+		let selVers = versions[0];
+		symbols.elfDataProvided = true;
+		symbols.selected_version = selVers;
+		goto(base + '/browse/' + selVers + '/');
+	} else if (!symbols.elfDataProvided) {
 		goto(base + '/');
 		return;
 	}

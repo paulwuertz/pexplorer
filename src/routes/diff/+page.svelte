@@ -14,10 +14,12 @@
 	let { data } = $props();
 	let files = $state();
 	let versions = $derived(Object.keys(symbols.symbols));
-	let bss_section = $derived(symbols.symbols[symbols.selected_version].sections.find(
-		e => e.name == "bss" || e.name == "bss" 
-	) || {}); 
-	// TODO assumes sections did not change 
+	let bss_section = $derived(
+		symbols.symbols[symbols.selected_version].sections.find(
+			(e) => e.name == 'bss' || e.name == 'bss'
+		) || {}
+	);
+	// TODO assumes sections did not change
 	let bss_section_id = $derived(bss_section.index);
 	let selected_symbols = $state({});
 	let selected_symbols_to_compare = $state({});
@@ -63,9 +65,13 @@
 			return;
 		}
 
-		selected_symbols = helpers.symbolsToMap(symbols.symbols[symbols.selected_version]['functions']);
+		let selectedSym = symbols.symbols[symbols.selected_version];
+		let selectedRefSym = symbols.symbols[symbols.selected_versions_to_compare];
+		selected_symbols = helpers.symbolsToMap(
+			selectedSym['functions'].concat(selectedSym['variables'])
+		);
 		selected_symbols_to_compare = helpers.symbolsToMap(
-			symbols.symbols[symbols.selected_versions_to_compare]['functions']
+			selectedRefSym['functions'].concat(selectedRefSym['variables'])
 		);
 		// selected_thread_stat = symbols.symbols[symbols.selected_version]['stack_reports'];
 		// selected_thread_stat_to_compare =
