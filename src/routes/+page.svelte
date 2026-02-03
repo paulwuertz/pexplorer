@@ -34,6 +34,7 @@
 	let symbol_map = $state(symbols.symbols);
 	let symbol_links = $state(symbols.symbolLinks);
 	let versions = $derived(Object.keys(symbol_map));
+	let nr_versions_provided = $derived(versions.length);
 	let selected_primary_versions = $state(symbols.selected_version);
 	let selected_secondary_versions = $state(symbols.selected_versions_to_compare);
 
@@ -76,7 +77,7 @@
 						reportJSON['symPathByName'] = symPathByAddr;
 						// TODO how much space saving it pre-calculated?
 						console.log(reportJSON);
-						let identifier = reportJSON['firmwareID'];
+						let identifier = files.accepted[files.accepted.length-1].name+"_"+nr_versions_provided;
 						symbols.symbols[identifier] = reportJSON;
 						symbols.elfDataProvided = true;
 					} else {
