@@ -70,6 +70,7 @@ func wasm_get_fn_calls_from_disasm() js.Func {
 			f.DisAsm = disasm
 		}
 		callgraphextraction.AddCallGraph(&elfReport)
+		callgraphextraction.GetStackUseDetails(&elfReport)
 
 		datajson, _ := json.Marshal(elfReport)
 		datajson2, _ := json.Marshal(addr2Disasm)

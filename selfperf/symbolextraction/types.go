@@ -13,17 +13,18 @@ type ElfSection struct {
 }
 
 type FunctionSymbol struct {
-	Name              string            `json:"name"`
-	Address           uint64            `json:"address,omitempty,omitzero"`
-	FlashSize         uint64            `json:"size"`
-	FunctionStackSize uint64            `json:"stack_size,omitempty,omitzero"`
-	SectionIndex      uint8             `json:"secidx"`
-	SourceFilePath    string            `json:"file,omitempty,omitzero"`
-	SourceFileLine    uint64            `json:"line,omitempty,omitzero"`
-	Variables         []*VariableSymbol `json:"vars,omitempty,omitzero"`
-	Asm               []byte            `json:"asm,omitempty,omitzero"`
-	Callees           []FunctionCall    `json:"callees,omitempty,omitzero"`
-	Callers           []FunctionCall    `json:"callers,omitempty,omitzero"`
+	Name            string            `json:"name"`
+	Address         uint64            `json:"address,omitempty,omitzero"`
+	FlashSize       uint64            `json:"size"`
+	SectionIndex    uint8             `json:"secidx"`
+	SourceFilePath  string            `json:"file,omitempty,omitzero"`
+	SourceFileLine  uint64            `json:"line,omitempty,omitzero"`
+	Variables       []*VariableSymbol `json:"vars,omitempty,omitzero"`
+	Asm             []byte            `json:"asm,omitempty,omitzero"`
+	Callees         []FunctionCall    `json:"callees,omitempty,omitzero"`
+	Callers         []FunctionCall    `json:"callers,omitempty,omitzero"`
+	StackSize       uint64            `json:"stack_size,omitempty,omitzero"`
+	StackQualifiers string            `json:"stack_qualifiers,omitempty,omitzero"`
 	// calls + refs
 	entry     *dwarf.Entry      `json:"-"`
 	variables []*VariableSymbol `json:"-"`

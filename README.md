@@ -1,3 +1,22 @@
+TODO
+
+* breitensuche + properties
+    * darstellung mittels flame? brainstorm
+* isolierte callgraphen auflisten
+* seite zur dynamischen auflistung/lösung
+* stack usage CLI demo
+    * as first proto in browser
+* variable page
+    * auflösung der data auf felder
+* puncover PR add format according to scheme
+* regenerate demos
+* tests with ELFs
+    * CI test
+* segment view?
+* export
+* import
+* settings page
+
 # sv
 
 Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).

@@ -29,6 +29,7 @@ func AddDisAsmFromAsm(s *symbolextraction.SElfReport) {
 			0,         // insns to disassemble, 0 for all
 		)
 
+		// TODO gapstone.ErrOK (=> 0) means failed disasm...
 		if err != nil && err != gapstone.ErrOK {
 			fmt.Println("Disassembly error: ", err)
 			continue
@@ -50,4 +51,5 @@ func EnhanceByDisasm(s *symbolextraction.SElfReport) {
 	// get calls from disasm
 	AddDisAsmFromAsm(s)
 	AddCallGraph(s)
+	GetStackUseDetails(s)
 }

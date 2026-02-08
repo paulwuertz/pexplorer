@@ -33,15 +33,14 @@ func ExtractFunctions(elfFile elf.File) []FunctionSymbol {
 
 		address := sym.Value
 		functions = append(functions, FunctionSymbol{
-			Name:              name,
-			Address:           address,
-			FlashSize:         sym.Size,
-			FunctionStackSize: 0,
-			SourceFilePath:    "",
-			SourceFileLine:    0,
-			SectionIndex:      uint8(sym.Section),
-			Callees:           make([]FunctionCall, 0),
-			Callers:           make([]FunctionCall, 0),
+			Name:           name,
+			Address:        address,
+			FlashSize:      sym.Size,
+			SourceFilePath: "",
+			SourceFileLine: 0,
+			SectionIndex:   uint8(sym.Section),
+			Callees:        make([]FunctionCall, 0),
+			Callers:        make([]FunctionCall, 0),
 		})
 	}
 	// sort lowest address first

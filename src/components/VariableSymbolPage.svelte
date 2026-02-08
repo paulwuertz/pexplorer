@@ -72,7 +72,7 @@
 	<!-- // .map(function(e, i, a){return "index "+i+" => "+ e}) -->
 </pre>
 
-<h4>Stack Worst-Case Scenarios</h4>
+<h4>Interpretation</h4>
 
 <Table style="word-break: break-all;" hover bordered>
 	<thead>

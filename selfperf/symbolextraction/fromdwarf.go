@@ -165,12 +165,11 @@ func getVariableTypes(s *SElfReport) []Typedef {
 					if ok1 && ok2 {
 						size := int64(addrBegin) + addrEnd + 1
 						funcs = append(funcs, FunctionSymbol{
-							Name:              name,
-							Address:           addrBegin,
-							FlashSize:         uint64(size),
-							FunctionStackSize: 0,
-							SourceFilePath:    filename,
-							SourceFileLine:    uint64(cuFileLine),
+							Name:           name,
+							Address:        addrBegin,
+							FlashSize:      uint64(size),
+							SourceFilePath: filename,
+							SourceFileLine: uint64(cuFileLine),
 							// SectionIndex:      uint8(sym.Section),
 							// asm
 						})

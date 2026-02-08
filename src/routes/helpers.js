@@ -200,8 +200,14 @@ export const getDisasmFnMap = (asmReport) => {
 		let fFile = f['file'] || '';
 		let ASM = Uint8Array.fromBase64(f['asm']);
 		let disasm = [];
-		// console.log(fName + fFile + ' ASM: ' + ASM);
-		let disasmData = d.disasm(ASM, baseAddr);
+		let disasmData;
+		try {
+			disasmData = d.disasm(ASM, baseAddr);
+		} catch (error) {
+			console.log(fName + fFile + ' ASM: ' + ASM);
+			console.log(f, disasmData);
+			continue
+		}
 		// Display results;
 		let fnInstr = [];
 		disasmData.forEach(function (instr) {

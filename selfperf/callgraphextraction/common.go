@@ -1,8 +1,13 @@
 package callgraphextraction
 
 import (
+	"encoding/binary"
 	"fmt"
+	"log"
+	"sort"
 
+	"github.com/go-delve/delve/pkg/dwarf/frame"
+	"github.com/go-delve/delve/pkg/dwarf/godwarf"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
@@ -54,4 +59,50 @@ func AddCallGraph(s *symbolextraction.SElfReport) {
 			}
 		}
 	}
+}
+
+func GetFunctionStackUsage(f *symbolextraction.FunctionSymbol, frames frame.FrameDescriptionEntries) (uint64, error) {
+	mainfde, err := frames.FDEForPC(f.Address)
+	fmt.Println("\t\tfn", err)
+	if err != nil {
+		return 0, err
+	}
+	fmt.Println("\t\tfn", f.Name, mainfde.Length, f.SourceFilePath, f.SourceFileLine)
+	var max uint64 = 0
+	for _, d := range f.DisAsm {
+		i := d.Addr
+		// for ARM the return addr is saved in r13,
+		// when CFA is in R13 and only there, then CFA.off seems to be pretty much the frame size...
+		// if not and the CFA reg changes and the SP is pushed around we do not know from this table...
+		s, err := mainfde.EstablishFrame(i)
+		if err != nil {
+			fmt.Println(err, "skip frame at addr", i, "for fn:", f.Name)
+			continue
+		}
+		if uint64(s.CFA.Offset) >= max {
+			max = uint64(s.CFA.Offset)
+		}
+		fmt.Println(fmt.Sprintf("%x", i), "off:", s.CFA.Offset, d.Instruction, d.Opstr, "-> cfa reg:", s.CFA.Reg, "rule:", symbolextraction.RegRuleEnum2String[s.CFA.Rule], "expr:", s.CFA.Expression, "regs:", s.Regs, "reta:", s.RetAddrReg)
+	}
+	f.StackSize = max
+	f.StackQualifiers = "estimated-experimental-needs-testing"
+	// for i := mainfde.Begin(); i < mainfde.End(); i = i + 2 {
+	return 0, err
+}
+
+func GetStackUseDetails(s *symbolextraction.SElfReport) {
+	framedata, _ := godwarf.GetDebugSectionElf(s.Elf, "frame")
+	fe, err := frame.Parse(framedata, binary.LittleEndian, 0, 4, 0)
+	if err != nil {
+		log.Fatal("could not parse frame data of elffile", err)
+	}
+	sort.Slice(fe, func(i, j int) bool {
+		return fe[i].Begin() < fe[j].Begin()
+	})
+
+	for i := 0; i < len(s.Functions); i++ {
+		function := &s.Functions[i]
+		GetFunctionStackUsage(function, fe)
+	}
+	return
 }
