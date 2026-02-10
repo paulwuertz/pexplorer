@@ -1,4 +1,4 @@
-package callgraphextraction
+package callgraph
 
 import "testing"
 

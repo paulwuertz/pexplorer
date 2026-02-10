@@ -9,7 +9,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/paulwuertz/pexplorer/selfperf/callgraphextraction"
+	"github.com/paulwuertz/pexplorer/selfperf/callgraph"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
@@ -112,7 +112,7 @@ func main() {
 		Addr2FnMap: map[uint64]*symbolextraction.FunctionSymbol{},
 	}
 	symbolextraction.EnhanceByDwarfDebugInfo(&elfReport)
-	callgraphextraction.EnhanceByDisasm(&elfReport)
+	callgraph.EnhanceByDisasm(&elfReport)
 	datajson, _ := json.MarshalIndent(elfReport, "", "    ")
 
 	fmt.Println("functions found:", string(datajson))

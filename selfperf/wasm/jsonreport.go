@@ -10,7 +10,7 @@ import (
 	"fmt"
 	"syscall/js"
 
-	"github.com/paulwuertz/pexplorer/selfperf/callgraphextraction"
+	"github.com/paulwuertz/pexplorer/selfperf/callgraph"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
@@ -69,8 +69,8 @@ func wasm_get_fn_calls_from_disasm() js.Func {
 			}
 			f.DisAsm = disasm
 		}
-		callgraphextraction.AddCallGraph(&elfReport)
-		callgraphextraction.GetStackUseDetails(&elfReport)
+		callgraph.AddCallGraph(&elfReport)
+		callgraph.GetStackUseDetails(&elfReport)
 
 		datajson, _ := json.Marshal(elfReport)
 		datajson2, _ := json.Marshal(addr2Disasm)

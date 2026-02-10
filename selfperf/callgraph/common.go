@@ -1,10 +1,11 @@
-package callgraphextraction
+package callgraph
 
 import (
 	"encoding/binary"
 	"fmt"
 	"log"
 	"sort"
+	"strings"
 
 	"github.com/go-delve/delve/pkg/dwarf/frame"
 	"github.com/go-delve/delve/pkg/dwarf/godwarf"
@@ -41,17 +42,17 @@ func AddCallGraph(s *symbolextraction.SElfReport) {
 		for _, insn := range f.DisAsm {
 			if IsFnCallInstr(insn.Instruction) {
 				//stackoverflow.com/questions/75285743/arm-gcc-cortex-m4-calling-address-as-function-generates-blx-instead-of-bl
-				var calladdr uint64
-				n, err := fmt.Sscanf(insn.Opstr, "#0x%X", &calladdr)
+				var calladdr []uint64 = make([]uint64, 1) // wasteful hack to get a nullable int... TODO any better way?
+				n, err := fmt.Sscanf(insn.Opstr, "#0x%X", &calladdr[0])
 				if err == nil && n == 1 {
-					f.Callees = append(f.Callees, symbolextraction.FunctionCall{f.Address, uint64(calladdr), false})
+					f.Callees = append(f.Callees, symbolextraction.FunctionCall{&f.Address, &calladdr[0], false})
 				} else {
-					f.Callees = append(f.Callees, symbolextraction.FunctionCall{CallFrom: f.Address, DynamicCall: true})
+					f.Callees = append(f.Callees, symbolextraction.FunctionCall{CallFrom: &f.Address, DynamicCall: true})
 					continue
 				}
-				fnCalled, fnFound := s.Addr2FnMap[uint64(calladdr)]
+				fnCalled, fnFound := s.Addr2FnMap[calladdr[0]]
 				if fnFound {
-					fnCalled.Callers = append(fnCalled.Callers, symbolextraction.FunctionCall{f.Address, uint64(calladdr), false})
+					fnCalled.Callers = append(fnCalled.Callers, symbolextraction.FunctionCall{&f.Address, &calladdr[0], false})
 				} else {
 					msg := fmt.Sprintf("static call from %s at %d to unknown function", f.Name, f.Address)
 					s.Info = append(s.Info, msg)
@@ -104,5 +105,47 @@ func GetStackUseDetails(s *symbolextraction.SElfReport) {
 		function := &s.Functions[i]
 		GetFunctionStackUsage(function, fe)
 	}
-	return
+}
+
+func TraverseCallSubGraph(s *symbolextraction.SElfReport, f *symbolextraction.FunctionSymbol, subgraphIndex uint, calldepth uint) uint64 {
+	var biggestSubStackSize uint64 = 0
+	if len(f.Callees) == 0 {
+		fmt.Println(strings.Repeat("\t", int(calldepth)), f.Name, " endtree stacksize:", f.StackSize)
+		return f.StackSize
+	}
+	if f.Visited {
+		fmt.Println(strings.Repeat("\t", int(calldepth)), f.Name, "revisited stacksize:", f.StackSize, "biggest calletreesize:", f.MaxStackSizeCallees)
+		return f.MaxStackSizeCallees
+	}
+	f.Visited = true
+	for _, callees := range f.Callees {
+		callAddr := callees.CallTo
+		if callAddr == nil {
+			continue
+		}
+		callee, ok := s.Addr2FnMap[*callAddr]
+		if !ok {
+			// log.Fatal("fn not found", f)
+			continue
+		}
+		subStackSize := f.StackSize + TraverseCallSubGraph(s, callee, subgraphIndex, calldepth+1)
+		if subStackSize > biggestSubStackSize {
+			biggestSubStackSize = subStackSize
+		}
+	}
+	fmt.Println(strings.Repeat("\t", int(calldepth)), f.Name, "stacksize:", f.StackSize, "biggest calletreesize:", biggestSubStackSize)
+	f.MaxStackSizeCallees = biggestSubStackSize
+	return biggestSubStackSize
+}
+
+func TraverseCallGraph(s *symbolextraction.SElfReport) {
+	var subgraphIndex uint = 0
+	for i := 0; i < len(s.Functions); i++ {
+		function := &s.Functions[i]
+		isRootOfCalltree := len(function.Callers) == 0
+		if !function.Visited && isRootOfCalltree {
+			TraverseCallSubGraph(s, function, subgraphIndex, 0)
+			subgraphIndex++
+		}
+	}
 }
