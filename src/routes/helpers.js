@@ -206,7 +206,7 @@ export const getDisasmFnMap = (asmReport) => {
 		} catch (error) {
 			console.log(fName + fFile + ' ASM: ' + ASM);
 			console.log(f, disasmData);
-			continue
+			continue;
 		}
 		// Display results;
 		let fnInstr = [];

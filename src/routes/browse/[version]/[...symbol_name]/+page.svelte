@@ -6,7 +6,7 @@
 	import { base } from '$app/paths';
 	import { symbols } from '../../../symbols.svelte.js';
 
-	import { Breadcrumb, BreadcrumbItem, Row } from '@sveltestrap/sveltestrap';
+	import { Breadcrumb, BreadcrumbItem, Row, Tooltip } from '@sveltestrap/sveltestrap';
 	import { Table } from '@sveltestrap/sveltestrap';
 	import Highlight from 'svelte-highlight';
 	import atomOneDark from 'svelte-highlight/styles/atom-one-dark';
@@ -80,10 +80,15 @@
 					data: sunburst_data,
 					radius: [0, '90%'],
 					label: {
-						rotate: 'radial',
-						minAngle: 15,
-						formatter: '{b} - {c}'
+						show: false
+						// rotate: 'radial',
+						// minAngle: 15,
+						// formatter: '{b} - {c}'
 					}
+				},
+				tooltip: {
+					show: true,
+					trigger: 'item'
 				}
 			};
 			option && romChart.setOption(option);
@@ -108,10 +113,15 @@
 					data: sunburst_data,
 					radius: [0, '90%'],
 					label: {
-						rotate: 'radial',
-						minAngle: 15,
-						formatter: '{b} - {c}'
+						show: false
+						// rotate: 'radial',
+						// minAngle: 15,
+						// formatter: '{b} - {c}'
 					}
+				},
+				tooltip: {
+					show: true,
+					trigger: 'item'
 				}
 			};
 			option && ramChart.setOption(option);

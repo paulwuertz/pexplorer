@@ -28,7 +28,6 @@
 	let staticInitDataBase64 = $derived(sym_data.staticInitData);
 	let staticInitData = $derived(Uint8Array.fromBase64(staticInitDataBase64) || []);
 	let type = $derived(sym_data.type);
-	
 </script>
 
 <Table style="word-break: break-all;" hover bordered>
