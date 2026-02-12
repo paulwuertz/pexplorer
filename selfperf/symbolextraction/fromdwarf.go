@@ -32,7 +32,8 @@ var RegRuleEnum2String = map[frame.Rule]string{
 func setLineInfo(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) {
 	// TODO try Lookup by Address using .debug_aranges.
 	linedata, _ := godwarf.GetDebugSectionElf(elf, "line")
-	debugLines := line.ParseAll(linedata, nil, nil, 0, true, 4)
+	linedata_str, _ := godwarf.GetDebugSectionElf(elf, "line_str")
+	debugLines := line.ParseAll(linedata, linedata_str, nil, 0, true, 4)
 
 	// map all possible src breakpoint adresses to its dbgline compilation unit
 	var addr2fileMap map[uint64]*line.DebugLineInfo = make(map[uint64]*line.DebugLineInfo)

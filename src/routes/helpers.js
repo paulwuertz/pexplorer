@@ -142,10 +142,13 @@ let add_sym_to_object_tree = (symbol, path_array, data_tree, data_field) => {
 export const symbols_to_sunburst_tree_data = (symbols, data_field) => {
 	let data = [];
 	for (const symbol of symbols) {
-		if (typeof symbol.file !== 'string') {
-			continue;
+		const noPath = ['<unknown>'];
+		let path_elements;
+		if (!symbol.file || typeof symbol.file !== 'string') {
+			path_elements = noPath;
+		} else {
+			path_elements = symbol.file.split('/').slice(1);
 		}
-		let path_elements = symbol.file ? symbol.file.split('/').slice(1) : ['unlocatable'];
 		add_sym_to_object_tree(symbol, path_elements, data, data_field);
 	}
 	return data;
