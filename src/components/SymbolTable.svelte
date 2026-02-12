@@ -35,6 +35,8 @@
 				{ id: 'secidx', key: 'secidx', name: 'Section' },
 				{ id: 'address', key: 'address', name: 'Address' },
 				{ id: 'size', key: 'size', name: 'Symbol size' },
+				{ id: 'callers', key: 'callers', name: '#Callers' },
+				{ id: 'callees', key: 'callees', name: '#Callees' },
 				{ id: 'stack_size', key: 'stack_size', name: 'Stack size' },
 				{ id: 'stack_qualifiers', key: 'stack_qualifiers', name: 'Stack size type' }
 			]
@@ -162,6 +164,8 @@
 								<img src="{base}/icons/Field_16x.svg" width="16px" title="Type function" />
 							{/if}
 						</td>
+					{:else if column.id == 'callers' || column.id == 'callees'}
+						<td>{(row[column.key] || []).length}</td>
 					{:else}
 						<td>{row[column.key]}</td>
 					{/if}
