@@ -21,10 +21,40 @@
 	import { symbols } from './symbols.svelte.js';
 	import * as helpers from './helpers.js';
 	import { base } from '$app/paths';
-
-	let CANNECTIVITY_SAMPLE_URL = 'https://p4w5.eu/report.json';
-	let ZEPHYR_HELLO_SAMPLE_URL = 'https://p4w5.eu/reportHelloWorld.json';
-	let ZEPHYR_MQTT_SAMPLE_URL = 'https://p4w5.eu/reportMQTTPublisher.json';
+	const testFW = [
+		{
+			name: 'CANnectivity v1.2 LLVM @ lpc55s16',
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/zephyr_cannectivity_12_llvm_lpc55s16.elf'
+		},
+		{
+			name: 'CANnectivity v1.2 GCC @ lpc55s16',
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/zephyr_cannectivity_12_gcc_lpc55s16.elf'
+		},
+		{
+			name: 'CANnectivity v1.3 LLVM @ lpc55s16',
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/zephyr_cannectivity_13_llvm_lpc55s16.elf'
+		},
+		{
+			name: 'CANnectivity v1.3 GCC @ lpc55s16',
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/zephyr_cannectivity_13_gcc_lpc55s16.elf'
+		},
+		{
+			name: 'Prusa Buddy - Core One v6.4.0',
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/Pinecilv1_EN_v2_23.elf'
+		},
+		{
+			name: 'IronOS Pinecilv1 EN v2.23',
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/Pinecilv1_EN_v2_23.elf'
+		},
+		{
+			name: 'IronOS Pinecilv2 EN v2.23',
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/Pinecilv2_EN_v2_23.elf'
+		},
+		{
+			name: 'ZSWatch v0.7.0',
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/zswatch_nrf5340_07.elf'
+		}
+	];
 
 	let files = $state({
 		accepted: [],
@@ -42,7 +72,7 @@
 		symbols.symbols = JSON.parse(jsonReports);
 	}
 
-	function loadReportFromELF(elfBinary) {
+	function loadReportFromELF(symID, elfBinary) {
 		console.log(elfBinary);
 		const go = new Go(); // Defined in wasm_exec.js
 		const WASM_URL = base + '/sELFperf.wasm';
@@ -82,9 +112,7 @@
 						reportJSON['symPathByName'] = symPathByAddr;
 						// TODO how much space saving it pre-calculated?
 						console.log(reportJSON);
-						let identifier =
-							files.accepted[files.accepted.length - 1].name + '_' + nr_versions_provided;
-						symbols.symbols[identifier] = reportJSON;
+						symbols.symbols[symID] = reportJSON;
 						symbols.elfDataProvided = true;
 					} else {
 					}
@@ -126,7 +154,8 @@
 				if (is_json) {
 					loadReportsfromJson(reader.result);
 				} else if (is_elf) {
-					loadReportFromELF(new Uint8Array(reader.result));
+					let symID = files.accepted[files.accepted.length - 1].name + '_' + nr_versions_provided;
+					loadReportFromELF(symID, new Uint8Array(reader.result));
 				} else {
 				}
 			};
@@ -144,9 +173,13 @@
 		// todo - handle files.rejected
 	}
 
-	async function addFirmwareByLink(link) {
+	async function addFirmwareByLink(name, link) {
 		if (!symbol_links.includes(link)) {
 			const response = await fetch(link);
+			if (link.endsWith('.elf')) {
+				loadReportFromELF(name, await response.bytes());
+				return;
+			}
 			const data = await response.json();
 			symbol_links.push(link);
 			localStorage.lastOpenElfURLs = JSON.stringify(symbol_links);
@@ -164,16 +197,8 @@
 		addFirmwareByLink('/report.json');
 	}
 
-	function addCanncectifitySample() {
-		addFirmwareByLink(CANNECTIVITY_SAMPLE_URL);
-	}
-
-	function addZephyrSampleHELLO() {
-		addFirmwareByLink(ZEPHYR_HELLO_SAMPLE_URL);
-	}
-
-	function addZephyrSampleMQTT() {
-		addFirmwareByLink(ZEPHYR_MQTT_SAMPLE_URL);
+	function addFWSample(name, url) {
+		addFirmwareByLink(name, url);
 	}
 
 	function addLink() {
@@ -280,12 +305,11 @@
 								:)</CardText
 							>
 							<div>
-								<Button color="light">Temporarily Disabled...</Button>
-								<Button color="light">...need to rebuild them :)</Button>
-								<!-- <Button color="light" onclick={addCanncectifitySample}>cannectivity Releases</Button> -->
-								<!-- <Button color="light" onclick={addZephyrSampleHELLO}>zephyr "hello world"</Button>
-								<Button color="light" onclick={addZephyrSampleMQTT}>zephyr MQTT pub</Button>
-								<Button color="light" onclick={addLocalSample}>Local report.json sample</Button> -->
+								{#each testFW as fw, i ('link-' + fw.name)}
+									<Button color="light" onclick={() => addFWSample(fw.name, fw.url)}
+										>{fw.name}</Button
+									>
+								{/each}
 							</div>
 						</Row>
 					</Col>
