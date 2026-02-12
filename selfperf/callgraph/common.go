@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"sort"
-	"strings"
 
 	"github.com/go-delve/delve/pkg/dwarf/frame"
 	"github.com/go-delve/delve/pkg/dwarf/godwarf"
@@ -64,11 +63,11 @@ func AddCallGraph(s *symbolextraction.SElfReport) {
 
 func GetFunctionStackUsage(f *symbolextraction.FunctionSymbol, frames frame.FrameDescriptionEntries) (uint64, error) {
 	mainfde, err := frames.FDEForPC(f.Address)
-	fmt.Println("\t\tfn", err)
+	// fmt.Println("\t\tfn", err)
 	if err != nil {
 		return 0, err
 	}
-	fmt.Println("\t\tfn", f.Name, mainfde.Length, f.SourceFilePath, f.SourceFileLine)
+	// fmt.Println("\t\tfn", f.Name, mainfde.Length, f.SourceFilePath, f.SourceFileLine)
 	var max uint64 = 0
 	for _, d := range f.DisAsm {
 		i := d.Addr
@@ -77,13 +76,13 @@ func GetFunctionStackUsage(f *symbolextraction.FunctionSymbol, frames frame.Fram
 		// if not and the CFA reg changes and the SP is pushed around we do not know from this table...
 		s, err := mainfde.EstablishFrame(i)
 		if err != nil {
-			fmt.Println(err, "skip frame at addr", i, "for fn:", f.Name)
+			// fmt.Println(err, "skip frame at addr", i, "for fn:", f.Name)
 			continue
 		}
 		if uint64(s.CFA.Offset) >= max {
 			max = uint64(s.CFA.Offset)
 		}
-		fmt.Println(fmt.Sprintf("%x", i), "off:", s.CFA.Offset, d.Instruction, d.Opstr, "-> cfa reg:", s.CFA.Reg, "rule:", symbolextraction.RegRuleEnum2String[s.CFA.Rule], "expr:", s.CFA.Expression, "regs:", s.Regs, "reta:", s.RetAddrReg)
+		// fmt.Println(fmt.Sprintf("%x", i), "off:", s.CFA.Offset, d.Instruction, d.Opstr, "-> cfa reg:", s.CFA.Reg, "rule:", symbolextraction.RegRuleEnum2String[s.CFA.Rule], "expr:", s.CFA.Expression, "regs:", s.Regs, "reta:", s.RetAddrReg)
 	}
 	f.StackSize = max
 	f.StackQualifiers = "estimated-experimental-needs-testing"
@@ -110,11 +109,11 @@ func GetStackUseDetails(s *symbolextraction.SElfReport) {
 func TraverseCallSubGraph(s *symbolextraction.SElfReport, f *symbolextraction.FunctionSymbol, subgraphIndex uint, calldepth uint) uint64 {
 	var biggestSubStackSize uint64 = 0
 	if len(f.Callees) == 0 {
-		fmt.Println(strings.Repeat("\t", int(calldepth)), f.Name, " endtree stacksize:", f.StackSize)
+		// fmt.Println(strings.Repeat("\t", int(calldepth)), f.Name, " endtree stacksize:", f.StackSize)
 		return f.StackSize
 	}
 	if f.Visited {
-		fmt.Println(strings.Repeat("\t", int(calldepth)), f.Name, "revisited stacksize:", f.StackSize, "biggest calletreesize:", f.MaxStackSizeCallees)
+		// fmt.Println(strings.Repeat("\t", int(calldepth)), f.Name, "revisited stacksize:", f.StackSize, "biggest calletreesize:", f.MaxStackSizeCallees)
 		return f.MaxStackSizeCallees
 	}
 	f.Visited = true
@@ -133,7 +132,7 @@ func TraverseCallSubGraph(s *symbolextraction.SElfReport, f *symbolextraction.Fu
 			biggestSubStackSize = subStackSize
 		}
 	}
-	fmt.Println(strings.Repeat("\t", int(calldepth)), f.Name, "stacksize:", f.StackSize, "biggest calletreesize:", biggestSubStackSize)
+	// fmt.Println(strings.Repeat("\t", int(calldepth)), f.Name, "stacksize:", f.StackSize, "biggest calletreesize:", biggestSubStackSize)
 	f.MaxStackSizeCallees = biggestSubStackSize
 	return biggestSubStackSize
 }

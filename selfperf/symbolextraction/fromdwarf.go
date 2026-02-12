@@ -44,9 +44,9 @@ func setLineInfo(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) {
 			log.Fatal("err it all pcs", err)
 		}
 		for _, addr := range addresses {
-			al, ok := addr2fileMap[addr]
+			_, ok := addr2fileMap[addr]
 			if ok { // TODO understand and handle duplicates
-				fmt.Println("duplicates address in", addr, "already", "\n\t", al.FileNames[0], "and\n\t", dbl.FileNames[0])
+				// fmt.Println("duplicates address in", addr, "already", "\n\t", al.FileNames[0], "and\n\t", dbl.FileNames[0])
 			}
 			addr2fileMap[addr] = dbl
 		}
@@ -220,7 +220,7 @@ func getVariableTypes(s *SElfReport) []Typedef {
 							curFunction.Variables = append(curFunction.Variables, varRef)
 						} else {
 							// cu
-							fmt.Println("entry var withot fn", entry)
+							// fmt.Println("entry var withot fn", entry)
 						}
 					}
 				} else {
