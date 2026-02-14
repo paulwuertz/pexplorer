@@ -63,9 +63,9 @@
 		</tr>
 
 		<tr>
-			<td><b>Function stack size</b>:</td>
+			<td><b>Function stack usage</b>:</td>
 			<td>
-				{stack_size} bytes - stack usage is '{stack_qualifier}' - TODO add info about qualifiers :)
+				{stack_size} bytes - qualified as '{stack_qualifier}' - TODO add info about qualifiers :)
 			</td>
 		</tr>
 
@@ -133,7 +133,10 @@
 </span>
 </pre>
 
-<h4>Stack Worst-Case Scenarios</h4>
+<h4>Worst-Case Stack Scenario currently found{#if max_stack_size_callees}: {max_stack_size_callees} bytes{/if}</h4>
+
+<FlameGraph sym_data={sym_data} ></FlameGraph>
+
 
 <Table style="word-break: break-all;" hover bordered>
 	<thead>
@@ -154,7 +157,7 @@
 								<b>{helpers.callxrs_text_to_symname(caller, sym_path_by_addr)}</b> - (this function)
 							</small>
 						{:else}
-						{/if} 
+						{/if}
 					</a>-->
 				</td>
 				<td>

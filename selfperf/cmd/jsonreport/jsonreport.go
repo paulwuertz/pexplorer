@@ -32,6 +32,7 @@ func main() {
 
 	elfReport := symbolextraction.GetFWReport(elfFile)
 	callgraph.EnhanceByDisasm(&elfReport)
+	callgraph.TraverseCallGraph(&elfReport)
 	elfReport.SingleFirmware = true
 	elfReport.FirmwareIdentifier = "unspecified"
 

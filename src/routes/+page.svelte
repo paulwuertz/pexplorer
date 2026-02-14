@@ -43,11 +43,11 @@
 			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/Pinecilv1_EN_v2_23.elf'
 		},
 		{
-			name: 'IronOS Pinecilv1 EN v2.23',
+			name: 'IronOS Pinecilv1 EN v2.23 (RISC-V WiP)',
 			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/Pinecilv1_EN_v2_23.elf'
 		},
 		{
-			name: 'IronOS Pinecilv2 EN v2.23',
+			name: 'IronOS Pinecilv2 EN v2.23 (RISC-V WiP)',
 			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/Pinecilv2_EN_v2_23.elf'
 		},
 		{
@@ -357,59 +357,6 @@
 				</Row>
 			</CardFooter>
 		</Card>
-
-		<!-- <Card-- id="step2" class="mt-3">
-			<CardHeader>
-				<CardTitle>
-					Step 2: Select a version to explore (mandatory)
-					{#if selected_primary_versions}
-						✅
-					{/if}
-					+ Select a second version to compare (optional)
-					{#if selected_secondary_versions}
-						✅
-					{/if}
-				</CardTitle>
-			</CardHeader>
-			<CardBody>
-				<Row cols={{ lg: 3, md: 2, sm: 1 }}>
-					{#each versions as version ('verselbtns-' + version)}
-						<div class="pb-3 px-3">
-							<Card>
-								<CardHeader>
-									<CardTitle>{version}</CardTitle>
-								</CardHeader>
-								<CardBody>
-									<CardText>
-										<TODO add source link symbol json >
-										Buildtime: {symbols.symbols[version].timestamp}
-									</CardText>
-									{#if selected_primary_versions == version}
-										<Button color="success" onclick={reset_selected_versions}>
-											Selected to view
-										</Button>
-									{:else if selected_secondary_versions == version}
-										<Button color="primary" onclick={reset_secondary_versions}>
-											Selected to compare
-										</Button>
-									{:else if selected_primary_versions && selected_secondary_versions}
-										<Button onclick={() => select_version(version)}>---</Button>
-									{:else}
-										<Button onclick={() => select_version(version)}>Browse</Button>
-									{/if}
-								</CardBody>
-							</Card>
-						</div>
-					{/each}
-				</Row>
-			</CardBody>
-
-			<CardFooter>
-				<Button size="md" color="danger" onclick={reset_selected_versions}
-					>Clear selected versions</Button
-				>
-			</CardFooter>
-		</Card-->
 	</Container>
 </div>
 

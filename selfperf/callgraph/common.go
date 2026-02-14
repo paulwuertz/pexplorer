@@ -85,7 +85,7 @@ func GetFunctionStackUsage(f *symbolextraction.FunctionSymbol, frames frame.Fram
 		// fmt.Println(fmt.Sprintf("%x", i), "off:", s.CFA.Offset, d.Instruction, d.Opstr, "-> cfa reg:", s.CFA.Reg, "rule:", symbolextraction.RegRuleEnum2String[s.CFA.Rule], "expr:", s.CFA.Expression, "regs:", s.Regs, "reta:", s.RetAddrReg)
 	}
 	f.StackSize = max
-	f.StackQualifiers = "estimated-experimental-needs-testing"
+	f.StackQualifiers = "estimated+experimental"
 	// for i := mainfde.Begin(); i < mainfde.End(); i = i + 2 {
 	return 0, err
 }
