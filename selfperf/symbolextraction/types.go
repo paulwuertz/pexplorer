@@ -35,9 +35,38 @@ type FunctionSymbol struct {
 }
 
 type FunctionCall struct {
+	// *uint64 for empty json export, TODO maybe use a string address?
 	CallFrom    *uint64 `json:"from,omitempty,omitzero"`
 	CallTo      *uint64 `json:"to,omitempty,omitzero"`
 	DynamicCall bool    `json:"dynamic"`
+}
+
+// smaller version of FunctionSymbol to export json for flamegraph rendering
+type CallNode struct {
+	Name                string     `json:"name"`
+	Calls               []CallNode `json:"calls,omitempty,omitzero"`
+	MaxStackSizeCallees uint64     `json:"max_stack_size_callees,omitempty,omitzero"`
+	StackSize           uint64     `json:"stack_size,omitempty,omitzero"`
+	Address             uint64     `json:"address,omitempty,omitzero"`
+	// for backtracking
+	Caller    *CallNode `json:"-"`
+	Recursion bool      `json:"-"`
+}
+
+type CallBranch struct {
+	CallList  []CallNode `json:"call_list,omitempty,omitzero"`
+	StackSize uint64     `json:"stack_size,omitempty,omitzero"`
+	//TODO are we interested in flash size? imagine only one call to a fn
+	// ie a library and so it is clear how much cutting it out would free...
+}
+
+type CallTree struct {
+	Tree            CallNode       `json:"tree,omitempty,omitzero"`
+	Branches        []CallBranch   `json:"branches,omitempty,omitzero"`
+	UnresolvedCalls []FunctionCall `json:"unresolved,omitempty,omitzero"`
+	// temp
+	currentCallDepth uint       `json:"-"`
+	currentBranch    CallBranch `json:"-"`
 }
 
 type DisAsm struct {

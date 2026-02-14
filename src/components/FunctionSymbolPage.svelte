@@ -33,6 +33,7 @@
 	);
 	let address = $derived(sym_data.address);
 	let stack_size = $derived(sym_data.stack_size);
+	let max_stack_size_callees = $derived(sym_data.max_stack_size_callees);
 	let stack_qualifier = $derived(sym_data.stack_qualifiers);
 	let callers = $derived(sym_data.callers || []);
 	let callees = $derived(sym_data.callees || []);

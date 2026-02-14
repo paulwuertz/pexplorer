@@ -42,16 +42,21 @@ func AddCallGraph(s *symbolextraction.SElfReport) {
 			if IsFnCallInstr(insn.Instruction) {
 				//stackoverflow.com/questions/75285743/arm-gcc-cortex-m4-calling-address-as-function-generates-blx-instead-of-bl
 				var calladdr []uint64 = make([]uint64, 1) // wasteful hack to get a nullable int... TODO any better way?
-				n, err := fmt.Sscanf(insn.Opstr, "#0x%X", &calladdr[0])
-				if err == nil && n == 1 {
-					f.Callees = append(f.Callees, symbolextraction.FunctionCall{&f.Address, &calladdr[0], false})
-				} else {
+				foundNumber, err := fmt.Sscanf(insn.Opstr, "#0x%X", &calladdr[0])
+				if err != nil || foundNumber != 1 {
 					f.Callees = append(f.Callees, symbolextraction.FunctionCall{CallFrom: &f.Address, DynamicCall: true})
 					continue
 				}
+				call := symbolextraction.FunctionCall{
+					CallFrom:    &f.Address,
+					CallTo:      &calladdr[0],
+					DynamicCall: false,
+				}
+				f.Callees = append(f.Callees, call)
 				fnCalled, fnFound := s.Addr2FnMap[calladdr[0]]
 				if fnFound {
-					fnCalled.Callers = append(fnCalled.Callers, symbolextraction.FunctionCall{&f.Address, &calladdr[0], false})
+					clr := symbolextraction.FunctionCall{CallFrom: &f.Address, CallTo: &calladdr[0], DynamicCall: false}
+					fnCalled.Callers = append(fnCalled.Callers, clr)
 				} else {
 					msg := fmt.Sprintf("static call from %s at %d to unknown function", f.Name, f.Address)
 					s.Info = append(s.Info, msg)
