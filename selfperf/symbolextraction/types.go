@@ -65,8 +65,7 @@ type CallTree struct {
 	Branches        []CallBranch   `json:"branches,omitempty,omitzero"`
 	UnresolvedCalls []FunctionCall `json:"unresolved,omitempty,omitzero"`
 	// temp
-	currentCallDepth uint       `json:"-"`
-	currentBranch    CallBranch `json:"-"`
+	CurrentBranch CallBranch `json:"-"`
 }
 
 type DisAsm struct {

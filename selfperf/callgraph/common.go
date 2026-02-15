@@ -115,6 +115,7 @@ func TraverseCallSubGraph(s *symbolextraction.SElfReport, f *symbolextraction.Fu
 	var biggestSubStackSize uint64 = 0
 	if len(f.Callees) == 0 {
 		// fmt.Println(strings.Repeat("\t", int(calldepth)), f.Name, " endtree stacksize:", f.StackSize)
+		f.MaxStackSizeCallees = f.StackSize
 		return f.StackSize
 	}
 	if f.Visited {

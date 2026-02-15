@@ -6,6 +6,7 @@
 
 	import { DataTable } from '@careswitch/svelte-data-table';
 	import {
+		Alert,
 		Badge,
 		Button,
 		Col,
@@ -16,6 +17,7 @@
 		Row,
 		Table
 	} from '@sveltestrap/sveltestrap';
+	import FlameGraph from './FlameGraph.svelte';
 	import * as helpers from '../routes/helpers.js';
 
 	const { fn_childs, symbol_version, SymPathByAddr } = $props();
@@ -38,6 +40,19 @@
 	let callers = $derived(sym_data.callers || []);
 	let callees = $derived(sym_data.callees || []);
 	let code_size = $derived(sym_data.size);
+
+	// TODO check if from ELF or JSON...
+	// or export... could take much time and disk...
+	let fn_calltree = $derived(JSON.parse(get_fn_calltree(sym_data.address)));
+	let unresolved = $derived(
+		Object.entries(
+			fn_calltree.unresolved.reduce((acc, element) => {
+				acc[element.from] = (acc[element.from] || 0) + 1;
+				return acc;
+			}, {})
+		)
+	);
+	let branches = $derived(fn_calltree.branches);
 
 	const worst_call_stack = () => {
 		// let my_symbol = { full_symbol_path: symbol_path_and_name, stack_size: sym_data.stack_size };
@@ -134,12 +149,86 @@
 </span>
 </pre>
 
-<h4>Worst-Case Stack Scenario currently found{#if max_stack_size_callees}: {max_stack_size_callees} bytes{/if}</h4>
+<h4>
+	Worst-Case Stack Scenario currently found{#if max_stack_size_callees}: {max_stack_size_callees} bytes{/if}
+</h4>
 
-<FlameGraph sym_data={sym_data} ></FlameGraph>
+<Alert color="warning">
+	<h4 class="alert-heading text-capitalize">Warning: experimental</h4>
 
+	Estimating the stack use from the ELF+dwarf debug .framesection is still an experiment and needs
+	testing!
+</Alert>
+
+{#key unresolved}
+	{#if unresolved}
+		<Alert color="warning">
+			<h4 class="alert-heading text-capitalize">Warning: unresolved function calls</h4>
+
+			There are {unresolved.length} unresolved function calls in this calltree.
+			<br />
+			These can be dynamic functions like callback.
+			<br />
+			Unresolved calls are from:
+
+			<ul>
+				{#each unresolved as addr_occurences}
+					<li>
+						<a
+							href={helpers.callxrs_text_to_links(
+								base,
+								symbol_version,
+								parseInt(addr_occurences[0]),
+								sym_path_by_addr,
+								true
+							)}
+						>
+							<small>
+								{helpers.callxrs_text_to_symname(
+									{ from: parseInt(addr_occurences[0]) },
+									sym_path_by_addr,
+									true
+								)}
+							</small>
+						</a>
+						- called ({addr_occurences[1]}) time{#if addr_occurences[1] > 1}s{/if}
+					</li>
+				{/each}
+			</ul>
+
+			Try to manually resolve them - TODO implement then link resolve page :)
+		</Alert>
+	{/if}
+{/key}
+
+<h5>Top 10 callpaths with highest stack usage</h5>
 
 <Table style="word-break: break-all;" hover bordered>
+	<thead>
+		<tr>
+			<th>#</th>
+			<th>Stack usage</th>
+			<th>Callpath causing this stack</th>
+		</tr>
+	</thead>
+	<tbody>
+		{#each branches.slice(0, 10) as b, i}
+			<tr>
+				<td>i</td>
+				<td>{JSON.stringify(b['stack_size'])}</td>
+				<td>
+					{#each b['call_list'] as c, j}
+						{c['name'] + ' (' + c['stack_size'] + ') ->'}
+					{/each}
+				</td>
+			</tr>
+		{/each}
+	</tbody>
+</Table>
+
+<FlameGraph {sym_data} {fn_calltree}></FlameGraph>
+
+<!-- <Table style="word-break: break-all;" hover bordered>
 	<thead>
 		<tr>
 			<th>#</th>
@@ -152,14 +241,14 @@
 			<tr>
 				<td>{index + ' '}</td>
 				<td>
-					<!-- <a href={helpers.callxrs_text_to_links(base, symbol_version, caller, sym_path_by_addr)}>
+					 <a href={helpers.callxrs_text_to_links(base, symbol_version, caller, sym_path_by_addr)}>
 						{#if symbol_path_and_name.includes(caller)}
 							<small>
 								<b>{helpers.callxrs_text_to_symname(caller, sym_path_by_addr)}</b> - (this function)
 							</small>
 						{:else}
 						{/if}
-					</a>-->
+					</a>
 				</td>
 				<td>
 					{caller.stack_size}
@@ -174,7 +263,7 @@
 			<td><b>&sum; {sym_data.deepest_callee_tree_size + sym_data.deepest_caller_tree_size}</b></td>
 		</tr>
 	</tfoot>
-</Table>
+</Table> -->
 
 <style>
 	pre {

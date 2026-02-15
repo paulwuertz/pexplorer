@@ -103,13 +103,14 @@
 							let urlPath = reportFns[i]['file'] + '/' + reportFns[i]['name'];
 							reportFns[i]['symtype'] = 'fn';
 							symPathByAddr[addr] = urlPath;
-							symPathByAddr[urlPath] = reportFns[i];
+							symPathByName[urlPath] = reportFns[i];
 						}
 						for (let i = 0; i < reportVars.length; i++) {
 							reportVars[i]['symtype'] = 'var';
 						}
 						reportJSON['SymPathByAddr'] = symPathByAddr;
 						reportJSON['symPathByName'] = symPathByAddr;
+						reportJSON['goWasmLoaded'] = true;
 						// TODO how much space saving it pre-calculated?
 						console.log(reportJSON);
 						symbols.symbols[symID] = reportJSON;
