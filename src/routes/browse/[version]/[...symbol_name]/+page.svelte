@@ -36,8 +36,12 @@
 	);
 	let symbol_path = $derived(symbol_path_and_name.split('/').slice(0, -1).join('/'));
 	let symbol_path_active = $derived(symbol_path_and_name.split('/').slice(-1));
-	let symbol_data = $derived(SymPathByName['/' + symbol_path_and_name]);
 	const isChildToPath = (symbol) => {
+        let pathAsAddr = parseInt(symbol_path_and_name)
+        let pathIsAddr = pathAsAddr != NaN
+
+		if (symbol_path_and_name === '/' || symbol_path_and_name === '') return true;
+		if (pathIsAddr && pathAsAddr === symbol.address) return true;
 		if (symbol_path_and_name === '/' || symbol_path_and_name === '') return true;
 		else {
 			let routePath = symbol_path_and_name;

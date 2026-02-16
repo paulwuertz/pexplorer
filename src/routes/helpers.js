@@ -155,7 +155,11 @@ export const symbols_to_sunburst_tree_data = (symbols, data_field) => {
 };
 
 export const row2AHref = (base, selected_version, row_data) => {
-	return base + '/#/browse/' + selected_version + row_data.file + '/' + row_data.name;
+    if (row_data.file) {
+        return base + '/#/browse/' + selected_version + row_data.file + '/' + row_data.name;
+    } else {
+        return base + '/#/browse/' + selected_version + "/0x" + row_data.address.toString(16);
+    }
 };
 
 var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_THUMB + cs.MODE_MCLASS);
