@@ -46,7 +46,7 @@
 	let fn_calltree = $derived(JSON.parse(get_fn_calltree(sym_data.address)));
 	let unresolved = $derived(
 		Object.entries(
-			fn_calltree.unresolved.reduce((acc, element) => {
+			(fn_calltree.unresolved || []).reduce((acc, element) => {
 				acc[element.from] = (acc[element.from] || 0) + 1;
 				return acc;
 			}, {})
@@ -161,7 +161,7 @@
 </Alert>
 
 {#key unresolved}
-	{#if unresolved}
+	{#if unresolved && unresolved.length > 0}
 		<Alert color="warning">
 			<h4 class="alert-heading text-capitalize">Warning: unresolved function calls</h4>
 
