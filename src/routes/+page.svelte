@@ -40,7 +40,7 @@
 		},
 		{
 			name: 'Prusa Buddy - Core One v6.4.0',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/Pinecilv1_EN_v2_23.elf'
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/prusa_buddy_boot_64.elf'
 		},
 		{
 			name: 'IronOS Pinecilv1 EN v2.23 (RISC-V WiP)',
