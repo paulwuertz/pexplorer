@@ -79,7 +79,7 @@ export let get_max_stack_sizes_of_thread = (allSymVersions, threadname) => {
 };
 
 export const sympath_to_link = (base, symbol_version, callxrs_text) => {
-	return base + '/browse/' + symbol_version + '/' + callxrs_text;
+	return base + '/#/browse/' + symbol_version + '/' + callxrs_text;
 };
 
 export const callxrs_text_to_links = (
@@ -92,7 +92,7 @@ export const callxrs_text_to_links = (
 	let direction = isCaller ? 'from' : 'to';
 	let callxrs_addr = callxrs[direction];
 	let callxrs_text = sym_path_by_addr[callxrs_addr];
-	return base + '/browse/' + symbol_version + '/' + callxrs_text;
+	return base + '/#/browse/' + symbol_version + '/' + callxrs_text;
 };
 
 export const callxrs_text_to_symname = (callxrs, sym_path_by_addr, isCaller) => {
@@ -155,7 +155,7 @@ export const symbols_to_sunburst_tree_data = (symbols, data_field) => {
 };
 
 export const row2AHref = (base, selected_version, row_data) => {
-	return base + '/browse/' + selected_version + row_data.file + '/' + row_data.name;
+	return base + '/#/browse/' + selected_version + row_data.file + '/' + row_data.name;
 };
 
 var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_THUMB + cs.MODE_MCLASS);

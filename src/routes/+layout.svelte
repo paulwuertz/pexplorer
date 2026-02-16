@@ -34,34 +34,35 @@
 		<Collapse {isOpen} navbar expand="md" on:update={handleUpdate}>
 			<Nav class="ms-auto" navbar>
 				<NavItem
-					><NavLink data-sveltekit-preload-data="tap" href="{base}/">Upload ELF / Report</NavLink
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/#/">Upload ELF / Report</NavLink
 					></NavItem
 				>
 				<NavItem
-					><NavLink data-sveltekit-preload-data="tap" href="{base}/browse">Browse symbols</NavLink
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/#/browse">Browse symbols</NavLink
 					></NavItem
 				>
 				<NavItem
-					><NavLink data-sveltekit-preload-data="tap" href="{base}/diff">Compare Versions</NavLink
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/#/diff">Compare Versions</NavLink
 					></NavItem
 				>
 				<NavItem
-					><NavLink data-sveltekit-preload-data="tap" href="{base}/threads">Threads</NavLink
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/#/threads">Threads</NavLink
 					></NavItem
 				>
 				<NavItem
-					><NavLink data-sveltekit-preload-data="tap" href="{base}/trends">Trends</NavLink></NavItem
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/#/trends">Trends</NavLink
+					></NavItem
 				>
 				<!-- <NavItem
-					><NavLink data-sveltekit-preload-data="tap" href="{base}/">Interrupts (TODO)</NavLink
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/#/">Interrupts (TODO)</NavLink
 					></NavItem
 				>
 				<NavItem
-					><NavLink data-sveltekit-preload-data="tap" href="{base}/">Settings (TODO)</NavLink
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/#/">Settings (TODO)</NavLink
 					></NavItem
 				>
 				<NavItem
-					><NavLink data-sveltekit-preload-data="tap" href="{base}/">About (TODO)</NavLink></NavItem>
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/#/">About (TODO)</NavLink></NavItem>
 				-->
 			</Nav>
 		</Collapse>
@@ -79,7 +80,7 @@
 	<Container fluid>
 		<div>
 			Want to know more - read about this project at the
-			<a href="{base}/blog"> devblog </a>
+			<a href="{base}/#/blog"> devblog </a>
 			- brought to you with &#128150; by
 			<a href="https://github.com/HBehrens/puncover/">
 				puncover

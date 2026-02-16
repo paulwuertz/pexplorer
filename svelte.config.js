@@ -13,7 +13,10 @@ const config = {
 			base: process.argv.includes('dev') ? '' : '/pexplorer',
 			relative: false
 		},
-
+		router: {
+			type: 'hash',
+			resolution: 'client'
+		},
 		prerender: { entries: [] },
 		appDir: 'app' // Required as the default is _app
 	},
