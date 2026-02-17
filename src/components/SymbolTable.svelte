@@ -150,7 +150,7 @@
 						{#if show_filepath != 'None'}
 							<td>
 								{#if show_filepath == 'Filename only'}
-									{row[column.key].substring(row[column.key].lastIndexOf('/') + 1)}
+									{(row[column.key] || "").substring((row[column.key] || "").lastIndexOf('/') + 1)}
 								{:else}
 									{row[column.key]}
 								{/if}
