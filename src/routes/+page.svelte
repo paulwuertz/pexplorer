@@ -353,7 +353,7 @@
 					</Col>
 					<Col sm="12" md={4}></Col>
 					<Col sm="12" md={4}>
-						<a href="/wip">WIP - new feature playground :)</a>
+						<!-- <a href="/#/wip">WIP - new feature playground :)</a> -->
 					</Col>
 				</Row>
 			</CardFooter>
