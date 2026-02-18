@@ -32,7 +32,7 @@
 				return json;
 			}
 			const recur = (item, id) => {
-				if (item.id === id) {
+				if (item.name === id) {
 					return item;
 				}
 				for (const child of item.calls || []) {
@@ -50,44 +50,40 @@
 			const data = [];
 			const filteredJson = filterJson(structuredClone(jsonObj), id);
 			const rootCalls = filteredJson.calls;
-			const rootVal = rootCalls.reduce((c, e) => c + e.max_stack_size_callees, 0);
-			const recur = (item, start = 0, level = 0, siblingSum, parentleftwidth) => {
-				let perc = (item.max_stack_size_callees / siblingSum) * 100;
-				let val = item.max_stack_size_callees;
+			const rootVal = filteredJson.max_stack_size_callees;
+			const recur = (item, start = 0, level = 0, factor) => {
+				let max_calle_stack_size = item.max_stack_size_callees * factor;
 				const temp = {
 					name: item.name,
-					// [level, start_val, end_val, name, percentage, stacksize, siblingsum, parentleftwidth]
+					// [level, start_val, end_val, name, stacksize, max_callee_stack]
 					value: [
 						level,
 						start,
-						start + val,
+						start + max_calle_stack_size,
 						item.name,
-						perc,
 						item.stack_size,
-						siblingSum,
-						parentleftwidth,
-						val
+						item.max_stack_size_callees
 					],
 					itemStyle: {
 						// TODO make recursive calls red :)
 						// color: ColorTypes[item.name.split(' ')[0]]
 					}
 				};
+
 				data.push(temp);
 				let prevStart = start;
-				let sibSum;
-				if (item.calls) {
-					sibSum = rootCalls.reduce((c, e) => c + e.max_stack_size_callees, 0);
-				} else {
-					sibSum = item.stack_size;
-				}
+				let childSum = (item.calls) ? item.calls.reduce((c, e) => c + (e.max_stack_size_callees || 0), 0) : 0;
 				let width_left_to_children = item.max_stack_size_callees - item.stack_size;
+                console.log(level, start, " lev}\n\t", temp.value, item.max_stack_size_callees, factor, childSum);
 				for (const child of item.calls || []) {
-					recur(child, prevStart, level + 1, sibSum, width_left_to_children);
-					prevStart = prevStart + (parentleftwidth * perc) / 100;
+                    if (child.max_stack_size_callees) {
+                        let childFactor = (child.max_stack_size_callees || 0) / childSum
+                        recur(child, prevStart, level + 1, factor * childFactor);
+                        prevStart = prevStart + (width_left_to_children * childFactor);
+                    }
 				}
 			};
-			recur(filteredJson, rootVal, 0, rootVal, rootVal);
+			recur(filteredJson, 0, 0, 1.0);
 			return data;
 		};
 		const heightOfJson = (json) => {
@@ -109,8 +105,8 @@
 			const start = api.coord([api.value(1), level]);
 			const end = api.coord([api.value(2), level]);
 			const height = ((api.size && api.size([0, 1])) || [0, 20])[1];
-			// [level, start_val, end_val, name, percentage, stacksize, siblingsum, parentleftwidth]
-			const width = api.value(7) * (api.value(8) / api.value(6));
+            // [level, start_val, end_val, name, stacksize, parentleftwidth, max_callee_stack]
+			const width = end[0] - start[0];
 			return {
 				type: 'rect',
 				transition: ['shape'],
@@ -165,8 +161,8 @@
 			},
 			tooltip: {
 				formatter: (params) => {
-					const wcf = params.value[2] - params.value[1];
-					return `${params.marker} ${params.value[3]}: (${params.value[5]} bytes of stack use itself and ${wcf} bytes worst case call stack usage)`;
+					const wcf = params.value[5];
+					return `${params.marker} ${params.value[3]}: (${params.value[4]} bytes of stack use itself and ${wcf} bytes worst case call stack usage)`;
 				}
 			},
 			title: [
