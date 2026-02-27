@@ -206,14 +206,14 @@ func getVariableTypes(s *SElfReport) []Typedef {
 			// get type info
 			atoff, ok := entry.Val(dwarf.AttrType).(dwarf.Offset)
 			if ok {
-				typeRef, _ := godwarf.ReadType(dwarfData, 0, atoff, cache)
-				if !ok {
+				typeRef, err := godwarf.ReadType(dwarfData, 0, atoff, cache)
+				if err != nil {
 					continue
 				}
 				typeStr := typeRef.Common().Name
-				typeMap[typeStr] = Typedef{Name: typeStr, Size: uint64(typeRef.Common().ByteSize)}
 				// try to get the type
-				if ok && typeStr != "" {
+				if typeStr != "" {
+					typeMap[typeStr] = Typedef{Name: typeStr, Size: uint64(typeRef.Common().ByteSize)}
 					if varRef != nil {
 						varRef.VariableType = typeRef.Common().Name
 						if curFunction != nil {

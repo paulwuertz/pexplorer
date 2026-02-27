@@ -114,5 +114,5 @@ type SElfReport struct {
 	Types              []Typedef        `json:"types,omitempty,omitzero"`
 	Info               []string         `json:"info"`
 	// lookup
-	Addr2FnMap map[uint64]*FunctionSymbol
+	Addr2FnMap map[uint64]*FunctionSymbol `json:"-"`
 }
