@@ -69,7 +69,17 @@
 	let selected_secondary_versions = $state(symbols.selected_versions_to_compare);
 
 	function loadReportsfromJson(jsonReports) {
-		symbols.symbols = JSON.parse(jsonReports);
+		try {
+			let reports = JSON.parse(jsonReports);
+			for (const r of Object.keys(reports)) {
+				symbols.symbols[r] = reports[r];
+			}
+		} catch (error) {
+			// TODO UI error
+			console.log('error from JSON report:', error);
+			return;
+		}
+		symbols.elfDataProvided = true;
 	}
 
 	function loadReportFromELF(symID, elfBinary) {
@@ -307,8 +317,10 @@
 							>
 							<div>
 								{#each testFW as fw, i ('link-' + fw.name)}
-									<Button color="light" onclick={() => addFWSample(fw.name, fw.url)}
-										>{fw.name}</Button
+									<Button
+										class="example-btn"
+										color="light"
+										onclick={() => addFWSample(fw.name, fw.url)}>{fw.name}</Button
 									>
 								{/each}
 							</div>
@@ -364,5 +376,9 @@
 <style>
 	#content {
 		margin-top: 20px;
+	}
+	:global(.example-btn) {
+		width: 100%;
+		margin-top: 5px;
 	}
 </style>

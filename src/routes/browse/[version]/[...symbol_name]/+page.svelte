@@ -37,8 +37,8 @@
 	let symbol_path = $derived(symbol_path_and_name.split('/').slice(0, -1).join('/'));
 	let symbol_path_active = $derived(symbol_path_and_name.split('/').slice(-1));
 	const isChildToPath = (symbol) => {
-        let pathAsAddr = parseInt(symbol_path_and_name)
-        let pathIsAddr = pathAsAddr != NaN
+		let pathAsAddr = parseInt(symbol_path_and_name);
+		let pathIsAddr = pathAsAddr != NaN;
 
 		if (symbol_path_and_name === '/' || symbol_path_and_name === '') return true;
 		if (pathIsAddr && pathAsAddr === symbol.address) return true;

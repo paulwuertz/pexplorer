@@ -141,16 +141,18 @@
 							</a>
 						</td>
 					{:else if column.key == 'secidx'}
-						{#if show_sections}
-							<td>{sections[row[column.key]].name}</td>
-						{/if}
+						<td>
+							{#if show_sections && sections && sections['secidx']}
+								{sections['secidx'].name}
+							{/if}
+						</td>
 					{:else if column.key == 'address'}
 						<td>0x{row[column.key].toString(16)}</td>
 					{:else if column.key == 'file'}
 						{#if show_filepath != 'None'}
 							<td>
 								{#if show_filepath == 'Filename only'}
-									{(row[column.key] || "").substring((row[column.key] || "").lastIndexOf('/') + 1)}
+									{(row[column.key] || '').substring((row[column.key] || '').lastIndexOf('/') + 1)}
 								{:else}
 									{row[column.key]}
 								{/if}

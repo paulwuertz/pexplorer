@@ -72,15 +72,25 @@
 
 				data.push(temp);
 				let prevStart = start;
-				let childSum = (item.calls) ? item.calls.reduce((c, e) => c + (e.max_stack_size_callees || 0), 0) : 0;
+				let childSum = item.calls
+					? item.calls.reduce((c, e) => c + (e.max_stack_size_callees || 0), 0)
+					: 0;
 				let width_left_to_children = item.max_stack_size_callees - item.stack_size;
-                console.log(level, start, " lev}\n\t", temp.value, item.max_stack_size_callees, factor, childSum);
+				console.log(
+					level,
+					start,
+					' lev}\n\t',
+					temp.value,
+					item.max_stack_size_callees,
+					factor,
+					childSum
+				);
 				for (const child of item.calls || []) {
-                    if (child.max_stack_size_callees) {
-                        let childFactor = (child.max_stack_size_callees || 0) / childSum
-                        recur(child, prevStart, level + 1, factor * childFactor);
-                        prevStart = prevStart + (width_left_to_children * childFactor);
-                    }
+					if (child.max_stack_size_callees) {
+						let childFactor = (child.max_stack_size_callees || 0) / childSum;
+						recur(child, prevStart, level + 1, factor * childFactor);
+						prevStart = prevStart + width_left_to_children * childFactor;
+					}
 				}
 			};
 			recur(filteredJson, 0, 0, 1.0);
@@ -105,7 +115,7 @@
 			const start = api.coord([api.value(1), level]);
 			const end = api.coord([api.value(2), level]);
 			const height = ((api.size && api.size([0, 1])) || [0, 20])[1];
-            // [level, start_val, end_val, name, stacksize, parentleftwidth, max_callee_stack]
+			// [level, start_val, end_val, name, stacksize, max_callee_stack]
 			const width = end[0] - start[0];
 			return {
 				type: 'rect',
