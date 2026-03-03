@@ -72,6 +72,11 @@
 		try {
 			let reports = JSON.parse(jsonReports);
 			for (const r of Object.keys(reports)) {
+				[reports[r]['SymPathByAddr'], reports[r]['symPathByName']] = helpers.fn2symPathLookups(
+					reports[r]['functions']
+				);
+				console.log('SymPathByAddr:', reports[r]['SymPathByAddr']);
+
 				symbols.symbols[r] = reports[r];
 			}
 		} catch (error) {
@@ -103,23 +108,17 @@
 						reportJSONstr = add_fn_calls_from_disasm(disasmFnMapArg);
 						reportJSON = JSON.parse(reportJSONstr);
 						// Todo mv somewhere better
-						let symPathByAddr = {};
-						let symPathByName = {};
 						let reportFns = reportJSON['functions'];
 						let reportVars = reportJSON['variables'];
 						for (let i = 0; i < reportFns.length; i++) {
-							let addr = reportFns[i]['address'];
 							// TODO what about syms with unknown path - can they be eliminated ^^?
-							let urlPath = reportFns[i]['file'] + '/' + reportFns[i]['name'];
 							reportFns[i]['symtype'] = 'fn';
-							symPathByAddr[addr] = urlPath;
-							symPathByName[urlPath] = reportFns[i];
 						}
 						for (let i = 0; i < reportVars.length; i++) {
 							reportVars[i]['symtype'] = 'var';
 						}
-						reportJSON['SymPathByAddr'] = symPathByAddr;
-						reportJSON['symPathByName'] = symPathByAddr;
+						[reportJSON['SymPathByAddr'], reportJSON['symPathByName']] =
+							helpers.fn2symPathLookups(reportFns);
 						reportJSON['goWasmLoaded'] = true;
 						// TODO how much space saving it pre-calculated?
 						console.log(reportJSON);

@@ -230,3 +230,17 @@ export const getDisasmFnMap = (asmReport) => {
 	// console.log(fn2Disasm, JSON.stringify(fn2Disasm, null, 4));
 	return fn2Disasm;
 };
+
+export const fn2symPathLookups = (reportFns) => {
+	let symPathByAddr = {};
+	let symPathByName = {};
+	for (let i = 0; i < reportFns.length; i++) {
+		let addr = reportFns[i]['address'];
+		// TODO what about syms with unknown path - can they be eliminated ^^?
+		let urlPath = reportFns[i]['file'] + '/' + reportFns[i]['name'];
+		reportFns[i]['symtype'] = 'fn';
+		symPathByAddr[addr] = urlPath;
+		symPathByName[urlPath] = reportFns[i];
+	}
+	return [symPathByAddr, symPathByName];
+};

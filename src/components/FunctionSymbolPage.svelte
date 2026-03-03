@@ -43,7 +43,9 @@
 
 	// TODO check if from ELF or JSON...
 	// or export... could take much time and disk...
-	let fn_calltree = $derived(JSON.parse(get_fn_calltree(sym_data.address)));
+	let fn_calltree = $derived(
+		typeof get_fn_calltree === 'function' && JSON.parse(get_fn_calltree(sym_data.address))
+	);
 	let unresolved = $derived(
 		Object.entries(
 			(fn_calltree.unresolved || []).reduce((acc, element) => {
@@ -203,28 +205,32 @@
 
 <h5>Top 10 callpaths with highest stack usage</h5>
 
-<Table style="word-break: break-all;" hover bordered>
-	<thead>
-		<tr>
-			<th>#</th>
-			<th>Stack usage</th>
-			<th>Callpath causing this stack</th>
-		</tr>
-	</thead>
-	<tbody>
-		{#each branches.slice(0, 10) as b, i}
+{#if branches}
+	<Table style="word-break: break-all;" hover bordered>
+		<thead>
 			<tr>
-				<td>i</td>
-				<td>{JSON.stringify(b['stack_size'])}</td>
-				<td>
-					{#each b['call_list'] as c, j}
-						{c['name'] + ' (' + c['stack_size'] + ') ->'}
-					{/each}
-				</td>
+				<th>#</th>
+				<th>Stack usage</th>
+				<th>Callpath causing this stack</th>
 			</tr>
-		{/each}
-	</tbody>
-</Table>
+		</thead>
+		<tbody>
+			{#each branches.slice(0, 10) as b, i}
+				<tr>
+					<td>i</td>
+					<td>{JSON.stringify(b['stack_size'])}</td>
+					<td>
+						{#each b['call_list'] as c, j}
+							{c['name'] + ' (' + c['stack_size'] + ') ->'}
+						{/each}
+					</td>
+				</tr>
+			{/each}
+		</tbody>
+	</Table>
+{:else}
+	No call tree analysis for JSON reports so far...
+{/if}
 
 <FlameGraph {sym_data} {fn_calltree}></FlameGraph>
 
