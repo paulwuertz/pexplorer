@@ -87,7 +87,7 @@
 				{#if (column.id != 'file' && column.id != 'secidx') || (column.id == 'file' && show_filepath != 'None') || (column.id == 'secidx' && show_sections)}
 					<th>
 						{column.name}
-						<button
+						<span
 							class="flex items-center"
 							onclick={() => function_table.toggleSort(column.id)}
 							disabled={!function_table.isSortable(column.id)}
@@ -103,7 +103,7 @@
 									{/if}
 								</span>
 							{/if}
-						</button>
+						</span>
 					</th>
 				{/if}
 			{/each}
@@ -162,6 +162,9 @@
 						<td style="min-width: 0px;">
 							{#if row[column.key] === 'var'}
 								<img src="{base}/icons/Method_16x.svg" width="16px" title="Type variable" />
+								{#if Object.hasOwn(row, 'type')}
+									{row['type']}
+								{/if}
 							{:else if row[column.key] === 'fn'}
 								<img src="{base}/icons/Field_16x.svg" width="16px" title="Type function" />
 							{/if}
