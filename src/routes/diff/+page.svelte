@@ -208,6 +208,10 @@
 			} else {
 				if (symbols.selected_version && symbols.selected_versions_to_compare) {
 					updateSelectedSymbols();
+				} else if (versions.length == 2) {
+					symbols.selected_version = versions[0];
+					symbols.selected_versions_to_compare = versions[1];
+					updateSelectedSymbols();
 				} else {
 					console.log('ELF loaded, please select which version to show :)');
 				}
