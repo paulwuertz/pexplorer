@@ -6,7 +6,7 @@ export let symbolsToMap = (syms) => {
 		sym.remark = sym.called_from_other_file ? 'linked-from-library' : '';
 		sym.newSymbols = false;
 		sym.deletedSymbols = false;
-		symMap[sym.file + sym.name] = sym;
+		symMap[sym.name] = sym;
 	}
 	return symMap;
 };
