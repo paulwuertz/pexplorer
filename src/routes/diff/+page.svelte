@@ -15,7 +15,7 @@
 	let files = $state();
 	let versions = $derived(Object.keys(symbols.symbols));
 	let bss_section = $derived(
-		symbols.symbols[symbols.selected_version].sections.find(
+		(symbols.symbols[symbols.selected_version].sections || []).find(
 			(e) => e.name == 'bss' || e.name == 'bss'
 		) || {}
 	);
