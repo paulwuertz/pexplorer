@@ -26,7 +26,9 @@
 	let address = $derived(sym_data.address);
 	let code_size = $derived(sym_data.size);
 	let staticInitDataBase64 = $derived(sym_data.staticInitData);
-	let staticInitData = $derived(Uint8Array.fromBase64(staticInitDataBase64) || []);
+	let staticInitData = $derived(
+		(staticInitDataBase64 && Uint8Array.fromBase64(staticInitDataBase64)) || undefined
+	);
 	let type = $derived(sym_data.type);
 </script>
 
@@ -62,14 +64,16 @@
 	</tbody>
 </Table>
 
-<h4>Init Data</h4>
-<!-- TODO figure out better export to highlight and diff... <Highlight language={armasm} {asm_code} /> -->
-<pre>
+{#if staticInitData}
+	<h4>Init Data</h4>
+	<!-- TODO figure out better export to highlight and diff... <Highlight language={armasm} {asm_code} /> -->
+	<pre>
 	Base64: {staticInitDataBase64}
 	arrayindex: {staticInitData.map((e, i) => i)}
 	Uint8Array: {staticInitData}
 	<!-- // .map(function(e, i, a){return "index "+i+" => "+ e}) -->
 </pre>
+{/if}
 
 <h4>Interpretation</h4>
 
