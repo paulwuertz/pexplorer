@@ -16,3 +16,7 @@ To ensure things are not broken and get more acurate over time some test firmwar
 #### Tests
 
 `go test -bench=. ./cmd/fw_jsonreport/`
+
+##### Compare to puncover
+
+`go test report_test.go -test.v`

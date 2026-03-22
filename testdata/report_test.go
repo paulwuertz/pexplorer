@@ -102,12 +102,13 @@ func TestExtractReport(t *testing.T) {
 			t.Logf("====================================================\n")
 			nrSameFns := 0
 			errs := map[string]int{
-				"FlashSize": 0,
-				"StackSize": 0,
-				"Callees":   0,
-				"Callers":   0,
-				"Name":      0,
-				"Src":       0,
+				"FlashSize":   0,
+				"StackSize":   0,
+				"NoStackSize": 0,
+				"Callees":     0,
+				"Callers":     0,
+				"Name":        0,
+				"Src":         0,
 			}
 			for _, f := range json_rep.Functions {
 				fMatch, isInOtherReport := matchedSameAddr[f.Address]
@@ -120,6 +121,8 @@ func TestExtractReport(t *testing.T) {
 					if fMatch.StackSize != 0 && fMatch.StackSize != f.StackSize {
 						errs["StackSize"] += 1
 						diffs += fmt.Sprintf("StackSize %d != %d, ", fMatch.StackSize, f.StackSize)
+					} else if fMatch.StackSize == 0 && fMatch.StackSize != f.StackSize {
+						errs["NoStackSize"] += 1
 					}
 					if len(fMatch.Callees) != len(f.Callees) {
 						errs["Callees"] += 1
@@ -155,7 +158,7 @@ func TestExtractReport(t *testing.T) {
 func main() {
 	// first iteration
 	// report_test.go:148: # fns with same props 289/583
-	// report_test.go:150: {"Callees":0,"Callers":0,"FlashSize":4,"Name":24,"Src":267,"StackSize":0}
+	// report_test.go:153: {"Callees":0,"Callers":0,"FlashSize":4,"Name":24,"NoStackSize":371,"Src":267,"StackSize":0}
 
 	// json_rep := ReportFromJsonFile("./ref_puncover_gcc/ref_puncover_gcc_zephyr_cannectivity_13_gcc_lpc55s16.json")
 	// elf_rep := ReportFromElfFile("./ref_puncover_gcc/ref_puncover_gcc_zephyr_cannectivity_13_gcc_lpc55s16.json")
