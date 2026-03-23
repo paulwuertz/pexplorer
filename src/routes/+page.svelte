@@ -24,35 +24,35 @@
 	const testFW = [
 		{
 			name: 'CANnectivity v1.2 LLVM @ lpc55s16',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/zephyr_cannectivity_12_llvm_lpc55s16.elf'
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zephyr_cannectivity_12_llvm_lpc55s16.elf'
 		},
 		{
 			name: 'CANnectivity v1.2 GCC @ lpc55s16',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/zephyr_cannectivity_12_gcc_lpc55s16.elf'
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zephyr_cannectivity_12_gcc_lpc55s16.elf'
 		},
 		{
 			name: 'CANnectivity v1.3 LLVM @ lpc55s16',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/zephyr_cannectivity_13_llvm_lpc55s16.elf'
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zephyr_cannectivity_13_llvm_lpc55s16.elf'
 		},
 		{
 			name: 'CANnectivity v1.3 GCC @ lpc55s16',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/zephyr_cannectivity_13_gcc_lpc55s16.elf'
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zephyr_cannectivity_13_gcc_lpc55s16.elf'
 		},
 		{
 			name: 'Prusa Buddy - Core One v6.4.0',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/prusa_buddy_boot_64.elf'
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/prusa_buddy_boot_64.elf'
 		},
 		{
 			name: 'IronOS Pinecilv1 EN v2.23 (RISC-V WiP)',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/Pinecilv1_EN_v2_23.elf'
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/Pinecilv1_EN_v2_23.elf'
 		},
 		{
 			name: 'IronOS Pinecilv2 EN v2.23 (RISC-V WiP)',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/Pinecilv2_EN_v2_23.elf'
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/Pinecilv2_EN_v2_23.elf'
 		},
 		{
 			name: 'ZSWatch v0.7.0',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/zswatch_nrf5340_07.elf'
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zswatch_nrf5340_07.elf'
 		}
 	];
 

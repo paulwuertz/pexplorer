@@ -9,6 +9,7 @@ import (
 	"os"
 	"testing"
 
+	"github.com/paulwuertz/pexplorer/selfperf/callgraph"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
@@ -32,6 +33,7 @@ func ReportFromElfFile(elffile string) symbolextraction.SElfReport {
 	}
 
 	elfReport := symbolextraction.GetFWReport(elfFile)
+	callgraph.EnhanceByDisasm(&elfReport)
 	return elfReport
 }
 
@@ -102,6 +104,7 @@ func TestExtractReport(t *testing.T) {
 			t.Logf("====================================================\n")
 			nrSameFns := 0
 			errs := map[string]int{
+				"Address":     0,
 				"FlashSize":   0,
 				"StackSize":   0,
 				"NoStackSize": 0,
@@ -114,6 +117,10 @@ func TestExtractReport(t *testing.T) {
 				fMatch, isInOtherReport := matchedSameAddr[f.Address]
 				if isInOtherReport {
 					diffs := ""
+					if fMatch.Address != f.Address {
+						errs["Address"] += 1
+						diffs += fmt.Sprintf("Address %d != %d, ", fMatch.Address, f.Address)
+					}
 					if fMatch.FlashSize != f.FlashSize {
 						errs["FlashSize"] += 1
 						diffs += fmt.Sprintf("FlashSize %d != %d, ", fMatch.FlashSize, f.FlashSize)
