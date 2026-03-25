@@ -30,7 +30,7 @@
 	let symbol_path_and_name = $derived(sym_data.file + sym_data.name);
 	let asm_code = $derived(
 		sym_data.asm
-			? helpers.csBase64ToASMText(sym_data.asm, sym_data.address, show_full_asm)
+			? helpers.csBase64ToASMText(sym_data.asm, sym_data.address, show_full_asm, base, symbol_version, sym_path_by_addr)
 			: undefined
 	);
 	let address = $derived(sym_data.address);
@@ -145,7 +145,7 @@
 <h4>Disassembly</h4>
 <!-- TODO figure out better export to highlight and diff... <Highlight language={armasm} {asm_code} /> -->
 <pre>
-{asm_code}
+{@html asm_code}
 <span class="center" onclick={() => (show_full_asm = !show_full_asm)}>
     {#if show_full_asm}↑ show less ↑{:else}↓ show more ↓{/if}
 </span>

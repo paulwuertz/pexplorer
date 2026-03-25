@@ -82,6 +82,19 @@ export const sympath_to_link = (base, symbol_version, callxrs_text) => {
 	return base + '/#/browse/' + symbol_version + '/' + callxrs_text;
 };
 
+export const try_get_callee_link_by_addr = (
+	base,
+	symbol_version,
+	call_to_addr,
+	sym_path_by_addr
+) => {
+	let callee_name = sym_path_by_addr[call_to_addr];
+    let link_href = base + '/#/browse/' + symbol_version + '/' + callee_name
+	let callxrs_slugs = callee_name.split('/');
+	let sym_name = callxrs_slugs[callxrs_slugs.length - 1];
+	return [link_href, sym_name];
+};
+
 export const callxrs_text_to_links = (
 	base,
 	symbol_version,
@@ -162,18 +175,46 @@ export const row2AHref = (base, selected_version, row_data) => {
 	}
 };
 
+export const isCallInstr = (instr) => {
+	if (instr === "bl") { // && ARM
+		return true;
+	}
+    return false;
+};
+
+export const getCallAddr = (instr) => {
+	if (true) { // ARM
+        // const like '#0xae39'
+		return parseInt(instr.op_str.substr(1), 16);
+	}
+    return 0;
+};
+
+
+export const checkCallInstrLink = (instr, base, symbol_version, sym_path_by_addr) => {
+    let link = "";
+    let isCall = isCallInstr(instr.mnemonic);
+    if(isCall){
+        let addr = getCallAddr(instr);
+        let [link_href, callee_name] = try_get_callee_link_by_addr(base, symbol_version, addr, sym_path_by_addr)
+        link += ' => call to <a href="' + link_href + '">'+callee_name+'</a>'
+    }
+    return link;
+}
+
 var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_THUMB + cs.MODE_MCLASS);
 
-export const csBase64ToASMText = (base64text, baseAddr, show_full_asm) => {
+export const csBase64ToASMText = (base64text, baseAddr, show_full_asm, base, symbol_version, sym_path_by_addr) => {
 	let ASM = Uint8Array.fromBase64(base64text);
 	// console.log('ASM: ' + ASM, base64text);
 	let disasmData = d.disasm(ASM, baseAddr);
 	// console.log(JSON.stringify(disasmData, null, 4));
 	// Display results;
-	let result = '\tAddr\t\tINSTR bytes     mnemonic\tOP\n';
+	let result = '\tAddr\tINSTR bytes     mnemonic\tOP\n';
 	if (!show_full_asm) disasmData = disasmData.slice(0, 10);
 	disasmData.forEach(function (instr) {
-		result +=
+        let linkToCall = checkCallInstrLink(instr, base, symbol_version, sym_path_by_addr)
+        result +=
 			'\t0x' +
 			instr.address.toString(16) +
 			':\t' +
@@ -184,7 +225,7 @@ export const csBase64ToASMText = (base64text, baseAddr, show_full_asm) => {
 			'\t' +
 			instr.mnemonic +
 			'\t\t' +
-			instr.op_str +
+			instr.op_str + linkToCall +
 			'\n';
 	});
 	if (!show_full_asm) result += '...';
