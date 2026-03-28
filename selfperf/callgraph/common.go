@@ -84,8 +84,20 @@ func GetFunctionStackUsage(f *symbolextraction.FunctionSymbol, frames frame.Fram
 			// fmt.Println(err, "skip frame at addr", i, "for fn:", f.Name)
 			continue
 		}
+
+		current_stacksize := max
+		switch s.CFA.Rule {
+		case frame.RuleOffset:
+			current_stacksize = uint64(s.CFA.Offset) * uint64(mainfde.CIE.DataAlignmentFactor)
+		// case frame.RuleCFA:
+		case frame.RuleCFA:
+			offset := uint64(s.CFA.Offset) * uint64(mainfde.CIE.DataAlignmentFactor)
+			reg := s.CFA.Reg
+			current_stacksize = offset + reg
+		}
+
 		if uint64(s.CFA.Offset) >= max {
-			max = uint64(s.CFA.Offset)
+			max = uint64(current_stacksize)
 		}
 		// fmt.Println(fmt.Sprintf("%x", i), "off:", s.CFA.Offset, d.Instruction, d.Opstr, "-> cfa reg:", s.CFA.Reg, "rule:", symbolextraction.RegRuleEnum2String[s.CFA.Rule], "expr:", s.CFA.Expression, "regs:", s.Regs, "reta:", s.RetAddrReg)
 	}

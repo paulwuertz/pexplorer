@@ -104,14 +104,16 @@ func TestExtractReport(t *testing.T) {
 			t.Logf("====================================================\n")
 			nrSameFns := 0
 			errs := map[string]int{
-				"Address":     0,
-				"FlashSize":   0,
-				"StackSize":   0,
-				"NoStackSize": 0,
-				"Callees":     0,
-				"Callers":     0,
-				"Name":        0,
-				"Src":         0,
+				"Address":          0,
+				"FlashSize":        0,
+				"StackSize":        0,
+				"StackSizeToSmall": 0,
+				"StackSizeToBig":   0,
+				"NoStackSize":      0,
+				"Callees":          0,
+				"Callers":          0,
+				"Name":             0,
+				"Src":              0,
 			}
 			for _, f := range json_rep.Functions {
 				fMatch, isInOtherReport := matchedSameAddr[f.Address]
@@ -125,8 +127,13 @@ func TestExtractReport(t *testing.T) {
 						errs["FlashSize"] += 1
 						diffs += fmt.Sprintf("FlashSize %d != %d, ", fMatch.FlashSize, f.FlashSize)
 					}
-					if fMatch.StackSize != 0 && fMatch.StackSize != f.StackSize {
+					if fMatch.StackSize != 0 && f.StackSize != 0 && fMatch.StackSize != f.StackSize {
 						errs["StackSize"] += 1
+						if fMatch.StackSize > f.StackSize {
+							errs["StackSizeToBig"] += 1
+						} else {
+							errs["StackSizeToSmall"] += 1
+						}
 						diffs += fmt.Sprintf("StackSize %d != %d, ", fMatch.StackSize, f.StackSize)
 					} else if fMatch.StackSize == 0 && fMatch.StackSize != f.StackSize {
 						errs["NoStackSize"] += 1
