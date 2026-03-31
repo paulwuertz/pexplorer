@@ -30,7 +30,14 @@
 	let symbol_path_and_name = $derived(sym_data.file + sym_data.name);
 	let asm_code = $derived(
 		sym_data.asm
-			? helpers.csBase64ToASMText(sym_data.asm, sym_data.address, show_full_asm, base, symbol_version, sym_path_by_addr)
+			? helpers.csBase64ToASMText(
+					sym_data.asm,
+					sym_data.address,
+					show_full_asm,
+					base,
+					symbol_version,
+					sym_path_by_addr
+				)
 			: undefined
 	);
 	let address = $derived(sym_data.address);

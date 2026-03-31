@@ -277,15 +277,22 @@
 						<CardSubtitle><b>...by file (easiest):</b></CardSubtitle>
 						<CardText>
 							<div class="uploadfield">
-								<div>
-									Uploaded files never leave your browser, processing happens locally. Refreshing
-									the site resets everything.
-								</div>
-
 								<br />
 
 								<Dropzone on:drop={handleFilesSelect} accept=".json,.elf" style="min-height:200px">
+									<svg viewBox="0 0 100 100" width="25%" style="margin-bottom: 20px;">
+										<g fill="#bdbdbd">
+											<path
+												d="m69.271 42.085c-5.941-7.138-11.883-14.276-17.824-21.414-0.437-0.524-0.951-0.715-1.447-0.681-0.496-0.034-1.011 0.157-1.447 0.681-5.941 7.137-11.883 14.276-17.824 21.414-1.1 1.319-0.461 3.494 1.446 3.494h7.479v32.386c0 1.116 0.931 2.047 2.047 2.047h16.598c1.116 0 2.047-0.931 2.047-2.047v-32.386h7.479c1.907 0 2.546-2.175 1.446-3.494z"
+											/>
+											<path
+												d="m50 0c-27.614 0-50 22.386-50 50s22.386 50 50 50 50-22.386 50-50-22.386-50-50-50zm0 92c-23.196 0-42-18.805-42-42 0-23.196 18.804-42 42-42 23.195 0 42 18.804 42 42 0 23.195-18.805 42-42 42z"
+											/>
+										</g>
+									</svg>
 									<p>Drag 'n' drop ELF files or JSON-report here, or click to select files.</p>
+									<p>Uploaded files never leave your browser, processing happens locally.</p>
+									<p>Refreshing the site resets everything.</p>
 									<p>ELF files must be build with debug info (-g) to get best results.</p>
 								</Dropzone>
 							</div>
@@ -294,9 +301,11 @@
 					<Col sm="12" md={4}>
 						<Row>
 							<CardSubtitle><b>...by link:</b></CardSubtitle>
-							<CardText
-								>Adding the symbol via links saves them in your browsers local storage so you can
-								continue browsing the same file when you come back.</CardText
+
+							<CardText>
+								<br />
+								Adding the symbol via links saves them in your browsers local storage so you can continue
+								browsing the same file when you come back.</CardText
 							>
 							<InputGroup>
 								<Input
