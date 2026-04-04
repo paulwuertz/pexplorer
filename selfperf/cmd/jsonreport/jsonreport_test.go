@@ -13,14 +13,14 @@ func BenchmarkReportGen(b *testing.B) {
 	benchmarks := []struct {
 		firmwareFile string
 	}{
-		{"../../../testdata/zswatch_nrf5340_07.elf"},
-		{"../../../testdata/Pinecilv2_EN_v2_23.elf"},
-		{"../../../testdata/Pinecilv1_EN_v2_23.elf"},
-		{"../../../testdata/zephyr_cannectivity_12_llvm_lpc55s16.elf"},
-		{"../../../testdata/zephyr_cannectivity_13_llvm_lpc55s16.elf"},
-		{"../../../testdata/zephyr_cannectivity_13_gcc_lpc55s16.elf"},
-		{"../../../testdata/zephyr_cannectivity_12_gcc_lpc55s16.elf"},
-		{"../../../testdata/prusa_buddy_boot_64.elf"},
+		{"../../../testdata/elf_testdata/zswatch_nrf5340_07.elf"},
+		{"../../../testdata/elf_testdata/Pinecilv2_EN_v2_23.elf"},
+		{"../../../testdata/elf_testdata/Pinecilv1_EN_v2_23.elf"},
+		{"../../../testdata/elf_testdata/zephyr_cannectivity_12_llvm_lpc55s16.elf"},
+		{"../../../testdata/elf_testdata/zephyr_cannectivity_13_llvm_lpc55s16.elf"},
+		{"../../../testdata/elf_testdata/zephyr_cannectivity_13_gcc_lpc55s16.elf"},
+		{"../../../testdata/elf_testdata/zephyr_cannectivity_12_gcc_lpc55s16.elf"},
+		{"../../../testdata/elf_testdata/prusa_buddy_boot_64.elf"},
 	}
 
 	for _, bm := range benchmarks {
