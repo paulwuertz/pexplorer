@@ -6,6 +6,7 @@ import (
 	"testing"
 
 	"github.com/paulwuertz/pexplorer/selfperf/callgraph"
+	"github.com/paulwuertz/pexplorer/selfperf/rtos"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
@@ -32,6 +33,7 @@ func BenchmarkReportGen(b *testing.B) {
 				}
 				elfReport := symbolextraction.GetFWReport(elfFile)
 				callgraph.EnhanceByDisasm(&elfReport)
+				rtos.ScanForRtosFeatures(&elfReport)
 			},
 		)
 	}
