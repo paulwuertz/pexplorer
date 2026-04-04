@@ -88,10 +88,14 @@ type VariableSymbol struct {
 }
 
 type Typedef struct {
-	Name    string       `json:"name"`
-	Size    uint64       `json:"size"`
-	Members []Typedef    `json:"members,omitempty,omitzero"`
-	cu      *CompileUnit `json:"-"`
+	Name       string       `json:"name,omitempty,omitzero"`
+	Type       string       `json:"type"`
+	Size       int64        `json:"size"`
+	BitSize    int64        `json:"bitsize,omitzero"`
+	ByteOffset int64        `json:"byte_offset"`
+	BitOffset  int64        `json:"bit_offset,omitzero"`
+	Members    []Typedef    `json:"members,omitempty,omitzero"`
+	cu         *CompileUnit `json:"-"`
 }
 
 // CompileUnit represents a compilation unit,

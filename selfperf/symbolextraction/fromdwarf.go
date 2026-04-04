@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"log"
 	"maps"
+	"reflect"
 	"slices"
 	"sort"
 
@@ -88,6 +89,57 @@ func setLineInfo(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) {
 	// 	function.SourceFileLine = uint64(ln)
 	// 	// fmt.Println("\tfile ", exact, fn, ln, function.Address, closest_addr, "diff", int64(function.Address)-int64(closest_addr), function.Name)
 	// }
+}
+
+func ExtractType(typeRef *godwarf.Type, cache map[string]Typedef) Typedef {
+	name := (*typeRef).Common().Name
+	if name == "gs_usb_data" {
+		fmt.Println("\tmnn", name)
+	}
+	switch (*typeRef).(type) {
+	case *godwarf.StructType:
+		structRef := (*typeRef).(*godwarf.StructType)
+		typestr := structRef.Kind + " " + structRef.StructName
+		typedef := Typedef{Name: name, Type: typestr, Size: structRef.Common().ByteSize, Members: make([]Typedef, 0)}
+		cachedef, ok := cache[typestr]
+		if ok {
+			return cachedef
+		} else {
+			cache[typestr] = Typedef{}
+		}
+		for _, f := range structRef.Field {
+			if f.Name == "gs_usb_data" {
+				fmt.Println("\tmnn", name)
+			}
+			member := ExtractType(&f.Type, cache)
+			member.ByteOffset = f.ByteOffset
+			member.BitOffset = f.BitOffset
+			member.BitSize = f.BitSize
+			member.Name = f.Name
+			typedef.Members = append(typedef.Members, member)
+			fmt.Println("\tStructType f", f)
+		}
+		cache[typestr] = typedef
+		return typedef
+	case godwarf.Type:
+		if name == "" {
+			switch (*typeRef).(type) {
+			case *godwarf.PtrType:
+				ptrRef := (*typeRef).(*godwarf.PtrType)
+				return ExtractType(&ptrRef.Type, cache)
+			case *godwarf.QualType:
+				ptrRef := (*typeRef).(*godwarf.QualType)
+				return ExtractType(&ptrRef.Type, cache)
+			default:
+				fmt.Println("uncatchedTypeType", reflect.TypeOf(typeRef), "of", name)
+				return Typedef{}
+			}
+		}
+		return Typedef{Type: name, Size: (*typeRef).Common().ByteSize, Members: make([]Typedef, 0)}
+	default:
+		fmt.Println("uncatchedType", reflect.TypeOf(typeRef), "of", name)
+		return Typedef{}
+	}
 }
 
 func getVariableTypes(s *SElfReport) []Typedef {
@@ -213,14 +265,17 @@ func getVariableTypes(s *SElfReport) []Typedef {
 				typeStr := typeRef.Common().Name
 				// try to get the type
 				if typeStr != "" {
-					typeMap[typeStr] = Typedef{Name: typeStr, Size: uint64(typeRef.Common().ByteSize)}
+					// https://github.com/ARM-software/abi-aa/blob/main/aaelf32/aaelf32.rst
+					// https://github.com/ARM-software/abi-aa/blob/main/aadwarf32/aadwarf32.rst
+					// https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst#the-base-procedure-call-standard
+					ExtractType(&typeRef, typeMap)
 					if varRef != nil {
 						varRef.VariableType = typeRef.Common().Name
 						if curFunction != nil {
 							curFunction.Variables = append(curFunction.Variables, varRef)
 						} else {
 							// cu
-							// fmt.Println("entry var withot fn", entry)
+							fmt.Println("entry var withot fn", entry)
 						}
 					}
 				} else {
