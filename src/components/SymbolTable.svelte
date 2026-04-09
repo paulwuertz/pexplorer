@@ -140,10 +140,10 @@
 								{row[column.key]}
 							</a>
 						</td>
-					{:else if column.key == 'secidx'}
+					{:else if column.key == 'secidx' && show_sections}
 						<td>
-							{#if show_sections && sections && sections['secidx']}
-								{sections['secidx'].name}
+							{#if sections && sections[row[column.key]]}
+								{sections[row[column.key]].name}
 							{/if}
 						</td>
 					{:else if column.key == 'address'}
