@@ -53,6 +53,10 @@
 		{
 			name: 'ZSWatch v0.7.0',
 			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zswatch_nrf5340_07.elf'
+		},
+		{
+			name: 'libresolar bms zephyr 4.3 commit b95360',
+			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/libre_solar_zephyr_43_b953.elf'
 		}
 	];
 
