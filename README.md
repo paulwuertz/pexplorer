@@ -39,20 +39,20 @@ Have a look at the [project board](https://github.com/users/paulwuertz/projects/
 
 Some of the big features I want to realize down the line:
 
-* static analysis for...
-    * ...stack sizes that is tested and exact
-    * ...callgraph extraction and manual dynamic call resolution
-    * ...worst case stack size for each function
-    * ...worst case exection time - at least some instruction counting estimate
-    * ...Interrupts - runtime and stack sizes for these are especially important
-* RTOS feature detection
-    * automatically detect the most popular RTOSes zephyr, FreeRTOS, ...
-    * extract a list of all threads, stacks,
-    * get stack analysis of threads with actual configured stack sizes, where possible
-* better diffs and trend detection
-    * diff of dis-ASM for functions across versions
-    * compare more then two versions and get more stat plot out of them
-* configuration
-    * support static - sharable links for every page
-    * add settings and resolution pages
-* build a CLI command utilities, to be used in CI automation for stack health checks
+- static analysis for...
+  - ...stack sizes that is tested and exact
+  - ...callgraph extraction and manual dynamic call resolution
+  - ...worst case stack size for each function
+  - ...worst case exection time - at least some instruction counting estimate
+  - ...Interrupts - runtime and stack sizes for these are especially important
+- RTOS feature detection
+  - automatically detect the most popular RTOSes zephyr, FreeRTOS, ...
+  - extract a list of all threads, stacks,
+  - get stack analysis of threads with actual configured stack sizes, where possible
+- better diffs and trend detection
+  - diff of dis-ASM for functions across versions
+  - compare more then two versions and get more stat plot out of them
+- configuration
+  - support static - sharable links for every page
+  - add settings and resolution pages
+- build a CLI command utilities, to be used in CI automation for stack health checks

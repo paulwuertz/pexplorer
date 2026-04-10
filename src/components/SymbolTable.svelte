@@ -140,12 +140,14 @@
 								{row[column.key]}
 							</a>
 						</td>
-					{:else if column.key == 'secidx' && show_sections}
-						<td>
-							{#if sections && sections[row[column.key]]}
-								{sections[row[column.key]].name}
-							{/if}
-						</td>
+					{:else if column.key == 'secidx'}
+						{#if show_sections}
+							<td>
+								{#if sections && sections[row[column.key]]}
+									{sections[row[column.key]].name}
+								{/if}
+							</td>
+						{/if}
 					{:else if column.key == 'address'}
 						<td>0x{row[column.key].toString(16)}</td>
 					{:else if column.key == 'file'}

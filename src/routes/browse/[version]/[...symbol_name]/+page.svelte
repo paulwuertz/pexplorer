@@ -158,7 +158,13 @@
 			<FunctionSymbolPage {fn_childs} {symbol_version} {SymPathByAddr} />
 		{:else if var_childs.length == 1 && fn_childs.length == 0}
 			{console.log('symbol_data: ', $state.snapshot(var_childs[0]))}
-			<VariableSymbolPage {var_childs} {symbol_version} {SymPathByAddr} {VariableTypes}/>
+			<VariableSymbolPage
+				{var_childs}
+				{symbol_version}
+				{SymPathByAddr}
+				{VariableTypes}
+				{sections}
+			/>
 		{:else if fn_childs}
 			<Row cols={{ md: 2, sm: 1 }}>
 				<div>
