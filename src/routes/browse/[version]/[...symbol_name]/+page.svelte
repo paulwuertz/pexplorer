@@ -23,6 +23,7 @@
 	let symbol_version = $derived(params.version);
 	let SymPathByAddr = $derived(symbols.symbols[symbol_version]['SymPathByAddr']);
 	let SymPathByName = $derived(symbols.symbols[symbol_version]['symPathByName']);
+	let VariableTypes = $derived(symbols.symbols[symbol_version]['types']);
 	let symbol_path_and_name = $derived(params.symbol_name);
 	let symbol_path_elements_and_parent_links = $derived(
 		symbol_path_and_name
@@ -157,7 +158,7 @@
 			<FunctionSymbolPage {fn_childs} {symbol_version} {SymPathByAddr} />
 		{:else if var_childs.length == 1 && fn_childs.length == 0}
 			{console.log('symbol_data: ', $state.snapshot(var_childs[0]))}
-			<VariableSymbolPage {var_childs} {symbol_version} {SymPathByAddr} />
+			<VariableSymbolPage {var_childs} {symbol_version} {SymPathByAddr} {VariableTypes}/>
 		{:else if fn_childs}
 			<Row cols={{ md: 2, sm: 1 }}>
 				<div>

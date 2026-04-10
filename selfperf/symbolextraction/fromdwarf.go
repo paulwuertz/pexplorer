@@ -93,7 +93,7 @@ func setLineInfo(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) {
 
 func ExtractType(typeRef *godwarf.Type, cache map[string]Typedef) Typedef {
 	name := (*typeRef).Common().Name
-	if name == "gs_usb_data" {
+	if name == "_static_thread_data" {
 		fmt.Println("\tmnn", name)
 	}
 	switch (*typeRef).(type) {
@@ -108,7 +108,7 @@ func ExtractType(typeRef *godwarf.Type, cache map[string]Typedef) Typedef {
 			cache[typestr] = Typedef{}
 		}
 		for _, f := range structRef.Field {
-			if f.Name == "gs_usb_data" {
+			if f.Name == "_static_thread_data" {
 				fmt.Println("\tmnn", name)
 			}
 			member := ExtractType(&f.Type, cache)
@@ -126,7 +126,10 @@ func ExtractType(typeRef *godwarf.Type, cache map[string]Typedef) Typedef {
 			switch (*typeRef).(type) {
 			case *godwarf.PtrType:
 				ptrRef := (*typeRef).(*godwarf.PtrType)
-				return ExtractType(&ptrRef.Type, cache)
+				ptrData := ExtractType(&ptrRef.Type, cache)
+				ptrData.IsPointer = true
+				ptrData.Size = (*ptrRef).Common().ByteSize
+				return ptrData
 			case *godwarf.QualType:
 				ptrRef := (*typeRef).(*godwarf.QualType)
 				return ExtractType(&ptrRef.Type, cache)

@@ -94,6 +94,7 @@ type Typedef struct {
 	BitSize    int64        `json:"bitsize,omitzero"`
 	ByteOffset int64        `json:"byte_offset"`
 	BitOffset  int64        `json:"bit_offset,omitzero"`
+	IsPointer  bool         `json:"is_pointer,omitempty,omitzero"`
 	Members    []Typedef    `json:"members,omitempty,omitzero"`
 	cu         *CompileUnit `json:"-"`
 }

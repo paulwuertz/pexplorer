@@ -16,6 +16,7 @@ testdataReportOutput:
 	go run ./cmd/jsonreport/jsonreport.go -i ../testdata/elf_testdata/zephyr_cannectivity_13_gcc_lpc55s16.elf -o tmp/zephyr_cannectivity_13_gcc_lpc55s16.json -p
 	go run ./cmd/jsonreport/jsonreport.go -i ../testdata/elf_testdata/zephyr_cannectivity_12_gcc_lpc55s16.elf -o tmp/zephyr_cannectivity_12_gcc_lpc55s16.json -p
 	go run ./cmd/jsonreport/jsonreport.go -i ../testdata/elf_testdata/prusa_buddy_boot_64.elf -o tmp/prusa_buddy_boot_64.json -p
+	go run ./cmd/jsonreport/jsonreport.go -i ../testdata/elf_testdata/libre_solar_zephyr_43_b953.elf -o tmp/libre_solar_zephyr_43_b953.elf.json -p
 
 jsonvalidate:
 	jsonschema validate --verbose  schema.json tmp/*.json
