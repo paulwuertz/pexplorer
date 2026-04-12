@@ -16,14 +16,16 @@
 	import * as helpers from '../../../helpers.js';
 	import FunctionSymbolPage from '../../../../components/FunctionSymbolPage.svelte';
 	import VariableSymbolPage from '../../../../components/VariableSymbolPage.svelte';
+	import SunburstTreeMapGraph from '../../../../components/SunburstTreeMapGraph.svelte';
 
 	let { route, data } = $props();
 	let params = $derived(data);
 
 	let symbol_version = $derived(params.version);
-	let SymPathByAddr = $derived(symbols.symbols[symbol_version]['SymPathByAddr']);
-	let SymPathByName = $derived(symbols.symbols[symbol_version]['symPathByName']);
-	let VariableTypes = $derived(symbols.symbols[symbol_version]['types']);
+	let fw_symbols = $derived(symbols.symbols[symbol_version]);
+	let SymPathByAddr = $derived(fw_symbols['SymPathByAddr']);
+	let SymPathByName = $derived(fw_symbols['symPathByName']);
+	let VariableTypes = $derived(fw_symbols['types']);
 	let symbol_path_and_name = $derived(params.symbol_name);
 	let symbol_path_elements_and_parent_links = $derived(
 		symbol_path_and_name
@@ -51,87 +53,9 @@
 			return symbol.file && symPath.includes(routePath);
 		}
 	};
-	let sections = $derived(symbols.symbols[symbol_version].sections);
-	let fn_childs = $derived(symbols.symbols[symbol_version].functions.filter(isChildToPath).sort());
-	let var_childs = $derived(symbols.symbols[symbol_version].variables.filter(isChildToPath).sort());
-	$inspect(symbol_path_and_name, fn_childs, var_childs);
-	onMount(async () => {
-		if (browser && fn_childs) {
-			var romChartDom = document.getElementById('sunburst_chart_rom');
-			var romChart = echarts.init(romChartDom);
-			var ramChartDom = document.getElementById('sunburst_chart_ram');
-			var ramChart = echarts.init(ramChartDom);
-			var option;
-
-			// TODO rm hack - think about how to distinguish better memory regions for all controller types...
-			let rom_syms = fn_childs.filter(
-				(e) =>
-					!(
-						e.address.toString(16).startsWith(2) && // not 0x2... in RAM
-						e.address >= 0x20000000
-					)
-			);
-			var sunburst_data = helpers.symbols_to_sunburst_tree_data(rom_syms, 'size');
-			console.log('sunburst_data', sunburst_data);
-			option = {
-				// visualMap: {
-				//     type: 'continuous',
-				//     inRange: {
-				//         color: ['#2F93C8', '#AEC48F', '#FFDB5C', '#F98862']
-				//     }
-				// },
-				series: {
-					type: 'sunburst',
-					data: sunburst_data,
-					radius: [0, '90%'],
-					label: {
-						show: false
-						// rotate: 'radial',
-						// minAngle: 15,
-						// formatter: '{b} - {c}'
-					}
-				},
-				tooltip: {
-					show: true,
-					trigger: 'item'
-				}
-			};
-			option && romChart.setOption(option);
-
-			let ram_syms = var_childs.filter((e) => {
-				return (
-					e.address.toString(16).startsWith(2) && // 0x2... in RAM
-					e.address >= 0x20000000
-				);
-			});
-			var sunburst_data = helpers.symbols_to_sunburst_tree_data(ram_syms, 'size');
-			console.log('sunburst_data', sunburst_data);
-			option = {
-				// visualMap: {
-				//     type: 'continuous',
-				//     inRange: {
-				//         color: ['#2F93C8', '#AEC48F', '#FFDB5C', '#F98862']
-				//     }
-				// },
-				series: {
-					type: 'sunburst',
-					data: sunburst_data,
-					radius: [0, '90%'],
-					label: {
-						show: false
-						// rotate: 'radial',
-						// minAngle: 15,
-						// formatter: '{b} - {c}'
-					}
-				},
-				tooltip: {
-					show: true,
-					trigger: 'item'
-				}
-			};
-			option && ramChart.setOption(option);
-		}
-	});
+	let sections = $derived(fw_symbols.sections);
+	let fn_childs = $derived(fw_symbols.functions.filter(isChildToPath).sort());
+	let var_childs = $derived(fw_symbols.variables.filter(isChildToPath).sort());
 </script>
 
 <svelte:head>
@@ -166,16 +90,7 @@
 				{sections}
 			/>
 		{:else if fn_childs}
-			<Row cols={{ md: 2, sm: 1 }}>
-				<div>
-					<h3>Flash usage</h3>
-					<div id="sunburst_chart_rom" style="width: 100%;height:600px;"></div>
-				</div>
-				<div>
-					<h3>Static RAM usage</h3>
-					<div id="sunburst_chart_ram" style="width: 100%;height:600px;"></div>
-				</div>
-			</Row>
+			<SunburstTreeMapGraph {fw_symbols} />
 			{fn_childs.length} function and {var_childs.length} variable symbols in this path: '/{symbol_path}'
 
 			<SymbolTable

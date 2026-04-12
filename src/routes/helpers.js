@@ -164,6 +164,10 @@ export const symbols_to_sunburst_tree_data = (symbols, data_field) => {
 		}
 		add_sym_to_object_tree(symbol, path_elements, data, data_field);
 	}
+	// unpack to first level with > 1 element
+	while (data.length == 1 && data[0].children) {
+		data = data[0].children;
+	}
 	return data;
 };
 
