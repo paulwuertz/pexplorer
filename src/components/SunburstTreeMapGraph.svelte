@@ -70,16 +70,19 @@
 				option.series.roam = false;
 				option.series.nodeClick = undefined;
 				option.series.label.show = true;
+                // TODO expose leafDepth as setting
+                option.series.leafDepth = 6;
+                // TODO add? visibleMin = 300;
 			} else {
 				option.series.type = 'sunburst';
 				option.series.radius = [0, '90%'];
 			}
-			// option &&
-			romChart.setOption(option);
+			//
+			option && romChart.setOption(option);
 
 			let ram_options = JSON.parse(JSON.stringify(option));
 			ram_options.series.data = ram_sunburst_data;
-			ramChart.setOption(ram_options);
+			ram_options && ramChart.setOption(ram_options);
 			return [ramChart, romChart];
 		} else {
 			return [];
