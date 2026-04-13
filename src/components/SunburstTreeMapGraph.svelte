@@ -8,30 +8,35 @@
 	import * as echarts from 'echarts';
 	import * as helpers from '../routes/helpers.js';
 
-	const { fw_symbols } = $props();
+	const { symbols_in_symbols } = $props();
 
+	let symbols = $derived(symbols_in_symbols ? symbols_in_symbols : []);
 	let initialized = $state(false);
 	let chartStyle = $state('treemap');
 	let sunburst_chart_rom = $state(null);
 	let sunburst_chart_ram = $state(null);
 	let romChart = $derived(null);
 	let ramChart = $derived(null);
-
+	$inspect(symbols);
 	// TODO rm hack - think about how to distinguish better memory regions for all controller types...
-	let rom_syms = fw_symbols.functions.filter(
-		// TODO non bss section
-		(e) =>
-			!(
-				e.address.toString(16).startsWith(2) && // not 0x2... in RAM
-				e.address >= 0x20000000
-			)
+	let rom_syms = $derived(
+		symbols.filter(
+			// TODO non bss section
+			(e) =>
+				!(
+					e.address.toString(16).startsWith(2) && // not 0x2... in RAM
+					e.address >= 0x20000000
+				)
+		)
 	);
-	let ram_syms = fw_symbols.variables.filter((e) => {
-		return (
-			e.address.toString(16).startsWith(2) && // 0x2... in RAM
-			e.address >= 0x20000000
-		);
-	});
+	let ram_syms = $derived(
+		symbols.filter((e) => {
+			return (
+				e.address.toString(16).startsWith(2) && // 0x2... in RAM
+				e.address >= 0x20000000
+			);
+		})
+	);
 	let rom_sunburst_data = $derived(helpers.symbols_to_sunburst_tree_data(rom_syms, 'size'));
 	let ram_sunburst_data = $derived(helpers.symbols_to_sunburst_tree_data(ram_syms, 'size'));
 	let updateCharts = () => {
@@ -70,9 +75,9 @@
 				option.series.roam = false;
 				option.series.nodeClick = undefined;
 				option.series.label.show = true;
-                // TODO expose leafDepth as setting
-                option.series.leafDepth = 6;
-                // TODO add? visibleMin = 300;
+				// TODO expose leafDepth as setting
+				option.series.leafDepth = 6;
+				// TODO add? visibleMin = 300;
 			} else {
 				option.series.type = 'sunburst';
 				option.series.radius = [0, '90%'];

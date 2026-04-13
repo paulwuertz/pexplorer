@@ -11,7 +11,6 @@
 	import Highlight from 'svelte-highlight';
 	import atomOneDark from 'svelte-highlight/styles/atom-one-dark';
 	import armasm from 'svelte-highlight/languages/armasm';
-	import * as echarts from 'echarts';
 	import SymbolTable from '../../../../components/SymbolTable.svelte';
 	import * as helpers from '../../../helpers.js';
 	import FunctionSymbolPage from '../../../../components/FunctionSymbolPage.svelte';
@@ -56,6 +55,7 @@
 	let sections = $derived(fw_symbols.sections);
 	let fn_childs = $derived(fw_symbols.functions.filter(isChildToPath).sort());
 	let var_childs = $derived(fw_symbols.variables.filter(isChildToPath).sort());
+	let symbols_in_symbols = $derived([...fn_childs, ...var_childs]);
 </script>
 
 <svelte:head>
@@ -90,7 +90,7 @@
 				{sections}
 			/>
 		{:else if fn_childs}
-			<SunburstTreeMapGraph {fw_symbols} />
+			<SunburstTreeMapGraph {symbols_in_symbols} />
 			{fn_childs.length} function and {var_childs.length} variable symbols in this path: '/{symbol_path}'
 
 			<SymbolTable
