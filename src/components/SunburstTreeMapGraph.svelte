@@ -11,12 +11,11 @@
 	const { symbols_in_symbols } = $props();
 
 	let symbols = $derived(symbols_in_symbols ? symbols_in_symbols : []);
-	let initialized = $state(false);
 	let chartStyle = $state('treemap');
 	let sunburst_chart_rom = $state(null);
 	let sunburst_chart_ram = $state(null);
-	let romChart = $derived(null);
-	let ramChart = $derived(null);
+	let romChart = $state(null);
+	let ramChart = $state(null);
 	$inspect(symbols);
 	// TODO rm hack - think about how to distinguish better memory regions for all controller types...
 	let rom_syms = $derived(
@@ -40,58 +39,53 @@
 	let rom_sunburst_data = $derived(helpers.symbols_to_sunburst_tree_data(rom_syms, 'size'));
 	let ram_sunburst_data = $derived(helpers.symbols_to_sunburst_tree_data(ram_syms, 'size'));
 	let updateCharts = () => {
-		var option;
-		if (initialized) {
-			option = {
-				// visualMap: {
-				//     type: 'continuous',
-				//     inRange: {
-				//         color: ['#2F93C8', '#AEC48F', '#FFDB5C', '#F98862']
-				//     }
-				// },
-				series: {
-					// color: [
-					//     "#5070dd", "#b6d634", "#505372", "#ff994d", "#0ca8df", "#ffd10a",
-					//     "#fb628b", "#785db0", "#3fbe95"
-					// ],
-					// colorMappingBy: "id",
-					data: rom_sunburst_data,
-					label: {
-						show: false,
-						// rotate: 'radial',
-						// minAngle: 15,
-						formatter: '{b} - {c} bytes'
-					}
-				},
-				tooltip: {
-					show: true,
-					trigger: 'item'
+		var option = {
+			// visualMap: {
+			//     type: 'continuous',
+			//     inRange: {
+			//         color: ['#2F93C8', '#AEC48F', '#FFDB5C', '#F98862']
+			//     }
+			// },
+			series: {
+				// color: [
+				//     "#5070dd", "#b6d634", "#505372", "#ff994d", "#0ca8df", "#ffd10a",
+				//     "#fb628b", "#785db0", "#3fbe95"
+				// ],
+				// colorMappingBy: "id",
+				data: rom_sunburst_data,
+				label: {
+					show: false,
+					// rotate: 'radial',
+					// minAngle: 15,
+					formatter: '{b} - {c} bytes'
 				}
-			};
-			console.log(rom_sunburst_data);
-
-			if (chartStyle == 'treemap') {
-				option.series.type = 'treemap';
-				option.series.roam = false;
-				option.series.nodeClick = undefined;
-				option.series.label.show = true;
-				// TODO expose leafDepth as setting
-				option.series.leafDepth = 6;
-				// TODO add? visibleMin = 300;
-			} else {
-				option.series.type = 'sunburst';
-				option.series.radius = [0, '90%'];
+			},
+			tooltip: {
+				show: true,
+				trigger: 'item'
 			}
-			//
-			option && romChart.setOption(option);
+		};
+		console.log(rom_sunburst_data);
 
-			let ram_options = JSON.parse(JSON.stringify(option));
-			ram_options.series.data = ram_sunburst_data;
-			ram_options && ramChart.setOption(ram_options);
-			return [ramChart, romChart];
+		if (chartStyle == 'treemap') {
+			option.series.type = 'treemap';
+			option.series.roam = false;
+			option.series.nodeClick = undefined;
+			option.series.label.show = true;
+			// TODO expose leafDepth as setting
+			option.series.leafDepth = 6;
+			// TODO add? visibleMin = 300;
 		} else {
-			return [];
+			option.series.type = 'sunburst';
+			option.series.radius = [0, '90%'];
 		}
+		//
+		option && romChart && romChart.setOption(option);
+
+		let ram_options = JSON.parse(JSON.stringify(option));
+		ram_options.series.data = ram_sunburst_data;
+		ram_options && ramChart && ramChart.setOption(ram_options);
+		return [ramChart, romChart];
 	};
 	let charts = $derived(() => {
 		return updateCharts();
@@ -104,11 +98,9 @@
 		}
 	};
 
-	onMount(() => {
+	$effect(() => {
 		romChart = echarts.init(sunburst_chart_rom);
 		ramChart = echarts.init(sunburst_chart_ram);
-		console.log('onmounty1');
-		initialized = true;
 		console.log('onmounty2');
 		updateCharts();
 	});
