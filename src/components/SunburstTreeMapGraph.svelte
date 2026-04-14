@@ -8,15 +8,16 @@
 	import * as echarts from 'echarts';
 	import * as helpers from '../routes/helpers.js';
 
-	const { symbols_in_symbols } = $props();
+	const { symbols_in_symbols, treeMapRenderDepth } = $props();
 
 	let symbols = $derived(symbols_in_symbols ? symbols_in_symbols : []);
+	let render_depth = $derived(treeMapRenderDepth);
 	let chartStyle = $state('treemap');
 	let sunburst_chart_rom = $state(null);
 	let sunburst_chart_ram = $state(null);
 	let romChart = $state(null);
 	let ramChart = $state(null);
-	$inspect(symbols);
+
 	// TODO rm hack - think about how to distinguish better memory regions for all controller types...
 	let rom_syms = $derived(
 		symbols.filter(
@@ -73,7 +74,7 @@
 			option.series.nodeClick = undefined;
 			option.series.label.show = true;
 			// TODO expose leafDepth as setting
-			option.series.leafDepth = 6;
+			option.series.leafDepth = render_depth;
 			// TODO add? visibleMin = 300;
 		} else {
 			option.series.type = 'sunburst';

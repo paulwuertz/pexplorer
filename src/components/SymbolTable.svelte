@@ -19,7 +19,7 @@
 	} from '@sveltestrap/sveltestrap';
 	import * as helpers from '../routes/helpers.js';
 
-	const { fnSymbols, varSymbols, selected_version, sections } = $props();
+	let { fnSymbols, varSymbols, selected_version, sections, render_depth = $bindable(6) } = $props();
 	let show_sections = $state(true);
 	let show_filepath = $state('Full filepath');
 	let function_table_data = $derived([...fnSymbols, ...varSymbols]);
@@ -50,6 +50,7 @@
 	<!-- TODO add filter for fn, var or both :) -->
 	<Col sm="12" md={4}>Filter symbols by text:</Col>
 	<Col sm="12" md={4}>Show file column:</Col>
+	<Col sm="12" md={4}>Chart render depth:</Col>
 </Row>
 <Row>
 	<Col sm="12" md={4}>
@@ -69,6 +70,10 @@
 			{/each}
 		</InputGroup>
 		<Input bind:checked={show_sections} type="switch" label="Show section column:" />
+	</Col>
+
+	<Col sm="12" md={4}>
+		<Input type="number" min="1" max="99" bind:value={render_depth} />
 	</Col>
 </Row>
 

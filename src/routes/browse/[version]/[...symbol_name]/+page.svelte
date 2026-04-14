@@ -20,6 +20,8 @@
 	let { route, data } = $props();
 	let params = $derived(data);
 
+	// let sunburstGraphRenderAngle = $state(0);
+	let treeMapRenderDepth = $state(6);
 	let symbol_version = $derived(params.version);
 	let fw_symbols = $derived(symbols.symbols[symbol_version]);
 	let SymPathByAddr = $derived(fw_symbols['SymPathByAddr']);
@@ -90,7 +92,7 @@
 				{sections}
 			/>
 		{:else if fn_childs}
-			<SunburstTreeMapGraph {symbols_in_symbols} />
+			<SunburstTreeMapGraph {symbols_in_symbols} {treeMapRenderDepth} />
 			{fn_childs.length} function and {var_childs.length} variable symbols in this path: '/{symbol_path}'
 
 			<SymbolTable
@@ -98,6 +100,7 @@
 				varSymbols={var_childs}
 				selected_version={symbol_version}
 				{sections}
+				bind:render_depth={treeMapRenderDepth}
 			/>
 		{:else}
 			404 - nonononon
