@@ -1,0 +1,161 @@
+{
+	"$schema": "http://json-schema.org/draft-07/schema#",
+	"$id": "http://json-schema.org/draft-07/schema#",
+	"title": "Generated Schema",
+	"description": "Schema generated from JSON data",
+	"type": "object",
+	"properties": {
+		"firmwareID": {
+			"type": "string",
+			"minLength": 1,
+			"title": "Firmware ID"
+		},
+		"timestamp": {
+			"type": "string",
+			"title": "Timestamp"
+		},
+		"sections": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string",
+						"title": "Name"
+					},
+					"address": {
+						"type": "integer",
+						"title": "Address"
+					},
+					"size": {
+						"type": "integer",
+						"title": "Size"
+					},
+					"index": {
+						"type": "integer",
+						"title": "Index"
+					}
+				},
+				"required": ["name", "address", "size", "index"]
+			},
+			"title": "Sections"
+		},
+		"functions": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string",
+						"minLength": 1,
+						"title": "Name"
+					},
+					"address": {
+						"type": "integer",
+						"title": "Address"
+					},
+					"size": {
+						"type": "integer",
+						"title": "Size"
+					},
+					"secidx": {
+						"type": "integer",
+						"title": "Secidx"
+					},
+					"file": {
+						"type": "string",
+						"minLength": 1,
+						"title": "File"
+					},
+					"line": {
+						"type": "integer",
+						"title": "Line"
+					},
+					"asm": {
+						"type": "string",
+						"minLength": 1,
+						"title": "asm"
+					},
+					"disasm": {
+						"type": "array",
+						"items": {
+							"type": "string"
+						},
+						"minLength": 1,
+						"title": "disasm"
+					}
+				},
+				"required": ["name", "address", "size"]
+			},
+			"title": "Functions"
+		},
+		"variables": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string",
+						"minLength": 1,
+						"title": "Name"
+					},
+					"address": {
+						"type": "integer",
+						"title": "Address"
+					},
+					"size": {
+						"type": "integer",
+						"title": "Size"
+					},
+					"secidx": {
+						"type": "integer",
+						"title": "Secidx"
+					},
+					"file": {
+						"type": "string",
+						"minLength": 1,
+						"title": "File"
+					},
+					"line": {
+						"type": "integer",
+						"title": "Line"
+					},
+					"staticInitData": {
+						"type": "string",
+						"minLength": 1,
+						"title": "Static Init Data"
+					}
+				},
+				"required": ["name", "address", "size"]
+			},
+			"title": "Variables"
+		},
+		"types": {
+			"type": "array",
+			"items": {
+				"type": "object",
+				"properties": {
+					"name": {
+						"type": "string",
+						"minLength": 1,
+						"title": "Name"
+					},
+					"size": {
+						"type": "integer",
+						"title": "Size"
+					}
+				},
+				"required": ["name", "size"]
+			},
+			"title": "Types"
+		},
+		"info": {
+			"type": "array",
+			"items": {
+				"type": "string"
+			},
+			"title": "Info"
+		}
+	},
+	"required": ["functions", "variables"]
+}
