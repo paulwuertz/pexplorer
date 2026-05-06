@@ -3,13 +3,11 @@ package symbolextraction
 import (
 	"debug/dwarf"
 	"debug/elf"
-	"encoding/binary"
 	"fmt"
 	"log"
 	"maps"
 	"reflect"
 	"slices"
-	"sort"
 
 	"github.com/go-delve/delve/pkg/dwarf/frame"
 	"github.com/go-delve/delve/pkg/dwarf/godwarf"
@@ -292,61 +290,8 @@ func getVariableTypes(s *SElfReport) []Typedef {
 	return slices.Collect(maps.Values(typeMap))
 }
 
-func getStackUseDetails(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) (srcFiles []string) {
-	dwarfData, _ := elf.DWARF()
-	rd := dwarfData.Reader()
-	for idx := 0; ; idx++ {
-		entry, err := rd.Next()
-		if err != nil {
-			// return fmt.Errorf("iterate entry error: %v", err)
-		}
-		if entry == nil {
-			return nil
-		}
-
-		// parse compilation unit
-		if entry.Tag == dwarf.TagTypedef {
-			tree, err := godwarf.LoadTree(entry.Offset, dwarfData, 0)
-			fmt.Println("tree -", tree.Val(dwarf.AttrName), tree.Val(dwarf.AttrType), err)
-			ty, err := godwarf.ReadType(dwarfData, int(entry.Offset), 0, nil)
-			fmt.Println("\t-", ty, err)
-		}
-	}
-
-	framedata, _ := godwarf.GetDebugSectionElf(elf, "frame")
-	fe, err := frame.Parse(framedata, binary.LittleEndian, 0, 4, 0)
-	if err != nil {
-		log.Fatal("could not parse frame data of elffile", err)
-	}
-	sort.Slice(fe, func(i, j int) bool {
-		return fe[i].Begin() < fe[j].Begin()
-	})
-
-	for i := 0; i < len(funcs); i++ {
-		function := &funcs[i]
-		mainfde, err := fe.FDEForPC(function.Address)
-		fmt.Println("\t\tfn", err)
-		if err != nil {
-			continue
-		}
-		fmt.Println("\t\tfn", function.Name, mainfde.Length)
-		for i := mainfde.Begin(); i < mainfde.End(); i = i + 2 {
-			// for ARM the return addr is saved in r13,
-			// when CFA is in R13 and only there, then CFA.off seems to be pretty much the frame size...
-			// if not and the CFA reg changes and the SP is pushed around we do not know from this table...
-			s, err := mainfde.EstablishFrame(i)
-			if err != nil {
-				continue
-			}
-			fmt.Println(fmt.Sprintf("%x", i), "-> cfa/off/rule:", s.CFA.Reg, "/", s.CFA.Offset, "/", RegRuleEnum2String[s.CFA.Rule], " expr:", s.CFA.Expression, "regs:", s.Regs, " reta:", s.RetAddrReg)
-		}
-	}
-	return
-}
-
 func EnhanceByDwarfDebugInfo(s *SElfReport) (srcFiles []string) {
 	s.Types = getVariableTypes(s)
-	// getStackUseDetails(s.Elf, s.Functions, s.Variables)
 	setLineInfo(s.Elf, s.Functions, s.Variables)
 	return
 }

@@ -23,8 +23,8 @@ type FunctionSymbol struct {
 	Asm                 []byte            `json:"asm,omitempty,omitzero"`
 	Callees             []FunctionCall    `json:"callees,omitempty,omitzero"`
 	Callers             []FunctionCall    `json:"callers,omitempty,omitzero"`
-	StackSize           uint64            `json:"stack_size,omitempty,omitzero"`
-	MaxStackSizeCallees uint64            `json:"max_stack_size_callees,omitempty,omitzero"`
+	StackSize           int64             `json:"stack_size,omitempty,omitzero"`
+	MaxStackSizeCallees int64             `json:"max_stack_size_callees,omitempty,omitzero"`
 	StackQualifiers     string            `json:"stack_qualifiers,omitempty,omitzero"`
 	// calls + refs
 	entry     *dwarf.Entry      `json:"-"`
@@ -45,8 +45,8 @@ type FunctionCall struct {
 type CallNode struct {
 	Name                string     `json:"name"`
 	Calls               []CallNode `json:"calls,omitempty,omitzero"`
-	MaxStackSizeCallees uint64     `json:"max_stack_size_callees,omitempty,omitzero"`
-	StackSize           uint64     `json:"stack_size,omitempty,omitzero"`
+	MaxStackSizeCallees int64      `json:"max_stack_size_callees,omitempty,omitzero"`
+	StackSize           int64      `json:"stack_size,omitempty,omitzero"`
 	Address             uint64     `json:"address,omitempty,omitzero"`
 	// for backtracking
 	Caller    *CallNode `json:"-"`
@@ -55,7 +55,7 @@ type CallNode struct {
 
 type CallBranch struct {
 	CallList  []CallNode `json:"call_list,omitempty,omitzero"`
-	StackSize uint64     `json:"stack_size,omitempty,omitzero"`
+	StackSize int64      `json:"stack_size,omitempty,omitzero"`
 	//TODO are we interested in flash size? imagine only one call to a fn
 	// ie a library and so it is clear how much cutting it out would free...
 }

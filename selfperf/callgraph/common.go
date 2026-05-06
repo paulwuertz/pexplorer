@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"log"
 	"sort"
+	"strconv"
+	"strings"
 
 	"github.com/go-delve/delve/pkg/dwarf/frame"
 	"github.com/go-delve/delve/pkg/dwarf/godwarf"
@@ -19,7 +21,7 @@ import (
 func IsFnCallInstr(instr string) bool {
 	l := len(instr)
 	// allow bl+blx with optional 2 letter condition -> 2, 3, 4 or 5 letters
-	if l < 2 || l > 5 {
+	if l < 2 || l > 6 {
 		return false
 	}
 	// catch non bl(x)'s, but b + condition le is a if or loop jump
@@ -66,14 +68,46 @@ func AddCallGraph(s *symbolextraction.SElfReport) {
 	}
 }
 
-func GetFunctionStackUsage(f *symbolextraction.FunctionSymbol, frames frame.FrameDescriptionEntries) (uint64, error) {
+func ExtractFunctionStackUsage(f *symbolextraction.FunctionSymbol) {
+	// fmt.Println("\t\tfn", f.Name, mainfde.Length, f.SourceFilePath, f.SourceFileLine)
+	var current_stacksize int64 = 0
+	for _, d := range f.DisAsm {
+		if f.Name == "main" {
+			f.StackQualifiers = "estimated+experimental"
+		}
+		sub := strings.HasPrefix(d.Instruction, "sub")
+		stack_pointer := strings.HasPrefix(d.Opstr, "sp, #0x")
+		if strings.HasPrefix(d.Instruction, "push") {
+			//push   {r0, r1, r2, r3, r4, lr} OR
+			//push.w {r0, r1, r2, r3, r4, lr} with a suffix condition - maybe TODO distinguish cond.?
+			nr_regs := strings.Count(d.Opstr, ",") + 1
+			current_stacksize += int64(nr_regs) * 4
+			fmt.Println(f.Name, "push now", current_stacksize, "@", d.Addr)
+		} else if sub && stack_pointer {
+			// sub   sp, #0x10
+			stackSubSize, err := strconv.ParseInt(d.Opstr[5:], 0, 64)
+			if err != nil {
+				log.Fatalf(f.Name, "sub now hexstr err", d.Opstr)
+			}
+			current_stacksize += stackSubSize
+			fmt.Println(f.Name, "sub now", current_stacksize, "@", d.Addr)
+		}
+		// fmt.Println(fmt.Sprintf("%x", i), "off:", s.CFA.Offset, d.Instruction, d.Opstr, "-> cfa reg:", s.CFA.Reg, "rule:", symbolextraction.RegRuleEnum2String[s.CFA.Rule], "expr:", s.CFA.Expression, "regs:", s.Regs, "reta:", s.RetAddrReg)
+	}
+	f.StackSize = current_stacksize
+	f.StackQualifiers = "estimated+experimental"
+	fmt.Println(f.Name, "result:", current_stacksize)
+}
+
+// maybe it could be useful in the future... was my first intend, but was off to much...
+func GetFunctionStackUsage_DebugFrameUnwinding(f *symbolextraction.FunctionSymbol, frames frame.FrameDescriptionEntries) (uint64, error) {
 	mainfde, err := frames.FDEForPC(f.Address)
 	// fmt.Println("\t\tfn", err)
 	if err != nil {
 		return 0, err
 	}
 	// fmt.Println("\t\tfn", f.Name, mainfde.Length, f.SourceFilePath, f.SourceFileLine)
-	var max uint64 = 0
+	var max int64 = 0
 	for _, d := range f.DisAsm {
 		i := d.Addr
 		// for ARM the return addr is saved in r13,
@@ -84,22 +118,24 @@ func GetFunctionStackUsage(f *symbolextraction.FunctionSymbol, frames frame.Fram
 			// fmt.Println(err, "skip frame at addr", i, "for fn:", f.Name)
 			continue
 		}
-
-		current_stacksize := max
+		if f.Name == "led_state_identify_run" && d.Addr > 0x601 {
+			f.StackQualifiers = "estimated+experimental"
+		}
+		var current_stacksize int64 = 0
 		switch s.CFA.Rule {
 		case frame.RuleOffset:
-			current_stacksize = uint64(s.CFA.Offset) * uint64(mainfde.CIE.DataAlignmentFactor)
+			current_stacksize = s.CFA.Offset * mainfde.CIE.DataAlignmentFactor
 		// case frame.RuleCFA:
 		case frame.RuleCFA:
-			offset := uint64(s.CFA.Offset) * uint64(mainfde.CIE.DataAlignmentFactor)
+			offset := s.CFA.Offset * mainfde.CIE.DataAlignmentFactor
 			reg := s.CFA.Reg
-			current_stacksize = offset + reg
+			current_stacksize = offset + int64(reg)
 		}
 
-		if uint64(s.CFA.Offset) >= max {
-			max = uint64(current_stacksize)
+		if current_stacksize >= max {
+			max = current_stacksize
 		}
-		// fmt.Println(fmt.Sprintf("%x", i), "off:", s.CFA.Offset, d.Instruction, d.Opstr, "-> cfa reg:", s.CFA.Reg, "rule:", symbolextraction.RegRuleEnum2String[s.CFA.Rule], "expr:", s.CFA.Expression, "regs:", s.Regs, "reta:", s.RetAddrReg)
+		fmt.Println(fmt.Sprintf("%x", i), "off:", s.CFA.Offset, d.Instruction, d.Opstr, "-> cfa reg:", s.CFA.Reg, "rule:", symbolextraction.RegRuleEnum2String[s.CFA.Rule], "expr:", s.CFA.Expression, "regs:", s.Regs, "reta:", s.RetAddrReg)
 	}
 	f.StackSize = max
 	f.StackQualifiers = "estimated+experimental"
@@ -107,7 +143,7 @@ func GetFunctionStackUsage(f *symbolextraction.FunctionSymbol, frames frame.Fram
 	return 0, err
 }
 
-func GetStackUseDetails(s *symbolextraction.SElfReport) {
+func GetStackUseDetails_DebugFrameUnwinding(s *symbolextraction.SElfReport) {
 	framedata, _ := godwarf.GetDebugSectionElf(s.Elf, "frame")
 	fe, err := frame.Parse(framedata, binary.LittleEndian, 0, 4, 0)
 	if err != nil {
@@ -119,12 +155,19 @@ func GetStackUseDetails(s *symbolextraction.SElfReport) {
 
 	for i := 0; i < len(s.Functions); i++ {
 		function := &s.Functions[i]
-		GetFunctionStackUsage(function, fe)
+		GetFunctionStackUsage_DebugFrameUnwinding(function, fe)
 	}
 }
 
-func TraverseCallSubGraph(s *symbolextraction.SElfReport, f *symbolextraction.FunctionSymbol, subgraphIndex uint, calldepth uint) uint64 {
-	var biggestSubStackSize uint64 = 0
+func GetStackUseDetails(s *symbolextraction.SElfReport) {
+	for i := 0; i < len(s.Functions); i++ {
+		function := &s.Functions[i]
+		ExtractFunctionStackUsage(function)
+	}
+}
+
+func TraverseCallSubGraph(s *symbolextraction.SElfReport, f *symbolextraction.FunctionSymbol, subgraphIndex uint, calldepth uint) int64 {
+	var biggestSubStackSize int64 = 0
 	if len(f.Callees) == 0 {
 		// fmt.Println(strings.Repeat("\t", int(calldepth)), f.Name, " endtree stacksize:", f.StackSize)
 		f.MaxStackSizeCallees = f.StackSize

@@ -109,6 +109,7 @@ func TestExtractReport(t *testing.T) {
 				"StackSize":        0,
 				"StackSizeToSmall": 0,
 				"StackSizeToBig":   0,
+				"StackSizeMatch":   0,
 				"NoStackSize":      0,
 				"Callees":          0,
 				"Callers":          0,
@@ -119,6 +120,10 @@ func TestExtractReport(t *testing.T) {
 				fMatch, isInOtherReport := matchedSameAddr[f.Address]
 				if isInOtherReport {
 					diffs := ""
+					if f.Name == "main" {
+						f.StackQualifiers = "estimated+experimental"
+
+					}
 					if fMatch.Address != f.Address {
 						errs["Address"] += 1
 						diffs += fmt.Sprintf("Address %d != %d, ", fMatch.Address, f.Address)
@@ -137,6 +142,8 @@ func TestExtractReport(t *testing.T) {
 						diffs += fmt.Sprintf("StackSize %d != %d, ", fMatch.StackSize, f.StackSize)
 					} else if fMatch.StackSize == 0 && fMatch.StackSize != f.StackSize {
 						errs["NoStackSize"] += 1
+					} else if fMatch.StackSize != 0 && fMatch.StackSize == f.StackSize {
+						errs["StackSizeMatch"] += 1
 					}
 					if len(fMatch.Callees) != len(f.Callees) {
 						errs["Callees"] += 1
