@@ -105,6 +105,7 @@ func TestExtractReport(t *testing.T) {
 			nrSameFns := 0
 			errs := map[string]int{
 				"Address":           0,
+				"AddressByOne":      0,
 				"FlashSize":         0,
 				"StackSize":         0,
 				"StackSizeToSmall":  0,
@@ -124,7 +125,10 @@ func TestExtractReport(t *testing.T) {
 						f.StackQualifiers = "estimated+experimental"
 
 					}
-					if fMatch.Address != f.Address {
+					if fMatch.Address+1 != f.Address || fMatch.Address != f.Address+1 {
+						errs["AddressByOne"] += 1
+						diffs += fmt.Sprintf("Address %d != %d, ", fMatch.Address, f.Address)
+					} else if fMatch.Address != f.Address {
 						errs["Address"] += 1
 						diffs += fmt.Sprintf("Address %d != %d, ", fMatch.Address, f.Address)
 					}

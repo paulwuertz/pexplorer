@@ -31,6 +31,31 @@ func IsFnCallInstr(instr string) bool {
 	return true
 }
 
+// TODO - are there more like these?
+func IsForwardedCall(instr symbolextraction.DisAsm, f *symbolextraction.FunctionSymbol, s *symbolextraction.SElfReport) (bool, uint64) {
+	var calladdr uint64 = 0
+	noKnownForwardedInstruction := instr.Instruction != "b.w"
+	foundNumber, err := fmt.Sscanf(instr.Opstr, "#0x%X", &calladdr)
+	if f.Name == "log_backend_enable" {
+		f.StackQualifiers = "estimated+experimental"
+	}
+	if err != nil || foundNumber != 1 || noKnownForwardedInstruction {
+		return false, 0
+	}
+	startAddr := f.Address
+	endAddr := f.Address + f.FlashSize
+	outsiteCallrange := (calladdr < startAddr) || (calladdr > endAddr)
+	if !outsiteCallrange {
+		return false, 0
+	}
+	_, ok := s.Addr2FnMap[calladdr]
+	if !ok {
+		return false, 0
+	} else {
+		return true, calladdr
+	}
+}
+
 func AddCallGraph(s *symbolextraction.SElfReport) {
 	for i := 0; i < len(s.Functions); i++ {
 		f := &s.Functions[i]
@@ -41,6 +66,7 @@ func AddCallGraph(s *symbolextraction.SElfReport) {
 		}
 
 		for _, insn := range f.DisAsm {
+			isForwardedCall, forwardedAddr := IsForwardedCall(insn, f, s)
 			if IsFnCallInstr(insn.Instruction) {
 				//stackoverflow.com/questions/75285743/arm-gcc-cortex-m4-calling-address-as-function-generates-blx-instead-of-bl
 				var calladdr []uint64 = make([]uint64, 1) // wasteful hack to get a nullable int... TODO any better way?
@@ -58,6 +84,21 @@ func AddCallGraph(s *symbolextraction.SElfReport) {
 				fnCalled, fnFound := s.Addr2FnMap[calladdr[0]]
 				if fnFound {
 					clr := symbolextraction.FunctionCall{CallFrom: &f.Address, CallTo: &calladdr[0], DynamicCall: false}
+					fnCalled.Callers = append(fnCalled.Callers, clr)
+				} else {
+					msg := fmt.Sprintf("static call from %s at %d to unknown function", f.Name, f.Address)
+					s.Info = append(s.Info, msg)
+				}
+			} else if isForwardedCall {
+				call := symbolextraction.FunctionCall{
+					CallFrom:    &f.Address,
+					CallTo:      &forwardedAddr,
+					DynamicCall: false,
+				}
+				f.Callees = append(f.Callees, call)
+				fnCalled, fnFound := s.Addr2FnMap[forwardedAddr]
+				if fnFound {
+					clr := symbolextraction.FunctionCall{CallFrom: &f.Address, CallTo: &forwardedAddr, DynamicCall: false}
 					fnCalled.Callers = append(fnCalled.Callers, clr)
 				} else {
 					msg := fmt.Sprintf("static call from %s at %d to unknown function", f.Name, f.Address)

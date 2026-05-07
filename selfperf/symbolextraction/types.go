@@ -23,7 +23,7 @@ type FunctionSymbol struct {
 	Asm                 []byte            `json:"asm,omitempty,omitzero"`
 	Callees             []FunctionCall    `json:"callees,omitempty,omitzero"`
 	Callers             []FunctionCall    `json:"callers,omitempty,omitzero"`
-	StackSize           int64             `json:"stack_size,omitempty,omitzero"`
+	StackSize           int64             `json:"stack_size"`
 	MaxStackSizeCallees int64             `json:"max_stack_size_callees,omitempty,omitzero"`
 	StackQualifiers     string            `json:"stack_qualifiers,omitempty,omitzero"`
 	// calls + refs
