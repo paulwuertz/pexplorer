@@ -71,10 +71,10 @@ func AddCallGraph(s *symbolextraction.SElfReport) {
 func ExtractFunctionStackUsage(f *symbolextraction.FunctionSymbol) {
 	// fmt.Println("\t\tfn", f.Name, mainfde.Length, f.SourceFilePath, f.SourceFileLine)
 	var current_stacksize int64 = 0
+	if f.Name == "main" {
+		f.StackQualifiers = "estimated+experimental"
+	}
 	for _, d := range f.DisAsm {
-		if f.Name == "main" {
-			f.StackQualifiers = "estimated+experimental"
-		}
 		sub := strings.HasPrefix(d.Instruction, "sub")
 		stack_pointer := strings.HasPrefix(d.Opstr, "sp, #0x")
 		if strings.HasPrefix(d.Instruction, "push") {

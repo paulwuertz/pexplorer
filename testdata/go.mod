@@ -10,4 +10,8 @@ require (
 	github.com/knightsc/gapstone v4.0.1+incompatible // indirect
 )
 
+replace github.com/paulwuertz/pexplorer/selfperf v0.0.0-20260218094942-abdd34d37a06 => ../selfperf
+
 replace github.com/paulwuertz/pexplorer/selfperf/symbolextraction v0.0.0-20260218094942-abdd34d37a06 => ../selfperf/symbolextraction
+
+replace github.com/paulwuertz/pexplorer/selfperf/callgraph v0.0.0-20260218094942-abdd34d37a06 => ../selfperf/callgraph
