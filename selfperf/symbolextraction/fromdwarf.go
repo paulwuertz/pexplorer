@@ -263,6 +263,10 @@ func getVariableTypes(s *SElfReport) []Typedef {
 				if err != nil {
 					continue
 				}
+
+				if varRef != nil && (*varRef).Address == 0x800fad8 {
+					fmt.Println("entry var withot fn", entry)
+				}
 				typeStr := typeRef.Common().Name
 				// try to get the type
 				if typeStr != "" {
@@ -271,7 +275,7 @@ func getVariableTypes(s *SElfReport) []Typedef {
 					// https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst#the-base-procedure-call-standard
 					ExtractType(&typeRef, typeMap)
 					if varRef != nil {
-						varRef.VariableType = typeRef.Common().Name
+						varRef.VariableType = typeStr
 						if curFunction != nil {
 							curFunction.Variables = append(curFunction.Variables, varRef)
 						} else {
@@ -280,7 +284,12 @@ func getVariableTypes(s *SElfReport) []Typedef {
 						}
 					}
 				} else {
-					// ?
+					t := ExtractType(&typeRef, typeMap)
+					if t.Name != "" && varRef != nil {
+						varRef.VariableType = t.Name
+					} else {
+						// ?
+					}
 				}
 			} else {
 				// fmt.Println("\t- no type info found", entry.Tag.String())
