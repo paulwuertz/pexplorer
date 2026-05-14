@@ -9,7 +9,6 @@
 	import { Breadcrumb, BreadcrumbItem, Row, Tooltip } from '@sveltestrap/sveltestrap';
 	import { Table } from '@sveltestrap/sveltestrap';
 	import Highlight from 'svelte-highlight';
-	import atomOneDark from 'svelte-highlight/styles/atom-one-dark';
 	import armasm from 'svelte-highlight/languages/armasm';
 	import SymbolTable from '../../../../components/SymbolTable.svelte';
 	import * as helpers from '../../../helpers.js';
@@ -59,10 +58,6 @@
 	let var_childs = $derived(fw_symbols.variables.filter(isChildToPath).sort());
 	let symbols_in_symbols = $derived([...fn_childs, ...var_childs]);
 </script>
-
-<svelte:head>
-	{@html atomOneDark}
-</svelte:head>
 
 <div class="container">
 	<hr />
