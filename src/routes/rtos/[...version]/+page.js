@@ -11,7 +11,7 @@ export async function load({ url, params, parent }) {
 		let selVers = versions[0];
 		symbols.elfDataProvided = true;
 		symbols.selected_version = selVers;
-		goto(base + '/#/rtos/' + selVers );
+		goto(base + '/#/rtos/' + selVers);
 	} else if (!symbols.elfDataProvided) {
 		goto(base + '/#/');
 		return;

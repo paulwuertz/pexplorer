@@ -22,7 +22,6 @@
 	const { page_name } = $props();
 
 	let versions = $derived(Object.keys(symbols.symbols));
-
 </script>
 
 <div class="container" id="content">

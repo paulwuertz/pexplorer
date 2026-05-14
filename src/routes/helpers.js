@@ -90,10 +90,10 @@ export const try_get_callee_link_by_addr = (
 ) => {
 	let callee_name = sym_path_by_addr[call_to_addr];
 	let link_href = base + '/#/browse/' + symbol_version + '/' + callee_name;
-    if (callee_name == undefined) {
-        return ["/", "???"]
-    }
-    let callxrs_slugs = callee_name.split('/');
+	if (callee_name == undefined) {
+		return ['/', '???'];
+	}
+	let callxrs_slugs = callee_name.split('/');
 	let sym_name = callxrs_slugs[callxrs_slugs.length - 1];
 	return [link_href, sym_name];
 };
@@ -118,10 +118,10 @@ export const callxrs_text_to_symname = (callxrs, sym_path_by_addr, isCaller) => 
 	}
 	let callxrs_addr = callxrs[direction];
 	let callxrs_text = sym_path_by_addr[callxrs_addr];
-    if (callxrs_text == undefined) {
-        return "???"
-    }
-    console.log("callxrs_text", callxrs_addr, callxrs_text, callxrs_text);
+	if (callxrs_text == undefined) {
+		return '???';
+	}
+	console.log('callxrs_text', callxrs_addr, callxrs_text, callxrs_text);
 	let callxrs_slugs = callxrs_text.split('/');
 	let sym_name = callxrs_slugs[callxrs_slugs.length - 1];
 	return sym_name;

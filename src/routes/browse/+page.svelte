@@ -12,4 +12,4 @@
 
 <hr />
 
-<VersionSelect page_name={"browse"}></VersionSelect>
+<VersionSelect page_name={'browse'}></VersionSelect>
