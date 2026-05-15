@@ -117,12 +117,17 @@ func (fm SectionMaps) getSectionByIndex(i uint8) (sec *elf.Section) {
 }
 
 func AddASMToFunctions(syms []FunctionSymbol, fm SectionMaps, info []string) {
-	sec := fm.getSectionByName("text")
-	sr := sec.Open()
-	textStartAddr := sec.Addr // todo addr or offset?
-	textEndAddr := sec.Addr + sec.Size
 	for i, _ := range syms {
 		sym := &syms[i]
+		sec := fm.getSectionByIndex(sym.SectionIndex)
+		if sec == nil {
+			msg := fmt.Sprintf("section for symbol '%s' not found in ELF, section id: %X", sym.Name, sym.SectionIndex)
+			info = append(info, msg)
+			continue
+		}
+		sr := sec.Open()
+		textStartAddr := sec.Addr // todo addr or offset?
+		textEndAddr := sec.Addr + sec.Size
 		addr, size := sym.Address, sym.FlashSize
 		if addr >= textStartAddr && addr <= textEndAddr {
 			symSecOffset := int64(addr - textStartAddr - 1)
