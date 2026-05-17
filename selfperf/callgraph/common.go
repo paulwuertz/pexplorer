@@ -31,6 +31,13 @@ func IsFnCallInstr(instr string) bool {
 	return true
 }
 
+func IsDynamicCallInstr(instr string) bool {
+	if instr == "blx" {
+		return true
+	}
+	return false
+}
+
 // TODO - are there more like these?
 func IsForwardedCall(instr symbolextraction.DisAsm, f *symbolextraction.FunctionSymbol, s *symbolextraction.SElfReport) (bool, uint64) {
 	var calladdr uint64 = 0

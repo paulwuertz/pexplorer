@@ -88,13 +88,23 @@
 			static_thread_args.forEach((member) => {
 				thread_data[member.name] = getMemberBytes(staticInitData, member.byte_offset, member.size);
 			});
-			thread_data['name'] = t['name'];
 
 			let entry_function = functions.find((val, i, arr) => {
 				return val['address'] == thread_data['init_entry'];
 			});
 			if (entry_function) {
+				thread_data['name'] = entry_function['name'];
+				thread_data['file'] = entry_function['file'];
 				thread_data['entry_function'] = entry_function;
+				if (typeof get_fn_calltree === 'function') {
+					let fn_calltree = JSON.parse(get_fn_calltree(entry_function.address));
+					if (Object.hasOwn(fn_calltree, 'unresolved')) {
+						thread_data['unresolved_calls'] = fn_calltree.unresolved.length;
+					} else {
+						thread_data['unresolved_calls'] = 0;
+					}
+					thread_data['fn_calltree'] = fn_calltree;
+				}
 				thread_data['max_stack_size_callees'] = entry_function['max_stack_size_callees'];
 			}
 			let thread_name = variables.find((val, i, arr) => {
@@ -135,7 +145,12 @@
 										<b>Thread entry function:</b>
 										<br />
 										<span>
-											<a data-sveltekit-preload-data="tap" href={'#'}> _k_thread_data_leds </a>
+											<a
+												data-sveltekit-preload-data="tap"
+												href={'#/browse/' + version_name + sTread['file'] + '/' + sTread['name']}
+											>
+												{sTread['name']}
+											</a>
 										</span>
 									</div>
 									<div class="pb-3">
@@ -146,13 +161,13 @@
 									<div class="pb-3">
 										<b>Unresolved dynamic calls:</b>
 										<br />
-										<span>TODO</span>
+										<span>{sTread['unresolved_calls']}</span>
 									</div>
-									<div class="pb-3">
+									<!-- <div class="pb-3">
 										<b>Functions missing stack-use info:</b>
 										<br />
 										<span>TODO</span>
-									</div>
+									</div> -->
 
 									<CardSubtitle>Minimum stack use scenario found:</CardSubtitle>
 									<div class="pt-3">

@@ -154,7 +154,7 @@
 		myChart.showLoading();
 		let stackTrace = fn_calltree; //await fetch(ROOT_PATH).then((resp) => resp.json())
 		myChart.hideLoading();
-		console.log(stackTrace);
+		// console.log(stackTrace);
 
 		const levelOfOriginalJson = heightOfJson(stackTrace.tree);
 		option = {

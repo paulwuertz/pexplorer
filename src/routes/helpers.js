@@ -121,7 +121,7 @@ export const callxrs_text_to_symname = (callxrs, sym_path_by_addr, isCaller) => 
 	if (callxrs_text == undefined) {
 		return '???';
 	}
-	console.log('callxrs_text', callxrs_addr, callxrs_text, callxrs_text);
+	//console.log('callxrs_text', callxrs_addr, callxrs_text, callxrs_text);
 	let callxrs_slugs = callxrs_text.split('/');
 	let sym_name = callxrs_slugs[callxrs_slugs.length - 1];
 	return sym_name;
