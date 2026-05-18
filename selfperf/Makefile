@@ -8,7 +8,9 @@ test:
 
 testdataReportOutput:
 	mkdir -p tmp
-	go run ./cmd/jsonreport/jsonreport.go -i ../testdata/elf_testdata/zswatch_nrf5340_07.elf -o tmp/zswatch_nrf5340_07.json -p
+	go run ./cmd/jsonreport/jsonreport.go -i ../testdata/elf_testdata/zswatch_nrf5340_070.elf -o tmp/zswatch_nrf5340_070.json -p
+	go run ./cmd/jsonreport/jsonreport.go -i ../testdata/elf_testdata/zswatch_nrf5340_080.elf -o tmp/zswatch_nrf5340_080.json -p
+	go run ./cmd/jsonreport/jsonreport.go -i ../testdata/elf_testdata/zswatch_nrf5340_081.elf -o tmp/zswatch_nrf5340_081.json -p
 	go run ./cmd/jsonreport/jsonreport.go -i ../testdata/elf_testdata/Pinecilv2_EN_v2_23.elf -o tmp/Pinecilv2_EN_v2_23.json -p
 	go run ./cmd/jsonreport/jsonreport.go -i ../testdata/elf_testdata/Pinecilv1_EN_v2_23.elf -o tmp/Pinecilv1_EN_v2_23.json -p
 	go run ./cmd/jsonreport/jsonreport.go -i ../testdata/elf_testdata/zephyr_cannectivity_12_llvm_lpc55s16.elf -o tmp/zephyr_cannectivity_12_llvm_lpc55s16.json -p

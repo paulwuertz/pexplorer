@@ -21,41 +21,67 @@
 	import { symbols } from './symbols.svelte.js';
 	import * as helpers from './helpers.js';
 	import { base } from '$app/paths';
+
+	const testFWsets = [
+		{
+			common_name: 'CANnectivity - NXP LPC55S16',
+			versions: [
+				{
+					name: 'v1.2 - LLVM',
+					url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zephyr_cannectivity_12_llvm_lpc55s16.elf'
+				},
+				{
+					name: 'v1.2 - GCC',
+					url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zephyr_cannectivity_12_gcc_lpc55s16.elf'
+				},
+				{
+					name: 'v1.3 - LLVM',
+					url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zephyr_cannectivity_13_llvm_lpc55s16.elf'
+				},
+				{
+					name: 'v1.3 - GCC',
+					url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zephyr_cannectivity_13_gcc_lpc55s16.elf'
+				}
+			]
+		},
+		{
+			common_name: 'ZSWatch - Legacy',
+			versions: [
+				{
+					name: 'v0.7.0',
+					url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zswatch_nrf5340_070.elf'
+				},
+				{
+					name: 'v0.8.0',
+					url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zswatch_nrf5340_080.elf'
+				},
+				{
+					name: 'v0.8.1',
+					url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zswatch_nrf5340_081.elf'
+				}
+			]
+		},
+		{
+			common_name: 'Pinecil IronOS (RISC-V WiP)',
+			versions: [
+				{
+					name: 'V1 EN v2.23',
+					url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/Pinecilv1_EN_v2_23.elf'
+				},
+				{
+					name: 'V2 EN v2.23',
+					url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/Pinecilv2_EN_v2_23.elf'
+				}
+			]
+		}
+	];
 	const testFW = [
-		{
-			name: 'CANnectivity v1.2 LLVM @ lpc55s16',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zephyr_cannectivity_12_llvm_lpc55s16.elf'
-		},
-		{
-			name: 'CANnectivity v1.2 GCC @ lpc55s16',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zephyr_cannectivity_12_gcc_lpc55s16.elf'
-		},
-		{
-			name: 'CANnectivity v1.3 LLVM @ lpc55s16',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zephyr_cannectivity_13_llvm_lpc55s16.elf'
-		},
-		{
-			name: 'CANnectivity v1.3 GCC @ lpc55s16',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zephyr_cannectivity_13_gcc_lpc55s16.elf'
-		},
 		{
 			name: 'Prusa Buddy - Core One v6.4.0',
 			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/prusa_buddy_boot_64.elf'
 		},
 		{
-			name: 'IronOS Pinecilv1 EN v2.23 (RISC-V WiP)',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/Pinecilv1_EN_v2_23.elf'
-		},
-		{
-			name: 'IronOS Pinecilv2 EN v2.23 (RISC-V WiP)',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/Pinecilv2_EN_v2_23.elf'
-		},
-		{
-			name: 'ZSWatch v0.7.0',
-			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zswatch_nrf5340_07.elf'
-		},
-		{
-			name: 'libresolar bms zephyr 4.3 commit b95360',
+			name: 'Libresolar BMS vX.Y.Z',
 			url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/libre_solar_zephyr_43_b953.elf'
 		}
 	];
@@ -328,12 +354,25 @@
 								:)</CardText
 							>
 							<div>
+								<div><b><small>Individual firmware samples:</small></b></div>
 								{#each testFW as fw, i ('link-' + fw.name)}
 									<Button
 										class="example-btn"
 										color="light"
 										onclick={() => addFWSample(fw.name, fw.url)}>{fw.name}</Button
 									>
+								{/each}
+								{#each testFWsets as fws, i ('fwset-' + fws.common_name)}
+									<div><b><small>{fws.common_name}:</small></b></div>
+									<ButtonGroup>
+										{#each fws.versions as fw, i ('fw-version-' + fw.name)}
+											<Button
+												class="example-btn"
+												color="light"
+												onclick={() => addFWSample(fws.common_name + fw.name, fw.url)}>{fw.name}</Button
+											>
+										{/each}
+									</ButtonGroup>
 								{/each}
 							</div>
 						</Row>

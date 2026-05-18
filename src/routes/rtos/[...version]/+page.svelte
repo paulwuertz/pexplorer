@@ -8,6 +8,7 @@
 	import {
 		Badge,
 		Button,
+		ButtonGroup,
 		Col,
 		Container,
 		Input,
@@ -19,7 +20,8 @@
 		CardText,
 		CardTitle,
 		CardSubtitle,
-		Progress
+		Progress,
+		CardFooter
 	} from '@sveltestrap/sveltestrap';
 
 	import { symbols } from '../../symbols.svelte.js';
@@ -171,7 +173,8 @@
 										<b>Unresolved dynamic calls:</b>
 										<br />
 										<span
-											>{sTread['unresolved_calls']} calls from {sTread['from_nr_functions']} function</span
+											>{sTread['from_nr_functions']} function contain {sTread['unresolved_calls']} unresolved
+											calls over the currently known calltree of the task.</span
 										>
 									</div>
 									<!-- <div class="pb-3">
