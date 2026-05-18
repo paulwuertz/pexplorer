@@ -100,6 +100,15 @@
 					let fn_calltree = JSON.parse(get_fn_calltree(entry_function.address));
 					if (Object.hasOwn(fn_calltree, 'unresolved')) {
 						thread_data['unresolved_calls'] = fn_calltree.unresolved.length;
+						// TODO from-to+dynamic is anoying...
+						// if elf is the central format maby it does not matter to much
+						// but for diff/comparing call names would be nice, but also
+						// could take more memory - anyway think about extending the type...
+						let function_unresolved_calls_from = {};
+						(fn_calltree.unresolved || []).forEach((call) => {
+							function_unresolved_calls_from[call.from] = 'just counting :)';
+						});
+						thread_data['from_nr_functions'] = Object.keys(function_unresolved_calls_from).length;
 					} else {
 						thread_data['unresolved_calls'] = 0;
 					}
@@ -161,7 +170,9 @@
 									<div class="pb-3">
 										<b>Unresolved dynamic calls:</b>
 										<br />
-										<span>{sTread['unresolved_calls']}</span>
+										<span
+											>{sTread['unresolved_calls']} calls from {sTread['from_nr_functions']} function</span
+										>
 									</div>
 									<!-- <div class="pb-3">
 										<b>Functions missing stack-use info:</b>

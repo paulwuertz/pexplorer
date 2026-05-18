@@ -76,15 +76,15 @@
 					? item.calls.reduce((c, e) => c + (e.max_stack_size_callees || 0), 0)
 					: 0;
 				let width_left_to_children = item.max_stack_size_callees - item.stack_size;
-				console.log(
-					level,
-					start,
-					' lev}\n\t',
-					temp.value,
-					item.max_stack_size_callees,
-					factor,
-					childSum
-				);
+				// console.log(
+				// 	level,
+				// 	start,
+				// 	' lev}\n\t',
+				// 	temp.value,
+				// 	item.max_stack_size_callees,
+				// 	factor,
+				// 	childSum
+				// );
 				for (const child of item.calls || []) {
 					if (child.max_stack_size_callees) {
 						let childFactor = (child.max_stack_size_callees || 0) / childSum;
