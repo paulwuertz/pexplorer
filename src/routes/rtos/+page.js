@@ -4,7 +4,7 @@ import { base } from '$app/paths';
 
 export async function load({ route, params }) {
 	let versions = Object.keys(symbols.symbols);
-    let version = params && Object.hasOwn(params, "version") && params.version
+	let version = params && Object.hasOwn(params, 'version') && params.version;
 	console.log('rtos versel', symbols, params, version, versions.length);
 	if (versions.length == 1 && !version) {
 		let selVers = versions[0];

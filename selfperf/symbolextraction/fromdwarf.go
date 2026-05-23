@@ -89,11 +89,8 @@ func setLineInfo(elf *elf.File, funcs []FunctionSymbol, vars []VariableSymbol) {
 	// }
 }
 
-func ExtractType(typeRef *godwarf.Type, cache map[string]Typedef) Typedef {
+func ExtractType(typeRef *godwarf.Type, cache map[string]Typedef, s *SElfReport) Typedef {
 	name := (*typeRef).Common().Name
-	if name == "_static_thread_data" {
-		fmt.Println("\tmnn", name)
-	}
 	switch (*typeRef).(type) {
 	case *godwarf.StructType:
 		structRef := (*typeRef).(*godwarf.StructType)
@@ -106,16 +103,13 @@ func ExtractType(typeRef *godwarf.Type, cache map[string]Typedef) Typedef {
 			cache[typestr] = Typedef{}
 		}
 		for _, f := range structRef.Field {
-			if f.Name == "_static_thread_data" {
-				fmt.Println("\tmnn", name)
-			}
-			member := ExtractType(&f.Type, cache)
+			member := ExtractType(&f.Type, cache, s)
 			member.ByteOffset = f.ByteOffset
 			member.BitOffset = f.BitOffset
 			member.BitSize = f.BitSize
 			member.Name = f.Name
 			typedef.Members = append(typedef.Members, member)
-			fmt.Println("\tStructType f", f)
+			// fmt.Println("\tStructType f", f)
 		}
 		cache[typestr] = typedef
 		return typedef
@@ -124,21 +118,23 @@ func ExtractType(typeRef *godwarf.Type, cache map[string]Typedef) Typedef {
 			switch (*typeRef).(type) {
 			case *godwarf.PtrType:
 				ptrRef := (*typeRef).(*godwarf.PtrType)
-				ptrData := ExtractType(&ptrRef.Type, cache)
+				ptrData := ExtractType(&ptrRef.Type, cache, s)
 				ptrData.IsPointer = true
 				ptrData.Size = (*ptrRef).Common().ByteSize
 				return ptrData
 			case *godwarf.QualType:
 				ptrRef := (*typeRef).(*godwarf.QualType)
-				return ExtractType(&ptrRef.Type, cache)
+				return ExtractType(&ptrRef.Type, cache, s)
 			default:
-				fmt.Println("uncatchedTypeType", reflect.TypeOf(typeRef), "of", name)
+				msg := fmt.Sprintf("uncatched unnammed Type: %s", reflect.TypeOf(typeRef).Name())
+				s.Info = append(s.Info, msg)
 				return Typedef{}
 			}
 		}
 		return Typedef{Type: name, Size: (*typeRef).Common().ByteSize, Members: make([]Typedef, 0)}
 	default:
-		fmt.Println("uncatchedType", reflect.TypeOf(typeRef), "of", name)
+		msg := fmt.Sprintf("uncatchedType: %s of %s", reflect.TypeOf(typeRef).Name(), name)
+		s.Info = append(s.Info, msg)
 		return Typedef{}
 	}
 }
@@ -264,8 +260,9 @@ func getVariableTypes(s *SElfReport) []Typedef {
 					continue
 				}
 
-				if varRef != nil && (*varRef).Address == 0x800fad8 {
-					fmt.Println("entry var withot fn", entry)
+				if varRef != nil {
+					// TODO add test with samples
+					// fmt.Println("entry var withot fn", entry)
 				}
 				typeStr := typeRef.Common().Name
 				// try to get the type
@@ -273,18 +270,20 @@ func getVariableTypes(s *SElfReport) []Typedef {
 					// https://github.com/ARM-software/abi-aa/blob/main/aaelf32/aaelf32.rst
 					// https://github.com/ARM-software/abi-aa/blob/main/aadwarf32/aadwarf32.rst
 					// https://github.com/ARM-software/abi-aa/blob/main/aapcs32/aapcs32.rst#the-base-procedure-call-standard
-					ExtractType(&typeRef, typeMap)
+					ExtractType(&typeRef, typeMap, s)
 					if varRef != nil {
 						varRef.VariableType = typeStr
 						if curFunction != nil {
 							curFunction.Variables = append(curFunction.Variables, varRef)
 						} else {
 							// cu
-							fmt.Println("entry var withot fn", entry)
+							// TODO delete or do smth?
+							// msg := fmt.Sprintf("entry var withot fn: %s", entry)
+							// s.Info = append(s.Info, msg)
 						}
 					}
 				} else {
-					t := ExtractType(&typeRef, typeMap)
+					t := ExtractType(&typeRef, typeMap, s)
 					if t.Name != "" && varRef != nil {
 						varRef.VariableType = t.Name
 					} else {

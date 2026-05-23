@@ -120,7 +120,7 @@ func ExtractFunctionStackUsage(f *symbolextraction.FunctionSymbol) {
 	// fmt.Println("\t\tfn", f.Name, mainfde.Length, f.SourceFilePath, f.SourceFileLine)
 	var current_stacksize int64 = 0
 	if f.Name == "main" {
-		f.StackQualifiers = "estimated+experimental"
+		f.StackQualifiers = "experimental-estimate"
 	}
 	for _, d := range f.DisAsm {
 		sub := strings.HasPrefix(d.Instruction, "sub")
@@ -130,7 +130,7 @@ func ExtractFunctionStackUsage(f *symbolextraction.FunctionSymbol) {
 			//push.w {r0, r1, r2, r3, r4, lr} with a suffix condition - maybe TODO distinguish cond.?
 			nr_regs := strings.Count(d.Opstr, ",") + 1
 			current_stacksize += int64(nr_regs) * 4
-			fmt.Println(f.Name, "push now", current_stacksize, "@", d.Addr)
+			// fmt.Println(f.Name, "push now", current_stacksize, "@", d.Addr)
 		} else if sub && stack_pointer {
 			// sub   sp, #0x10
 			stackSubSize, err := strconv.ParseInt(d.Opstr[5:], 0, 64)
@@ -138,13 +138,13 @@ func ExtractFunctionStackUsage(f *symbolextraction.FunctionSymbol) {
 				log.Fatalf(f.Name, "sub now hexstr err", d.Opstr)
 			}
 			current_stacksize += stackSubSize
-			fmt.Println(f.Name, "sub now", current_stacksize, "@", d.Addr)
+			// fmt.Println(f.Name, "sub now", current_stacksize, "@", d.Addr)
 		}
 		// fmt.Println(fmt.Sprintf("%x", i), "off:", s.CFA.Offset, d.Instruction, d.Opstr, "-> cfa reg:", s.CFA.Reg, "rule:", symbolextraction.RegRuleEnum2String[s.CFA.Rule], "expr:", s.CFA.Expression, "regs:", s.Regs, "reta:", s.RetAddrReg)
 	}
 	f.StackSize = current_stacksize
 	f.StackQualifiers = "estimated+experimental"
-	fmt.Println(f.Name, "result:", current_stacksize)
+	// fmt.Println(f.Name, "result:", current_stacksize)
 }
 
 // maybe it could be useful in the future... was my first intend, but was off to much...

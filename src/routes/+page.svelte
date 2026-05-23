@@ -128,7 +128,10 @@
 				WebAssembly.instantiate(bytes, go.importObject).then(function (obj) {
 					wasm = obj.instance;
 					go.run(wasm);
+                    const startTime = performance.now()
 					let reportJSONstr = get_elf_report(elfBinary);
+                    const endTime1 = performance.now()
+                    console.log(`Report generation took ${(endTime1 - startTime)/1000} seconds`)
 					let reportJSON = JSON.parse(reportJSONstr);
 					console.log(reportJSON);
 					// end TODO :)
@@ -136,6 +139,8 @@
 						let disasmFnMap = helpers.getDisasmFnMap(reportJSON);
 						let disasmFnMapArg = Uint8Array.fromBase64(btoa(JSON.stringify(disasmFnMap)));
 						reportJSONstr = add_fn_calls_from_disasm(disasmFnMapArg);
+                        const endTime = performance.now()
+                        console.log(`After call annotation it took ${(endTime - startTime)/1000} seconds`)
 						reportJSON = JSON.parse(reportJSONstr);
 						// Todo mv somewhere better
 						let reportFns = reportJSON['functions'];

@@ -30,5 +30,5 @@
 </script>
 
 <div class="container" id="content">
-    <VersionSelect page_name={'rtos'}></VersionSelect>
+	<VersionSelect page_name={'rtos'}></VersionSelect>
 </div>

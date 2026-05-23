@@ -31,7 +31,7 @@
 	const PLOT_ID_PREFIX = 'stackSizeLayered_';
 
 	let params = $props();
-    // TODO - why are propsed nested +1 here on production build?!
+	// TODO - why are propsed nested +1 here on production build?!
 	let parameters = $derived(params && (params.data.data || params.data));
 	let version_name = $derived((parameters && parameters.version) || '');
 	let version = $derived(symbols.symbols[version_name] || {});
