@@ -131,76 +131,76 @@
 </script>
 
 <div class="container" id="content">
-    <Container fluid>
-        <h3>version_name: {JSON.stringify(version_name)}</h3>
-        <h4>Static threads by K_THREAD_DEFINE</h4>
-        <Row cols={{ lg: 3, md: 2, sm: 1 }}>
-            {#each static_thread_data as sTread (sTread.name)}
-                <div class="pb-3 px-3">
-                    <Card>
-                        <CardHeader>
-                            <CardTitle>{sTread['name']}</CardTitle>
-                        </CardHeader>
-                        <CardBody>
-                            <CardText>
-                                <!-- {#each Object.entries(sTread) as s}
+	<Container fluid>
+		<h3>version_name: {JSON.stringify(version_name)}</h3>
+		<h4>Static threads by K_THREAD_DEFINE</h4>
+		<Row cols={{ lg: 3, md: 2, sm: 1 }}>
+			{#each static_thread_data as sTread (sTread.name)}
+				<div class="pb-3 px-3">
+					<Card>
+						<CardHeader>
+							<CardTitle>{sTread['name']}</CardTitle>
+						</CardHeader>
+						<CardBody>
+							<CardText>
+								<!-- {#each Object.entries(sTread) as s}
                                     <div>{s[0]} - {s[1]}</div>
                                     {"init_thread":536872864,"init_stack":536877904,"init_stack_size":256,"init_entry":134227277,"init_p1":0,"init_p2":0,"init_p3":0,"init_prio":4,"init_options":0,"init_name":134288890,"init_delay":0,"name":"_k_thread_data_leds"}
                                 {/each} -->
-                                <!-- TODO add source link symbol json -->
-                                <!-- Buildtime: {symbols.symbols[version].timestamp} -->
-                                <div class="pb-3">
-                                    <b>Thread entry function:</b>
-                                    <br />
-                                    <span>
-                                        <a
-                                            data-sveltekit-preload-data="tap"
-                                            href={'#/browse/' + version_name + sTread['file'] + '/' + sTread['name']}
-                                        >
-                                            {sTread['name']}
-                                        </a>
-                                    </span>
-                                </div>
-                                <div class="pb-3">
-                                    <b>Configured stack size:</b>
-                                    <br />
-                                    <span>init_stack_size bytes</span>
-                                </div>
-                                <div class="pb-3">
-                                    <b>Unresolved dynamic calls:</b>
-                                    <br />
-                                    <span
-                                        >{sTread['from_nr_functions']} function contain {sTread['unresolved_calls']} unresolved
-                                        calls over the currently known calltree of the task.</span
-                                    >
-                                </div>
-                                <!-- <div class="pb-3">
+								<!-- TODO add source link symbol json -->
+								<!-- Buildtime: {symbols.symbols[version].timestamp} -->
+								<div class="pb-3">
+									<b>Thread entry function:</b>
+									<br />
+									<span>
+										<a
+											data-sveltekit-preload-data="tap"
+											href={'#/browse/' + version_name + sTread['file'] + '/' + sTread['name']}
+										>
+											{sTread['name']}
+										</a>
+									</span>
+								</div>
+								<div class="pb-3">
+									<b>Configured stack size:</b>
+									<br />
+									<span>init_stack_size bytes</span>
+								</div>
+								<div class="pb-3">
+									<b>Unresolved dynamic calls:</b>
+									<br />
+									<span
+										>{sTread['from_nr_functions']} function contain {sTread['unresolved_calls']} unresolved
+										calls over the currently known calltree of the task.</span
+									>
+								</div>
+								<!-- <div class="pb-3">
                                     <b>Functions missing stack-use info:</b>
                                     <br />
                                     <span>TODO</span>
                                 </div> -->
 
-                                <CardSubtitle>Minimum stack use scenario found:</CardSubtitle>
-                                <div class="pt-3">
-                                    <Progress
-                                        color={stackLevelToColor(
-                                            sTread['max_stack_size_callees'],
-                                            sTread['init_stack_size']
-                                        )}
-                                        value={sTread['max_stack_size_callees']}
-                                        max={sTread['init_stack_size']}
-                                        class="mb-2"
-                                    >
-                                        {(100 * sTread['max_stack_size_callees']) / sTread['init_stack_size']}% - {sTread[
-                                            'max_stack_size_callees'
-                                        ]} / {sTread['init_stack_size']} bytes)
-                                    </Progress>
-                                </div>
-                            </CardText>
-                        </CardBody>
-                    </Card>
-                </div>
-            {/each}
-        </Row>
-    </Container>
+								<CardSubtitle>Minimum stack use scenario found:</CardSubtitle>
+								<div class="pt-3">
+									<Progress
+										color={stackLevelToColor(
+											sTread['max_stack_size_callees'],
+											sTread['init_stack_size']
+										)}
+										value={sTread['max_stack_size_callees']}
+										max={sTread['init_stack_size']}
+										class="mb-2"
+									>
+										{(100 * sTread['max_stack_size_callees']) / sTread['init_stack_size']}% - {sTread[
+											'max_stack_size_callees'
+										]} / {sTread['init_stack_size']} bytes)
+									</Progress>
+								</div>
+							</CardText>
+						</CardBody>
+					</Card>
+				</div>
+			{/each}
+		</Row>
+	</Container>
 </div>
