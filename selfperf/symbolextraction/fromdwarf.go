@@ -125,6 +125,9 @@ func ExtractType(typeRef *godwarf.Type, cache map[string]Typedef, s *SElfReport)
 			case *godwarf.QualType:
 				ptrRef := (*typeRef).(*godwarf.QualType)
 				return ExtractType(&ptrRef.Type, cache, s)
+			case *godwarf.ArrayType:
+				arrRef := (*typeRef).(*godwarf.ArrayType)
+				return ExtractType(&arrRef.Type, cache, s)
 			default:
 				msg := fmt.Sprintf("uncatched unnammed Type: %s", reflect.TypeOf(typeRef).Name())
 				s.Info = append(s.Info, msg)
@@ -191,6 +194,7 @@ func getVariableTypes(s *SElfReport) []Typedef {
 		}
 
 		var filename string = ""
+		// TODO +AttrName and friends?!
 		cuFileIndex, fileNameFound := entry.Val(dwarf.AttrDeclFile).(int64)
 		cuFileLine, _ := entry.Val(dwarf.AttrDeclLine).(int64)
 		name, isNameOk := entry.Val(dwarf.AttrName).(string)
@@ -241,15 +245,24 @@ func getVariableTypes(s *SElfReport) []Typedef {
 			var found bool
 			// get var addr by name and at file info
 			if isNameOk {
+				if name == "z_interrupt_stacks" {
+					fmt.Println("entry var withot fn")
+				}
 				addr, err := delveReader.AddrFor(name, 0, 4)
-				if err == nil && addr != 0 {
-					varRef, found = varMap[addr]
-					if found {
-						// Variables do not come with an file attribute
-						// so use the current compilation units main file
-						varRef.SourceFilePath = curCompileUnit.Source[1]
-						varRef.SourceFileLine = uint64(cuFileLine)
+				if err != nil {
+					for _, v := range s.Variables {
+						if v.Name == name {
+							addr = v.Address
+							break
+						}
 					}
+				}
+				varRef, found = varMap[addr]
+				if found {
+					// Variables do not come with an file attribute
+					// so use the current compilation units main file
+					varRef.SourceFilePath = curCompileUnit.Source[1]
+					varRef.SourceFileLine = uint64(cuFileLine)
 				}
 			}
 			// get type info
