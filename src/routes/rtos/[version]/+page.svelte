@@ -127,6 +127,14 @@
 			return thread_data;
 		})
 	);
+
+	const isUnassociatedStaticStack = (symbol) => {
+		let sym_type = symbol.type || '';
+		let sym_addr = symbol.address || '';
+		let alreadyAssociated = static_thread_data.find((element) => element.init_stack == sym_addr);
+		return sym_type == 'z_thread_stack_element' && !alreadyAssociated;
+	};
+	let staticStacks = $derived(variables.filter(isUnassociatedStaticStack));
 	$inspect(version_name, static_thread_data);
 </script>
 
@@ -202,5 +210,14 @@
 				</div>
 			{/each}
 		</Row>
+		<h4>Detected static stacks without an associated thread:</h4>
+
+		<ul>
+			{#each staticStacks as sStacks (sStacks.name)}
+				<li>
+					{sStacks.name} - size: {sStacks.size} bytes - addr: 0x{sStacks.address.toString(16)}
+				</li>
+			{/each}
+		</ul>
 	</Container>
 </div>
