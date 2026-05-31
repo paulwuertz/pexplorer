@@ -284,4 +284,10 @@
 		border: 1px solid #ccc;
 		border-radius: 4px;
 	}
+	td, th {
+		min-width: 110px;
+		font-size: 14px;
+		padding-top: 0.25rem;
+		padding-bottom: 0.25rem;
+	}
 </style>
