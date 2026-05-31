@@ -12,7 +12,7 @@ import (
 
 type SectionMaps struct {
 	byName  map[string]*elf.Section
-	byIndex map[uint8]*elf.Section
+	byIndex map[uint64]*elf.Section
 }
 
 func ExtractFunctions(elfFile elf.File) []FunctionSymbol {
@@ -38,7 +38,7 @@ func ExtractFunctions(elfFile elf.File) []FunctionSymbol {
 			FlashSize:      sym.Size,
 			SourceFilePath: "",
 			SourceFileLine: 0,
-			SectionIndex:   uint8(sym.Section),
+			SectionIndex:   uint64(sym.Section),
 			Callees:        make([]FunctionCall, 0),
 			Callers:        make([]FunctionCall, 0),
 		})
@@ -71,7 +71,7 @@ func ExtractVariables(elfFile elf.File) []VariableSymbol {
 			Name:         name,
 			Address:      address,
 			FlashSize:    sym.Size,
-			SectionIndex: uint8(sym.Section),
+			SectionIndex: uint64(sym.Section),
 		})
 		// fmt.Println(fmt.Sprintf("fun %s at %x", sym.Name, address), sym)
 	}
@@ -85,7 +85,7 @@ func ExtractVariables(elfFile elf.File) []VariableSymbol {
 func ExtractSections(elfFile elf.File) (sections []ElfSection, secRefs SectionMaps) {
 	secData := elfFile.Sections
 	secRefs.byName = make(map[string]*elf.Section)
-	secRefs.byIndex = make(map[uint8]*elf.Section)
+	secRefs.byIndex = make(map[uint64]*elf.Section)
 
 	// build a symbol map from the symbol section
 	// this should be always present...
@@ -94,10 +94,10 @@ func ExtractSections(elfFile elf.File) (sections []ElfSection, secRefs SectionMa
 			Name:    section.Name,
 			Address: section.Addr,
 			Size:    section.Size,
-			Index:   uint8(i),
+			Index:   uint64(i),
 		})
 		secRefs.byName[section.Name] = section
-		secRefs.byIndex[uint8(i)] = section
+		secRefs.byIndex[uint64(i)] = section
 		// fmt.Println(fmt.Sprintf("fun %s at %x", sym.Name, address), sym)
 	}
 	return
@@ -111,7 +111,7 @@ func (fm SectionMaps) getSectionByName(name string) (sec *elf.Section) {
 	return // might be nil anyway if section is not present...
 }
 
-func (fm SectionMaps) getSectionByIndex(i uint8) (sec *elf.Section) {
+func (fm SectionMaps) getSectionByIndex(i uint64) (sec *elf.Section) {
 	sec = fm.byIndex[i]
 	return // might be nil anyway if section is not present...
 }

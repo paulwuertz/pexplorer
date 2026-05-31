@@ -245,9 +245,9 @@ func getVariableTypes(s *SElfReport) []Typedef {
 			var found bool
 			// get var addr by name and at file info
 			if isNameOk {
-				if name == "z_interrupt_stacks" {
-					fmt.Println("entry var withot fn")
-				}
+				// if name == "z_interrupt_stacks" {
+				// 	fmt.Println("entry var withot fn")
+				// }
 				addr, err := delveReader.AddrFor(name, 0, 4)
 				if err != nil {
 					for _, v := range s.Variables {

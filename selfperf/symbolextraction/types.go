@@ -9,14 +9,14 @@ type ElfSection struct {
 	Name    string `json:"name"`
 	Address uint64 `json:"address"`
 	Size    uint64 `json:"size"`
-	Index   uint8  `json:"index"`
+	Index   uint64 `json:"index"`
 }
 
 type FunctionSymbol struct {
 	Name                string            `json:"name"`
 	Address             uint64            `json:"address,omitempty,omitzero"`
 	FlashSize           uint64            `json:"size"`
-	SectionIndex        uint8             `json:"secidx"`
+	SectionIndex        uint64            `json:"secidx"`
 	SourceFilePath      string            `json:"file,omitempty,omitzero"`
 	SourceFileLine      uint64            `json:"line,omitempty,omitzero"`
 	Variables           []*VariableSymbol `json:"vars,omitempty,omitzero"`
@@ -79,7 +79,7 @@ type VariableSymbol struct {
 	Name           string       `json:"name"`
 	Address        uint64       `json:"address,omitempty,omitzero"`
 	FlashSize      uint64       `json:"size"`
-	SectionIndex   uint8        `json:"secidx"`
+	SectionIndex   uint64       `json:"secidx"`
 	SourceFilePath string       `json:"file,omitempty,omitzero"`
 	SourceFileLine uint64       `json:"line,omitempty,omitzero"`
 	VariableType   string       `json:"type,omitempty,omitzero"`
@@ -119,5 +119,6 @@ type SElfReport struct {
 	Types              []Typedef        `json:"types,omitempty,omitzero"`
 	Info               []string         `json:"info"`
 	// lookup
-	Addr2FnMap map[uint64]*FunctionSymbol `json:"-"`
+	Addr2FnMap  map[uint64]*FunctionSymbol `json:"-"`
+	SectionsMap map[uint64]*ElfSection     `json:"-"`
 }
