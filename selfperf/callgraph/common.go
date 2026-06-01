@@ -79,38 +79,44 @@ func AddCallGraph(s *symbolextraction.SElfReport) {
 				var calladdr []uint64 = make([]uint64, 1) // wasteful hack to get a nullable int... TODO any better way?
 				foundNumber, err := fmt.Sscanf(insn.Opstr, "#0x%X", &calladdr[0])
 				if err != nil || foundNumber != 1 {
-					f.Callees = append(f.Callees, symbolextraction.FunctionCall{CallFrom: &f.Address, DynamicCall: true})
+					f.Callees = append(f.Callees, symbolextraction.FunctionCall{
+						CallFromFunctionName: f.Name,
+						CallFrom:             &f.Address,
+						DynamicCall:          true,
+					})
 					continue
 				}
 				call := symbolextraction.FunctionCall{
-					CallFrom:    &f.Address,
-					CallTo:      &calladdr[0],
-					DynamicCall: false,
+					CallFromFunctionName: f.Name,
+					CallFrom:             &f.Address,
+					CallTo:               &calladdr[0],
+					DynamicCall:          false,
 				}
-				f.Callees = append(f.Callees, call)
 				fnCalled, fnFound := s.Addr2FnMap[calladdr[0]]
 				if fnFound {
-					clr := symbolextraction.FunctionCall{CallFrom: &f.Address, CallTo: &calladdr[0], DynamicCall: false}
-					fnCalled.Callers = append(fnCalled.Callers, clr)
+					call.CallToFunctionName = fnCalled.Name
+					fnCalled.Callers = append(fnCalled.Callers, call)
 				} else {
 					msg := fmt.Sprintf("static call from %s at %d to unknown function", f.Name, f.Address)
 					s.Info = append(s.Info, msg)
-				}
-			} else if isForwardedCall {
-				call := symbolextraction.FunctionCall{
-					CallFrom:    &f.Address,
-					CallTo:      &forwardedAddr,
-					DynamicCall: false,
 				}
 				f.Callees = append(f.Callees, call)
+			} else if isForwardedCall {
+				call := symbolextraction.FunctionCall{
+					CallFromFunctionName: f.Name,
+					CallFrom:             &f.Address,
+					CallTo:               &forwardedAddr,
+					DynamicCall:          false,
+				}
 				fnCalled, fnFound := s.Addr2FnMap[forwardedAddr]
 				if fnFound {
-					clr := symbolextraction.FunctionCall{CallFrom: &f.Address, CallTo: &forwardedAddr, DynamicCall: false}
-					fnCalled.Callers = append(fnCalled.Callers, clr)
+					call.CallToFunctionName = fnCalled.Name
+					fnCalled.Callers = append(fnCalled.Callers, call)
 				} else {
 					msg := fmt.Sprintf("static call from %s at %d to unknown function", f.Name, f.Address)
 					s.Info = append(s.Info, msg)
 				}
+				f.Callees = append(f.Callees, call)
 			}
 		}
 	}

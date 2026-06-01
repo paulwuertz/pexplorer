@@ -36,9 +36,11 @@ type FunctionSymbol struct {
 
 type FunctionCall struct {
 	// *uint64 for empty json export, TODO maybe use a string address?
-	CallFrom    *uint64 `json:"from,omitempty,omitzero"`
-	CallTo      *uint64 `json:"to,omitempty,omitzero"`
-	DynamicCall bool    `json:"dynamic"`
+	CallFrom             *uint64 `json:"from,omitempty,omitzero"`
+	CallFromFunctionName string  `json:"from_function_name,omitempty"`
+	CallTo               *uint64 `json:"to,omitempty,omitzero"`
+	CallToFunctionName   string  `json:"to_function_name,omitempty"`
+	DynamicCall          bool    `json:"dynamic"`
 }
 
 // smaller version of FunctionSymbol to export json for flamegraph rendering
