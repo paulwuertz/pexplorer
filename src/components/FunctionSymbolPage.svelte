@@ -284,7 +284,8 @@
 		border: 1px solid #ccc;
 		border-radius: 4px;
 	}
-	td, th {
+	td,
+	th {
 		min-width: 110px;
 		font-size: 14px;
 		padding-top: 0.25rem;

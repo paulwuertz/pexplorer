@@ -10,147 +10,212 @@
 		Col,
 		CardHeader,
 		Container,
-        Icon,
+		Icon,
 		Input,
 		Row,
 		CardBody,
 		CardText,
 		CardTitle,
-        Table,
+		Table
 	} from '@sveltestrap/sveltestrap';
 	import { symbols } from '../routes/symbols.svelte.js';
 	import * as helpers from '../routes/helpers.js';
 
-
 	const { settings } = $props();
 
-    let thread_stack_size = (thread) => {
-        if (Object.hasOwn(thread, "stack_variable_name")) {
-            return 1024 // TODO lookup symbolname + size
-        } else if (Object.hasOwn(thread, "size")) {
-            return thread.size
-        } else {
-            return 0 // TODO error
-        }
-    }
-    let setting = $derived(settings)
-    let threads = $derived(setting.threads || [])
-    let dynamic_calls = $derived(setting.dynamic_calls || [])
-    let versions = $derived(Object.keys(symbols.symbols));
-    let version_name = $derived(versions[0]);
+	let thread_stack_size = (thread) => {
+		if (Object.hasOwn(thread, 'stack_variable_name')) {
+			return 1024; // TODO lookup symbolname + size
+		} else if (Object.hasOwn(thread, 'size')) {
+			return thread.size;
+		} else {
+			return 0; // TODO error
+		}
+	};
+	let setting = $state(settings);
+	let threads = $state(setting.threads || []);
+	let dynamic_calls = $state(setting.dynamic_calls || []);
+	let versions = $derived(Object.keys(symbols.symbols));
+	let version_name = $derived(versions[0]);
 	let version = $derived(symbols.symbols[version_name] || {});
 	let functions = $derived(version.functions || []);
 	let variables = $derived(version.variables || []);
+
+	let selected_call_from = $state();
+	let selected_call_to = $state();
+	let add_dynamic_call = () => {
+		if (!selected_call_from) {
+			// TODO err
+			alert('Add missing selected_call_from');
+			return;
+		}
+		if (!selected_call_to) {
+			// TODO err
+			alert('Add missing selected_call_to');
+			return;
+		}
+		dynamic_calls.push({
+			call_from: selected_call_from,
+			call_to: selected_call_to
+		});
+	};
+
+	let selected_thread_entry = $state();
+	let selected_stack_variable = $state();
+	let selected_stack_size = $state();
+	let add_thread = () => {
+		if (!selected_thread_entry) {
+			// TODO err
+			alert('Add missing selected_thread_entry');
+			return;
+		}
+		if (selected_stack_variable) {
+			// "stack_variable_name" "size"
+			threads.push({
+				thread_entry_name: selected_thread_entry,
+				stack_variable_name: selected_stack_variable
+			});
+		} else if (selected_stack_size) {
+			threads.push({
+				thread_entry_name: selected_thread_entry,
+				size: selected_stack_size
+			});
+		} else {
+			alert('Add missing selected_stack_variable');
+			return;
+		}
+	};
 </script>
 
 <div class="container" id="content">
 	<h3>pexplorer setting:</h3>
 
-    Select symbols from:
+	Select symbols from:
 
-    <Input type="select">
-        {#each versions as option}
-        <option>{option}</option>
-        {/each}
-    </Input>
+	<Input type="select">
+		{#each versions as option}
+			<option>{option}</option>
+		{/each}
+	</Input>
 
 	<h4>Threads:</h4>
 
-    <Table bordered>
-    <thead>
-        <tr>
-            <th>Thread entry function name</th>
-            <th>Thread stack variable name</th>
-            <th>Thread stack size</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {#each threads as thread, index (thread.thread_entry_name+index)}
-        <tr>
-            <td>{thread.thread_entry_name}</td>
-            <td>{thread.stack_variable_name}</td>
-            <td>{thread_stack_size(thread)}</td>
-            <td>
-                <Button onclick={() => {threads = threads.filter((v, i) => i!=index)}} size="md" outline color="danger">
-                    <svg height="32" width="29" viewBox="0 0 1000 875"><path d="M0 281.296l0 -68.355q1.953 -37.107 29.295 -62.496t64.449 -25.389l93.744 0l0 -31.248q0 -39.06 27.342 -66.402t66.402 -27.342l312.48 0q39.06 0 66.402 27.342t27.342 66.402l0 31.248l93.744 0q37.107 0 64.449 25.389t29.295 62.496l0 68.355q0 25.389 -18.553 43.943t-43.943 18.553l0 531.216q0 52.731 -36.13 88.862t-88.862 36.13l-499.968 0q-52.731 0 -88.862 -36.13t-36.13 -88.862l0 -531.216q-25.389 0 -43.943 -18.553t-18.553 -43.943zm62.496 0l749.952 0l0 -62.496q0 -13.671 -8.789 -22.46t-22.46 -8.789l-687.456 0q-13.671 0 -22.46 8.789t-8.789 22.46l0 62.496zm62.496 593.712q0 25.389 18.553 43.943t43.943 18.553l499.968 0q25.389 0 43.943 -18.553t18.553 -43.943l0 -531.216l-624.96 0l0 531.216zm62.496 -31.248l0 -406.224q0 -13.671 8.789 -22.46t22.46 -8.789l62.496 0q13.671 0 22.46 8.789t8.789 22.46l0 406.224q0 13.671 -8.789 22.46t-22.46 8.789l-62.496 0q-13.671 0 -22.46 -8.789t-8.789 -22.46zm31.248 0l62.496 0l0 -406.224l-62.496 0l0 406.224zm31.248 -718.704l374.976 0l0 -31.248q0 -13.671 -8.789 -22.46t-22.46 -8.789l-312.48 0q-13.671 0 -22.46 8.789t-8.789 22.46l0 31.248zm124.992 718.704l0 -406.224q0 -13.671 8.789 -22.46t22.46 -8.789l62.496 0q13.671 0 22.46 8.789t8.789 22.46l0 406.224q0 13.671 -8.789 22.46t-22.46 8.789l-62.496 0q-13.671 0 -22.46 -8.789t-8.789 -22.46zm31.248 0l62.496 0l0 -406.224l-62.496 0l0 406.224zm156.24 0l0 -406.224q0 -13.671 8.789 -22.46t22.46 -8.789l62.496 0q13.671 0 22.46 8.789t8.789 22.46l0 406.224q0 13.671 -8.789 22.46t-22.46 8.789l-62.496 0q-13.671 0 -22.46 -8.789t-8.789 -22.46zm31.248 0l62.496 0l0 -406.224l-62.496 0l0 406.224z"/></svg>
-                </Button>
-            </td>
-        </tr>
-        {/each}
+	<Table bordered>
+		<thead>
+			<tr>
+				<th>Thread entry function name</th>
+				<th>Thread stack variable name</th>
+				<th>Thread stack size</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{#each threads as thread, index (thread.thread_entry_name + index)}
+				<tr>
+					<td>{thread.thread_entry_name}</td>
+					<td>{thread.stack_variable_name}</td>
+					<td>{thread_stack_size(thread)}</td>
+					<td>
+						<Button
+							onclick={() => {
+								threads = threads.filter((v, i) => i != index);
+							}}
+							size="md"
+							outline
+							color="danger"
+						>
+							<svg height="32" width="29" viewBox="0 0 1000 875"
+								><path
+									d="M0 281.296l0 -68.355q1.953 -37.107 29.295 -62.496t64.449 -25.389l93.744 0l0 -31.248q0 -39.06 27.342 -66.402t66.402 -27.342l312.48 0q39.06 0 66.402 27.342t27.342 66.402l0 31.248l93.744 0q37.107 0 64.449 25.389t29.295 62.496l0 68.355q0 25.389 -18.553 43.943t-43.943 18.553l0 531.216q0 52.731 -36.13 88.862t-88.862 36.13l-499.968 0q-52.731 0 -88.862 -36.13t-36.13 -88.862l0 -531.216q-25.389 0 -43.943 -18.553t-18.553 -43.943zm62.496 0l749.952 0l0 -62.496q0 -13.671 -8.789 -22.46t-22.46 -8.789l-687.456 0q-13.671 0 -22.46 8.789t-8.789 22.46l0 62.496zm62.496 593.712q0 25.389 18.553 43.943t43.943 18.553l499.968 0q25.389 0 43.943 -18.553t18.553 -43.943l0 -531.216l-624.96 0l0 531.216zm62.496 -31.248l0 -406.224q0 -13.671 8.789 -22.46t22.46 -8.789l62.496 0q13.671 0 22.46 8.789t8.789 22.46l0 406.224q0 13.671 -8.789 22.46t-22.46 8.789l-62.496 0q-13.671 0 -22.46 -8.789t-8.789 -22.46zm31.248 0l62.496 0l0 -406.224l-62.496 0l0 406.224zm31.248 -718.704l374.976 0l0 -31.248q0 -13.671 -8.789 -22.46t-22.46 -8.789l-312.48 0q-13.671 0 -22.46 8.789t-8.789 22.46l0 31.248zm124.992 718.704l0 -406.224q0 -13.671 8.789 -22.46t22.46 -8.789l62.496 0q13.671 0 22.46 8.789t8.789 22.46l0 406.224q0 13.671 -8.789 22.46t-22.46 8.789l-62.496 0q-13.671 0 -22.46 -8.789t-8.789 -22.46zm31.248 0l62.496 0l0 -406.224l-62.496 0l0 406.224zm156.24 0l0 -406.224q0 -13.671 8.789 -22.46t22.46 -8.789l62.496 0q13.671 0 22.46 8.789t8.789 22.46l0 406.224q0 13.671 -8.789 22.46t-22.46 8.789l-62.496 0q-13.671 0 -22.46 -8.789t-8.789 -22.46zm31.248 0l62.496 0l0 -406.224l-62.496 0l0 406.224z"
+								/></svg
+							>
+						</Button>
+					</td>
+				</tr>
+			{/each}
 
-        <tr>
-            <td>
-                <Input type="select">
-                    <option></option>
-                    {#each functions as f}
-                    <option>{f.name}</option>
-                    {/each}
-                </Input>
-            </td>
-            <td>
-                <Input type="select">
-                    <option></option>
-                    {#each variables as v}
-                    <option>{v.name}</option>
-                    {/each}
-                </Input>
-            </td>
-            <td>
-                <Input type="number"/>
-            </td>
-            <td>
-                <Button color="success">Add thread</Button>
-            </td>
-        </tr>
-    </tbody>
-    </Table>
+			<tr>
+				<td>
+					<Input type="select" bind:value={selected_thread_entry}>
+						<option></option>
+						{#each functions as f}
+							<option>{f.name}</option>
+						{/each}
+					</Input>
+				</td>
+				<td>
+					<Input type="select" bind:value={selected_stack_variable}>
+						<option></option>
+						{#each variables as v}
+							<option>{v.name}</option>
+						{/each}
+					</Input>
+				</td>
+				<td>
+					<Input type="number" bind:value={selected_stack_size} />
+				</td>
+				<td>
+					<Button color="success" on:click={add_thread}>Add thread</Button>
+				</td>
+			</tr>
+		</tbody>
+	</Table>
 
 	<h4>Dynamic calls:</h4>
 
+	<Table bordered>
+		<thead>
+			<tr>
+				<th>From</th>
+				<th>To</th>
+				<th></th>
+			</tr>
+		</thead>
+		<tbody>
+			{#each dynamic_calls as dynamic_call, index (dynamic_call.call_from + dynamic_call.call_to + index)}
+				<tr>
+					<td>{dynamic_call.call_from}</td>
+					<td>{dynamic_call.call_to}</td>
+					<td>
+						<Button
+							onclick={() => {
+								dynamic_calls = dynamic_calls.filter((v, i) => i != index);
+							}}
+							size="md"
+							outline
+							color="danger"
+						>
+							<svg height="32" width="29" viewBox="0 0 1000 875"
+								><path
+									d="M0 281.296l0 -68.355q1.953 -37.107 29.295 -62.496t64.449 -25.389l93.744 0l0 -31.248q0 -39.06 27.342 -66.402t66.402 -27.342l312.48 0q39.06 0 66.402 27.342t27.342 66.402l0 31.248l93.744 0q37.107 0 64.449 25.389t29.295 62.496l0 68.355q0 25.389 -18.553 43.943t-43.943 18.553l0 531.216q0 52.731 -36.13 88.862t-88.862 36.13l-499.968 0q-52.731 0 -88.862 -36.13t-36.13 -88.862l0 -531.216q-25.389 0 -43.943 -18.553t-18.553 -43.943zm62.496 0l749.952 0l0 -62.496q0 -13.671 -8.789 -22.46t-22.46 -8.789l-687.456 0q-13.671 0 -22.46 8.789t-8.789 22.46l0 62.496zm62.496 593.712q0 25.389 18.553 43.943t43.943 18.553l499.968 0q25.389 0 43.943 -18.553t18.553 -43.943l0 -531.216l-624.96 0l0 531.216zm62.496 -31.248l0 -406.224q0 -13.671 8.789 -22.46t22.46 -8.789l62.496 0q13.671 0 22.46 8.789t8.789 22.46l0 406.224q0 13.671 -8.789 22.46t-22.46 8.789l-62.496 0q-13.671 0 -22.46 -8.789t-8.789 -22.46zm31.248 0l62.496 0l0 -406.224l-62.496 0l0 406.224zm31.248 -718.704l374.976 0l0 -31.248q0 -13.671 -8.789 -22.46t-22.46 -8.789l-312.48 0q-13.671 0 -22.46 8.789t-8.789 22.46l0 31.248zm124.992 718.704l0 -406.224q0 -13.671 8.789 -22.46t22.46 -8.789l62.496 0q13.671 0 22.46 8.789t8.789 22.46l0 406.224q0 13.671 -8.789 22.46t-22.46 8.789l-62.496 0q-13.671 0 -22.46 -8.789t-8.789 -22.46zm31.248 0l62.496 0l0 -406.224l-62.496 0l0 406.224zm156.24 0l0 -406.224q0 -13.671 8.789 -22.46t22.46 -8.789l62.496 0q13.671 0 22.46 8.789t8.789 22.46l0 406.224q0 13.671 -8.789 22.46t-22.46 8.789l-62.496 0q-13.671 0 -22.46 -8.789t-8.789 -22.46zm31.248 0l62.496 0l0 -406.224l-62.496 0l0 406.224z"
+								/></svg
+							>
+						</Button>
+					</td>
+				</tr>
+			{/each}
 
-    <Table bordered>
-    <thead>
-        <tr>
-            <th>From</th>
-            <th>To</th>
-            <th></th>
-        </tr>
-    </thead>
-    <tbody>
-        {#each dynamic_calls as dynamic_call, index (dynamic_call.call_from+dynamic_call.call_to+index)}
-        <tr>
-            <td>{dynamic_call.call_from}</td>
-            <td>{dynamic_call.call_to}</td>
-            <td>
-                <Button onclick={() => {dynamic_calls = dynamic_calls.filter((v, i) => i!=index)}} size="md" outline color="danger">
-                    <svg height="32" width="29" viewBox="0 0 1000 875"><path d="M0 281.296l0 -68.355q1.953 -37.107 29.295 -62.496t64.449 -25.389l93.744 0l0 -31.248q0 -39.06 27.342 -66.402t66.402 -27.342l312.48 0q39.06 0 66.402 27.342t27.342 66.402l0 31.248l93.744 0q37.107 0 64.449 25.389t29.295 62.496l0 68.355q0 25.389 -18.553 43.943t-43.943 18.553l0 531.216q0 52.731 -36.13 88.862t-88.862 36.13l-499.968 0q-52.731 0 -88.862 -36.13t-36.13 -88.862l0 -531.216q-25.389 0 -43.943 -18.553t-18.553 -43.943zm62.496 0l749.952 0l0 -62.496q0 -13.671 -8.789 -22.46t-22.46 -8.789l-687.456 0q-13.671 0 -22.46 8.789t-8.789 22.46l0 62.496zm62.496 593.712q0 25.389 18.553 43.943t43.943 18.553l499.968 0q25.389 0 43.943 -18.553t18.553 -43.943l0 -531.216l-624.96 0l0 531.216zm62.496 -31.248l0 -406.224q0 -13.671 8.789 -22.46t22.46 -8.789l62.496 0q13.671 0 22.46 8.789t8.789 22.46l0 406.224q0 13.671 -8.789 22.46t-22.46 8.789l-62.496 0q-13.671 0 -22.46 -8.789t-8.789 -22.46zm31.248 0l62.496 0l0 -406.224l-62.496 0l0 406.224zm31.248 -718.704l374.976 0l0 -31.248q0 -13.671 -8.789 -22.46t-22.46 -8.789l-312.48 0q-13.671 0 -22.46 8.789t-8.789 22.46l0 31.248zm124.992 718.704l0 -406.224q0 -13.671 8.789 -22.46t22.46 -8.789l62.496 0q13.671 0 22.46 8.789t8.789 22.46l0 406.224q0 13.671 -8.789 22.46t-22.46 8.789l-62.496 0q-13.671 0 -22.46 -8.789t-8.789 -22.46zm31.248 0l62.496 0l0 -406.224l-62.496 0l0 406.224zm156.24 0l0 -406.224q0 -13.671 8.789 -22.46t22.46 -8.789l62.496 0q13.671 0 22.46 8.789t8.789 22.46l0 406.224q0 13.671 -8.789 22.46t-22.46 8.789l-62.496 0q-13.671 0 -22.46 -8.789t-8.789 -22.46zm31.248 0l62.496 0l0 -406.224l-62.496 0l0 406.224z"/></svg>
-                </Button>
-            </td>
-        </tr>
-        {/each}
-
-        <tr>
-            <td>
-                <Input type="select">
-                    <option></option>
-                    {#each functions as f}
-                    <option>{f.name}</option>
-                    {/each}
-                </Input>
-            </td>
-            <td>
-                <Input type="select">
-                    <option></option>
-                    {#each functions as f}
-                    <option>{f.name}</option>
-                    {/each}
-                </Input>
-            </td>
-            <td>
-                <Button color="success">Add dynamic call</Button>
-            </td>
-        </tr>
-    </tbody>
-    </Table>
+			<tr>
+				<td>
+					<Input type="select" bind:value={selected_call_from}>
+						<option></option>
+						{#each functions as f}
+							<option>{f.name}</option>
+						{/each}
+					</Input>
+				</td>
+				<td>
+					<Input type="select" bind:value={selected_call_to}>
+						<option></option>
+						{#each functions as f}
+							<option>{f.name}</option>
+						{/each}
+					</Input>
+				</td>
+				<td>
+					<Button color="success" on:click={add_dynamic_call}>Add dynamic call</Button>
+				</td>
+			</tr>
+		</tbody>
+	</Table>
 </div>
