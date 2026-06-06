@@ -7,6 +7,7 @@
 	import {
 		Card,
 		Button,
+		ButtonGroup,
 		Col,
 		CardHeader,
 		Container,
@@ -144,6 +145,17 @@
 		};
 		backup_settings(active_settings, new_setting);
 	};
+
+	function download(file, text) {
+		//creating an invisible element
+		let element = document.createElement('a');
+		element.setAttribute('href', 'data:text/plain;charset=utf-8, ' + encodeURIComponent(text));
+		element.setAttribute('download', file);
+		document.body.appendChild(element);
+		element.click();
+
+		document.body.removeChild(element);
+	}
 </script>
 
 <div class="container" id="content">
@@ -156,6 +168,20 @@
 			<option>{option}</option>
 		{/each}
 	</Input>
+
+	<ButtonGroup class="pb-3 pt-3">
+		<Button
+			color="primary"
+			on:click={download(
+				'pexplorer-' + version_name + '.json',
+				JSON.stringify(restore_active_settings(), 0, 4)
+			)}
+		>
+			Download settings
+		</Button>
+		<!-- <Button color="primary" active>Upload settings</Button>
+        <Button color="primary">Download puncover arguments</Button> -->
+	</ButtonGroup>
 
 	<h4>Threads:</h4>
 
@@ -178,6 +204,7 @@
 						<Button
 							onclick={() => {
 								threads = threads.filter((v, i) => i != index);
+								generate_and_store_new_setting();
 							}}
 							size="md"
 							outline
@@ -239,6 +266,7 @@
 						<Button
 							onclick={() => {
 								dynamic_calls = dynamic_calls.filter((v, i) => i != index);
+								generate_and_store_new_setting();
 							}}
 							size="md"
 							outline
