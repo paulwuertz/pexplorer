@@ -23,18 +23,39 @@
 
 	const { settings } = $props();
 
-	let thread_stack_size = (thread) => {
-		if (Object.hasOwn(thread, 'stack_variable_name')) {
-			return 1024; // TODO lookup symbolname + size
-		} else if (Object.hasOwn(thread, 'size')) {
-			return thread.size;
+	let local_storage_key = 'pexplorer_settings';
+	let DUMMY_STANDARD_SETTINGS_NAME = 'test';
+	let active_settings = DUMMY_STANDARD_SETTINGS_NAME;
+
+	let store_default_settings = () => {
+		localStorage.setItem(local_storage_key, '{}');
+		return '{}';
+	};
+
+	let restore_default_settings = () => {
+		let stored_settings_str = localStorage.getItem(local_storage_key);
+		let no_settings_backed_up = !stored_settings_str;
+		if (no_settings_backed_up) {
+			stored_settings_str = store_default_settings();
+		}
+		console.log('stored_settings_str', stored_settings_str);
+		let stored_settings = JSON.parse(stored_settings_str);
+		return stored_settings;
+	};
+
+	let restore_active_settings = () => {
+		let all_settings = restore_default_settings();
+		if (Object.hasOwn(all_settings, active_settings)) {
+			return all_settings[active_settings];
 		} else {
-			return 0; // TODO error
+			return {};
 		}
 	};
-	let setting = $state(settings);
+
+	let setting = $state(restore_active_settings());
 	let threads = $state(setting.threads || []);
 	let dynamic_calls = $state(setting.dynamic_calls || []);
+	// $inspect(setting, threads, dynamic_calls);
 	let versions = $derived(Object.keys(symbols.symbols));
 	let version_name = $derived(versions[0]);
 	let version = $derived(symbols.symbols[version_name] || {});
@@ -58,6 +79,7 @@
 			call_from: selected_call_from,
 			call_to: selected_call_to
 		});
+		generate_and_store_new_setting();
 	};
 
 	let selected_thread_entry = $state();
@@ -75,15 +97,52 @@
 				thread_entry_name: selected_thread_entry,
 				stack_variable_name: selected_stack_variable
 			});
+			generate_and_store_new_setting();
 		} else if (selected_stack_size) {
 			threads.push({
 				thread_entry_name: selected_thread_entry,
 				size: selected_stack_size
 			});
+			generate_and_store_new_setting();
 		} else {
 			alert('Add missing selected_stack_variable');
 			return;
 		}
+	};
+
+	let thread_stack_size = (thread) => {
+		if (Object.hasOwn(thread, 'stack_variable_name')) {
+			let stack_name = thread.stack_variable_name;
+			let stack_var = variables.find((v) => v.name == stack_name);
+			if (stack_var) {
+				return stack_var.size;
+			} else {
+				alert(stack_name, ' var could not be found for thread', thread.name);
+				return 0;
+			}
+		} else if (Object.hasOwn(thread, 'size')) {
+			return thread.size;
+		} else {
+			alert(thread.name, ' has no associated stack');
+			return 0; // TODO error
+		}
+	};
+
+	let backup_settings = (settings_name, new_setting_set) => {
+		let stored_settings = restore_default_settings();
+		// TODO protect overwrites?
+		// if (Object.hasOwn(stored_settings, settings_name)) {
+		stored_settings[settings_name] = new_setting_set;
+		// }
+		localStorage.setItem(local_storage_key, JSON.stringify(stored_settings));
+	};
+
+	let generate_and_store_new_setting = () => {
+		let new_setting = {
+			threads: threads,
+			dynamic_calls: dynamic_calls
+		};
+		backup_settings(active_settings, new_setting);
 	};
 </script>
 
