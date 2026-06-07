@@ -21,6 +21,7 @@
 	} from '@sveltestrap/sveltestrap';
 	import { symbols } from '../routes/symbols.svelte.js';
 	import * as helpers from '../routes/helpers.js';
+	import Dropzone from 'svelte-file-dropzone';
 
 	const { settings } = $props();
 
@@ -82,6 +83,56 @@
 		});
 		generate_and_store_new_setting();
 	};
+
+	function handleFilesSelect(e) {
+		const { acceptedFiles, fileRejections } = e.detail;
+		console.log(acceptedFiles);
+
+		for (let i = 0; i < acceptedFiles.length; i++) {
+			let file = acceptedFiles[i];
+			console.log(file);
+			const reader = new FileReader();
+			// Validate file existence and type
+			if (!file) {
+				console.log('No file selected. Please choose a file.', 'error');
+				return;
+			}
+
+			let file_type = file.type.toLocaleLowerCase();
+			let is_json = file_type.endsWith('json');
+
+			if (!is_json) {
+				console.log(
+					file.type +
+						'Unsupported file type ' +
+						"'" +
+						file.type +
+						"'" +
+						' - please select a text file.',
+					'error'
+				);
+				return;
+			}
+			reader.onload = () => {
+				console.log('loded', reader);
+				if (is_json) {
+					//TODO verify to schema
+					//TODO support multiple schemas
+					let settings = JSON.parse(reader.result);
+					dynamic_calls = settings.dynamic_calls;
+					threads = settings.threads;
+				} else {
+					//TODO
+					console.log('TODO');
+				}
+			};
+			reader.onerror = () => {
+				alert('Error reading the file. Please try again.');
+			};
+
+			reader.readAsText(file);
+		}
+	}
 
 	let selected_thread_entry = $state();
 	let selected_stack_variable = $state();
@@ -161,27 +212,40 @@
 <div class="container" id="content">
 	<h3>pexplorer setting:</h3>
 
+	<div class="pt-3">Upload a config file or download the current:</div>
+
+	<Row>
+		<Col>
+			<div class="pb-3 pt-3">
+				<Dropzone on:drop={handleFilesSelect} accept=".json">
+					<p>Drag 'n' drop JSON config here, or click to select files.</p>
+				</Dropzone>
+			</div>
+		</Col>
+		<Col>
+			<ButtonGroup class="pb-3 pt-3">
+				<Button
+					color="primary"
+					on:click={download(
+						'pexplorer-' + version_name + '.json',
+						JSON.stringify(restore_active_settings(), 0, 4)
+					)}
+				>
+					Download settings
+				</Button>
+				<!-- <Button color="primary" active>Upload settings</Button> -->
+				<!-- <Button color="primary">Download puncover arguments</Button> -->
+			</ButtonGroup>
+		</Col>
+	</Row>
+
 	Select symbols from:
 
-	<Input type="select">
+	<Input class="mb-3 mt-3" type="select">
 		{#each versions as option}
 			<option>{option}</option>
 		{/each}
 	</Input>
-
-	<ButtonGroup class="pb-3 pt-3">
-		<Button
-			color="primary"
-			on:click={download(
-				'pexplorer-' + version_name + '.json',
-				JSON.stringify(restore_active_settings(), 0, 4)
-			)}
-		>
-			Download settings
-		</Button>
-		<!-- <Button color="primary" active>Upload settings</Button>
-        <Button color="primary">Download puncover arguments</Button> -->
-	</ButtonGroup>
 
 	<h4>Threads:</h4>
 
