@@ -113,6 +113,7 @@ type SElfReport struct {
 	SingleFirmware     bool             `json:"singlefirmware"`
 	FirmwareIdentifier string           `json:"firmwareID"`
 	Timestamp          string           `json:"timestamp"`
+	Architecture       string           `json:"architecture"`
 	Elf                *elf.File        `json:"-"`
 	CompileUnits       []CompileUnit    `json:"compile_units"`
 	Sections           []ElfSection     `json:"sections"`

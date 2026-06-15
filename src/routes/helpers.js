@@ -219,16 +219,16 @@ export const checkCallInstrLink = (instr, base, symbol_version, sym_path_by_addr
 	return link;
 };
 
-var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_THUMB + cs.MODE_MCLASS);
 
 export const csBase64ToASMText = (
-	base64text,
+    base64text,
 	baseAddr,
 	show_full_asm,
 	base,
 	symbol_version,
 	sym_path_by_addr
 ) => {
+    var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_THUMB + cs.MODE_MCLASS);
 	let ASM = Uint8Array.fromBase64(base64text);
 	// console.log('ASM: ' + ASM, base64text);
 	let disasmData = d.disasm(ASM, baseAddr);
