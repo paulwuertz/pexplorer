@@ -54,8 +54,8 @@
 		}
 	};
 	let sections = $derived(fw_symbols.sections);
-	let fn_childs = $derived(fw_symbols.functions.filter(isChildToPath).sort());
-	let var_childs = $derived(fw_symbols.variables.filter(isChildToPath).sort());
+	let fn_childs = $derived((fw_symbols && fw_symbols.functions || []).filter(isChildToPath).sort());
+	let var_childs = $derived((fw_symbols && fw_symbols.variables || []).filter(isChildToPath).sort());
 	let symbols_in_symbols = $derived([...fn_childs, ...var_childs]);
 </script>
 

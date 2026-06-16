@@ -275,6 +275,7 @@ export const getDisasmFnMap = (asmReport) => {
 		let disasm = [];
 		let disasmData;
 		try {
+            var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_THUMB + cs.MODE_MCLASS);
 			disasmData = d.disasm(ASM, baseAddr);
 		} catch (error) {
 			console.log(fName + fFile + ' ASM: ' + ASM);
