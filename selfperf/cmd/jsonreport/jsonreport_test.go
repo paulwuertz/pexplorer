@@ -31,7 +31,7 @@ func BenchmarkReportGen(b *testing.B) {
 				if err != nil {
 					log.Fatal(err)
 				}
-				elfReport := symbolextraction.GetFWReport(elfFile)
+				elfReport := symbolextraction.GetFWReport(elfFile, "")
 				callgraph.EnhanceByDisasm(&elfReport)
 				rtos.ScanForRtosFeatures(&elfReport)
 			},

@@ -115,6 +115,7 @@ type SElfReport struct {
 	Timestamp          string           `json:"timestamp"`
 	Architecture       string           `json:"architecture"`
 	Elf                *elf.File        `json:"-"`
+	FirmwareHash       string           `json:"firmware_hash"`
 	CompileUnits       []CompileUnit    `json:"compile_units"`
 	Sections           []ElfSection     `json:"sections"`
 	Functions          []FunctionSymbol `json:"functions"`

@@ -4,7 +4,9 @@
 package main
 
 import (
+	"crypto/sha256"
 	"debug/elf"
+	"fmt"
 	"log"
 
 	"github.com/paulwuertz/pexplorer/selfperf/callgraph"
@@ -23,7 +25,9 @@ func main() {
 		log.Fatal(err)
 	}
 
-	elfReport := symbolextraction.GetFWReport(elfFile)
+	fw_hash := sha256.Sum256([]byte(elfFile))
+	fw_hash_str := fmt.Sprintf("%x", fw_hash)
+	elfReport := symbolextraction.GetFWReport(elfFile, fw_hash_str)
 	callgraph.EnhanceByDisasm(&elfReport)
 	callgraph.TraverseCallGraph(&elfReport)
 	rtos.ScanForRtosFeatures(&elfReport)

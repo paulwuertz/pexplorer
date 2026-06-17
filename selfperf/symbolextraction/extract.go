@@ -2,7 +2,7 @@ package symbolextraction
 
 import "debug/elf"
 
-func GetFWReport(elfFile *elf.File) SElfReport {
+func GetFWReport(elfFile *elf.File, fwhash string) SElfReport {
 
 	sectionJsonInfo, sectionsRef := ExtractSections(*elfFile)
 	functions := ExtractFunctions(*elfFile)
@@ -20,6 +20,7 @@ func GetFWReport(elfFile *elf.File) SElfReport {
 		Addr2FnMap:   map[uint64]*FunctionSymbol{},
 		SectionsMap:  map[uint64]*ElfSection{},
 		Architecture: elfFile.FileHeader.Machine.String(),
+		FirmwareHash: fwhash,
 	}
 	for i := 0; i < len(elfReport.Functions); i++ {
 		f := &elfReport.Functions[i]

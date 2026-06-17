@@ -32,7 +32,7 @@ func ReportFromElfFile(elffile string) symbolextraction.SElfReport {
 		log.Fatal(err)
 	}
 
-	elfReport := symbolextraction.GetFWReport(elfFile)
+	elfReport := symbolextraction.GetFWReport(elfFile, "")
 	callgraph.EnhanceByDisasm(&elfReport)
 	return elfReport
 }

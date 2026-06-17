@@ -5,6 +5,7 @@ package main
 
 import (
 	"bytes"
+	"crypto/sha256"
 	"debug/elf"
 	"encoding/json"
 	"fmt"
@@ -26,6 +27,8 @@ func wasm_get_elf_report() js.Func {
 		elf_size := elf_bin_js.Length()
 		elf_binary := make([]byte, elf_size)
 
+		fw_hash := sha256.Sum256([]byte(elf_binary))
+		fw_hash_str := fmt.Sprintf("%x", fw_hash)
 		fmt.Printf("args # %d\n", len(args))
 		fmt.Printf("input %d\n", elf_size)
 		bytes_copied := js.CopyBytesToGo(elf_binary, elf_bin_js)
@@ -34,7 +37,7 @@ func wasm_get_elf_report() js.Func {
 		r := bytes.NewReader(elf_binary)
 		elfFile, _ := elf.NewFile(r)
 
-		elfReport = symbolextraction.GetFWReport(elfFile)
+		elfReport = symbolextraction.GetFWReport(elfFile, fw_hash_str)
 		elfReport.SingleFirmware = true
 		elfReport.FirmwareIdentifier = "unspecified"
 		elfReport.Timestamp = "just now"
