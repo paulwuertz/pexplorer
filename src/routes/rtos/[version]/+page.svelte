@@ -79,7 +79,44 @@
 
 	let staticThreads = $derived(variables.filter(isStaticThread));
 	let variableTypes = $derived(version['types']);
-    let manuallyEnteredThreads = $state(restore_default_settings())
+	let manuallyEntered = $state(restore_default_settings());
+	let manuallyEnteredThreads = $derived(manuallyEntered['test']['threads']);
+	let manuallyEnteredThreadInfo = $derived(
+		manuallyEnteredThreads
+			.map((t, i, a) => {
+				let entry_function = functions.find((val, i, arr) => {
+					return val['name'] == t['thread_entry_name'];
+				});
+				if (entry_function) {
+					let thread_data = {};
+					thread_data['name'] = entry_function['name'];
+					thread_data['file'] = entry_function['file'];
+					thread_data['init_stack_size'] = helpers.stored_thread_settings_stack_size(t, variables);
+					thread_data['max_stack_size_callees'] = entry_function['max_stack_size_callees'];
+					thread_data['entry_function'] = entry_function;
+					let fn_calltree = JSON.parse(get_fn_calltree(entry_function.address));
+					if (Object.hasOwn(fn_calltree, 'unresolved')) {
+						thread_data['unresolved_calls'] = fn_calltree.unresolved.length;
+						// TODO from-to+dynamic is anoying...
+						// if elf is the central format maby it does not matter to much
+						// but for diff/comparing call names would be nice, but also
+						// could take more memory - anyway think about extending the type...
+						let function_unresolved_calls_from = {};
+						(fn_calltree.unresolved || []).forEach((call) => {
+							function_unresolved_calls_from[call.from] = 'just counting :)';
+						});
+						thread_data['from_nr_functions'] = Object.keys(function_unresolved_calls_from).length;
+					} else {
+						thread_data['unresolved_calls'] = 0;
+					}
+					thread_data['fn_calltree'] = fn_calltree;
+					return thread_data;
+				}
+				return null;
+			})
+			.filter((v) => v != null)
+	);
+	$inspect(manuallyEnteredThreadInfo);
 	let static_thread_args = $derived((typeStruct && typeStruct.members) || []);
 	let static_thread_data = $derived(
 		staticThreads.map((t, i, a) => {
@@ -145,12 +182,19 @@
 		<Row cols={{ lg: 3, md: 2, sm: 1 }}>
 			{#each static_thread_data as sTread (sTread.name)}
 				<div class="pb-3 px-3">
-					<ThreadInfoCard sTread={sTread} version_name={version_name}></ThreadInfoCard>
+					<ThreadInfoCard {sTread} {version_name}></ThreadInfoCard>
 				</div>
 			{/each}
 		</Row>
 		<h4>Manually configured threads:</h4>
 
+		<Row cols={{ lg: 3, md: 2, sm: 1 }}>
+			{#each manuallyEnteredThreadInfo as sTread (sTread.name)}
+				<div class="pb-3 px-3">
+					<ThreadInfoCard {sTread} {version_name}></ThreadInfoCard>
+				</div>
+			{/each}
+		</Row>
 
 		<h4>Detected static stacks without an associated thread:</h4>
 

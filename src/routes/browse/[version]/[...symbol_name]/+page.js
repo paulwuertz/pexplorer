@@ -11,5 +11,5 @@ export async function load({ route, params }) {
 		return;
 	}
 	console.log('load return', route, params);
-	return (route, params);
+	return route, params;
 }

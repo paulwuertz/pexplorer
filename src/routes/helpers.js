@@ -219,16 +219,15 @@ export const checkCallInstrLink = (instr, base, symbol_version, sym_path_by_addr
 	return link;
 };
 
-
 export const csBase64ToASMText = (
-    base64text,
+	base64text,
 	baseAddr,
 	show_full_asm,
 	base,
 	symbol_version,
 	sym_path_by_addr
 ) => {
-    var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_THUMB + cs.MODE_MCLASS);
+	var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_THUMB + cs.MODE_MCLASS);
 	let ASM = Uint8Array.fromBase64(base64text);
 	// console.log('ASM: ' + ASM, base64text);
 	let disasmData = d.disasm(ASM, baseAddr);
@@ -275,7 +274,7 @@ export const getDisasmFnMap = (asmReport) => {
 		let disasm = [];
 		let disasmData;
 		try {
-            var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_THUMB + cs.MODE_MCLASS);
+			var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_THUMB + cs.MODE_MCLASS);
 			disasmData = d.disasm(ASM, baseAddr);
 		} catch (error) {
 			console.log(fName + fFile + ' ASM: ' + ASM);
@@ -310,4 +309,22 @@ export const fn2symPathLookups = (reportFns) => {
 		symPathByName[urlPath] = reportFns[i];
 	}
 	return [symPathByAddr, symPathByName];
+};
+
+export const stored_thread_settings_stack_size = (thread, variables) => {
+	if (Object.hasOwn(thread, 'stack_variable_name')) {
+		let stack_name = thread.stack_variable_name;
+		let stack_var = variables.find((v) => v.name == stack_name);
+		if (stack_var) {
+			return stack_var.size;
+		} else {
+			alert(stack_name + ' var could not be found for thread' + thread.name);
+			return 0;
+		}
+	} else if (Object.hasOwn(thread, 'size')) {
+		return thread.size;
+	} else {
+		alert(thread.name + ' has no associated stack');
+		return 0; // TODO error
+	}
 };

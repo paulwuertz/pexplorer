@@ -121,6 +121,10 @@
 					let settings = JSON.parse(reader.result);
 					dynamic_calls = settings.dynamic_calls;
 					threads = settings.threads;
+					backup_settings(active_settings, {
+						threads: threads,
+						dynamic_calls: dynamic_calls
+					});
 				} else {
 					//TODO
 					console.log('TODO');
@@ -159,24 +163,6 @@
 		} else {
 			alert('Add missing selected_stack_variable');
 			return;
-		}
-	};
-
-	let thread_stack_size = (thread) => {
-		if (Object.hasOwn(thread, 'stack_variable_name')) {
-			let stack_name = thread.stack_variable_name;
-			let stack_var = variables.find((v) => v.name == stack_name);
-			if (stack_var) {
-				return stack_var.size;
-			} else {
-				alert(stack_name, ' var could not be found for thread', thread.name);
-				return 0;
-			}
-		} else if (Object.hasOwn(thread, 'size')) {
-			return thread.size;
-		} else {
-			alert(thread.name, ' has no associated stack');
-			return 0; // TODO error
 		}
 	};
 
@@ -263,7 +249,7 @@
 				<tr>
 					<td>{thread.thread_entry_name}</td>
 					<td>{thread.stack_variable_name}</td>
-					<td>{thread_stack_size(thread)}</td>
+					<td>{helpers.stored_thread_settings_stack_size(thread, variables)}</td>
 					<td>
 						<Button
 							onclick={() => {
