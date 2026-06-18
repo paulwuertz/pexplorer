@@ -71,7 +71,7 @@
 		if (chartStyle == 'treemap') {
 			option.series.type = 'treemap';
 			option.series.roam = false;
-			option.series.nodeClick = undefined;
+			option.series.nodeClick = 'zoomToNode';
 			option.series.label.show = true;
 			// TODO expose leafDepth as setting
 			option.series.leafDepth = render_depth;
@@ -110,11 +110,11 @@
 <Row cols={{ md: 2, sm: 1 }}>
 	<div>
 		<h3>Flash usage</h3>
-		<div bind:this={sunburst_chart_rom} style="width: 100%;height:600px;"></div>
+		<div id="sunburst_chart_rom" bind:this={sunburst_chart_rom} style="width:100%;height:600px;"></div>
 	</div>
 	<div>
 		<h3>Static RAM usage</h3>
-		<div bind:this={sunburst_chart_ram} style="width: 100%;height:600px;"></div>
+		<div id="sunburst_chart_ram" bind:this={sunburst_chart_ram} style="width:100%;height:600px;"></div>
 	</div>
 </Row>
 
