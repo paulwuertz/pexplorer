@@ -1,4 +1,8 @@
-import * as cs from '@alexaltea/capstone-js/dist/capstone.min.js';
+let Capstone = null;
+
+export async function loadCapstone(cs, reject) {
+	Capstone = cs;
+}
 
 export let symbolsToMap = (syms) => {
 	let symMap = {};
@@ -227,7 +231,7 @@ export const csBase64ToASMText = (
 	symbol_version,
 	sym_path_by_addr
 ) => {
-	var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_THUMB + cs.MODE_MCLASS);
+	var d = new Capstone.Capstone(Capstone.ARCH_ARM, Capstone.MODE_THUMB + Capstone.MODE_MCLASS);
 	let ASM = Uint8Array.fromBase64(base64text);
 	// console.log('ASM: ' + ASM, base64text);
 	let disasmData = d.disasm(ASM, baseAddr);
@@ -274,7 +278,7 @@ export const getDisasmFnMap = (asmReport) => {
 		let disasm = [];
 		let disasmData;
 		try {
-			var d = new cs.Capstone(cs.ARCH_ARM, cs.MODE_THUMB + cs.MODE_MCLASS);
+			var d = new Capstone.Capstone(Capstone.ARCH_ARM, Capstone.MODE_THUMB + Capstone.MODE_MCLASS);
 			disasmData = d.disasm(ASM, baseAddr);
 		} catch (error) {
 			console.log(fName + fFile + ' ASM: ' + ASM);

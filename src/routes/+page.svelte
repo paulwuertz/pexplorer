@@ -20,6 +20,7 @@
 
 	import { symbols } from './symbols.svelte.js';
 	import * as helpers from './helpers.js';
+	import { onMount } from 'svelte';
 	import { base } from '$app/paths';
 
 	const testFWsets = [
@@ -137,6 +138,12 @@
 					// end TODO :)
 					if (reportJSON.hasOwnProperty('singlefirmware')) {
 						let disasmFnMap = helpers.getDisasmFnMap(reportJSON);
+						// hacky bigint to int addr...
+						for (let f of Object.values(disasmFnMap)) {
+							for (let i of f) {
+								i.addr = parseInt(i.addr);
+							}
+						}
 						let disasmFnMapArg = Uint8Array.fromBase64(btoa(JSON.stringify(disasmFnMap)));
 						reportJSONstr = add_fn_calls_from_disasm(disasmFnMapArg);
 						const endTime = performance.now();
@@ -293,6 +300,12 @@
 		}
 		return;
 	};
+
+	onMount(() => {
+		MCapstone().then((cs) => {
+			helpers.loadCapstone(cs);
+		});
+	});
 </script>
 
 <div class="container" id="content">

@@ -17,7 +17,6 @@
 		NavLink,
 		NavbarToggler
 	} from '@sveltestrap/sveltestrap';
-
 	import { symbols } from './symbols.svelte.js';
 
 	let isOpen = $state(true);
