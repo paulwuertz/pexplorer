@@ -26,41 +26,15 @@
 	const { settings } = $props();
 
 	let local_storage_key = 'pexplorer_settings';
-	let DUMMY_STANDARD_SETTINGS_NAME = 'test';
-	let active_settings = DUMMY_STANDARD_SETTINGS_NAME;
 
-	let store_default_settings = () => {
-		localStorage.setItem(local_storage_key, '{}');
-		return '{}';
-	};
-
-	let restore_default_settings = () => {
-		let stored_settings_str = localStorage.getItem(local_storage_key);
-		let no_settings_backed_up = !stored_settings_str;
-		if (no_settings_backed_up) {
-			stored_settings_str = store_default_settings();
-		}
-		console.log('stored_settings_str', stored_settings_str);
-		let stored_settings = JSON.parse(stored_settings_str);
-		return stored_settings;
-	};
-
-	let restore_active_settings = () => {
-		let all_settings = restore_default_settings();
-		if (Object.hasOwn(all_settings, active_settings)) {
-			return all_settings[active_settings];
-		} else {
-			return {};
-		}
-	};
-
-	let setting = $state(restore_active_settings());
-	let threads = $state(setting.threads || []);
-	let dynamic_calls = $state(setting.dynamic_calls || []);
-	// $inspect(setting, threads, dynamic_calls);
 	let versions = $derived(Object.keys(symbols.symbols));
-	let version_name = $derived(versions[0]);
+	let version_name = $state(versions[0]);
+	let restored_settings = $state();
 	let version = $derived(symbols.symbols[version_name] || {});
+	let setting = $derived((restored_settings && restored_settings[version.firmware_hash]) || {});
+	let threads = $derived((setting && setting.threads) || []);
+	let dynamic_calls = $derived((setting && setting.dynamic_calls) || []);
+	// $inspect(setting, threads, dynamic_calls);
 	let functions = $derived(version.functions || []);
 	let variables = $derived(version.variables || []);
 
@@ -83,6 +57,36 @@
 		});
 		generate_and_store_new_setting();
 	};
+
+	let store_default_settings = () => {
+		localStorage.setItem(version.firmware_hash, '{}');
+		return '{}';
+	};
+
+	let restore_default_settings = () => {
+		let stored_settings_str = localStorage.getItem(local_storage_key);
+		let no_settings_backed_up = !stored_settings_str;
+		if (no_settings_backed_up) {
+			stored_settings_str = store_default_settings();
+		}
+		console.log('stored_settings_str', stored_settings_str);
+		let stored_settings = JSON.parse(stored_settings_str);
+		return stored_settings;
+	};
+
+	let restore_active_settings = () => {
+		let all_settings = restore_default_settings();
+		restored_settings = all_settings;
+		if (Object.hasOwn(all_settings, version.firmware_hash)) {
+			return all_settings[version.firmware_hash];
+		} else {
+			return {};
+		}
+	};
+
+	onMount(() => {
+		setting = restore_active_settings();
+	});
 
 	function handleFilesSelect(e) {
 		const { acceptedFiles, fileRejections } = e.detail;
@@ -121,7 +125,7 @@
 					let settings = JSON.parse(reader.result);
 					dynamic_calls = settings.dynamic_calls;
 					threads = settings.threads;
-					backup_settings(active_settings, {
+					backup_settings(version.firmware_hash, {
 						threads: threads,
 						dynamic_calls: dynamic_calls
 					});
@@ -173,6 +177,7 @@
 		stored_settings[settings_name] = new_setting_set;
 		// }
 		localStorage.setItem(local_storage_key, JSON.stringify(stored_settings));
+		restored_settings = stored_settings;
 	};
 
 	let generate_and_store_new_setting = () => {
@@ -180,7 +185,7 @@
 			threads: threads,
 			dynamic_calls: dynamic_calls
 		};
-		backup_settings(active_settings, new_setting);
+		backup_settings(version.firmware_hash, new_setting);
 	};
 
 	function download(file, text) {
@@ -225,9 +230,9 @@
 		</Col>
 	</Row>
 
-	Select symbols from:
+	Select which firmware to configure:
 
-	<Input class="mb-3 mt-3" type="select">
+	<Input class="mb-3 mt-3" type="select" bind:value={version_name}>
 		{#each versions as option}
 			<option>{option}</option>
 		{/each}
