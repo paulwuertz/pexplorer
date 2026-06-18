@@ -80,7 +80,14 @@
 	let staticThreads = $derived(variables.filter(isStaticThread));
 	let variableTypes = $derived(version['types']);
 	let manuallyEntered = $state(restore_default_settings());
-	let manuallyEnteredThreads = $derived(manuallyEntered['test']['threads']);
+	let manuallyEnteredConfig = $derived(
+		Object.hasOwn(manuallyEntered, version.firmware_hash)
+			? manuallyEntered[version.firmware_hash]
+			: null
+	);
+	let manuallyEnteredThreads = $derived(
+		(manuallyEnteredConfig && manuallyEnteredConfig['threads']) || []
+	);
 	let manuallyEnteredThreadInfo = $derived(
 		manuallyEnteredThreads
 			.map((t, i, a) => {
