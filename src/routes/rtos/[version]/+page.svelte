@@ -196,7 +196,7 @@
 		<h4>Manually configured threads:</h4>
 
 		<Row cols={{ lg: 3, md: 2, sm: 1 }}>
-			{#each manuallyEnteredThreadInfo as sTread (sTread.name)}
+			{#each manuallyEnteredThreadInfo as sTread, i (sTread.name + i)}
 				<div class="pb-3 px-3">
 					<ThreadInfoCard {sTread} {version_name}></ThreadInfoCard>
 				</div>

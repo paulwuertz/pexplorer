@@ -110,11 +110,19 @@
 <Row cols={{ md: 2, sm: 1 }}>
 	<div>
 		<h3>Flash usage</h3>
-		<div id="sunburst_chart_rom" bind:this={sunburst_chart_rom} style="width:100%;height:600px;"></div>
+		<div
+			id="sunburst_chart_rom"
+			bind:this={sunburst_chart_rom}
+			style="width:100%;height:600px;"
+		></div>
 	</div>
 	<div>
 		<h3>Static RAM usage</h3>
-		<div id="sunburst_chart_ram" bind:this={sunburst_chart_ram} style="width:100%;height:600px;"></div>
+		<div
+			id="sunburst_chart_ram"
+			bind:this={sunburst_chart_ram}
+			style="width:100%;height:600px;"
+		></div>
 	</div>
 </Row>
 

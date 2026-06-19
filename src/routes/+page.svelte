@@ -1,4 +1,4 @@
-<script lang="ts">
+<script>
 	// ui stuff
 	import {
 		Button,
@@ -14,6 +14,9 @@
 		Input,
 		InputGroup,
 		Row,
+		Toast,
+		ToastBody,
+		ToastHeader,
 		Col
 	} from '@sveltestrap/sveltestrap';
 	import Dropzone from 'svelte-file-dropzone';
@@ -22,6 +25,7 @@
 	import * as helpers from './helpers.js';
 	import { onMount } from 'svelte';
 	import { base } from '$app/paths';
+	import { text } from '@sveltejs/kit';
 
 	const testFWsets = [
 		{
@@ -98,6 +102,7 @@
 	let nr_versions_provided = $derived(versions.length);
 	let selected_primary_versions = $state(symbols.selected_version);
 	let selected_secondary_versions = $state(symbols.selected_versions_to_compare);
+	let toast_messages = $state([]);
 
 	function loadReportsfromJson(jsonReports) {
 		try {
@@ -129,14 +134,15 @@
 				WebAssembly.instantiate(bytes, go.importObject).then(function (obj) {
 					wasm = obj.instance;
 					go.run(wasm);
-					const startTime = performance.now();
+					const startTime1 = performance.now();
 					let reportJSONstr = get_elf_report(elfBinary);
 					const endTime1 = performance.now();
-					console.log(`Report generation took ${(endTime1 - startTime) / 1000} seconds`);
+					console.log(`Report generation took ${(endTime1 - startTime1) / 1000} seconds`);
 					let reportJSON = JSON.parse(reportJSONstr);
 					console.log(reportJSON);
 					// end TODO :)
 					if (reportJSON.hasOwnProperty('singlefirmware')) {
+						const startTime = performance.now();
 						let disasmFnMap = helpers.getDisasmFnMap(reportJSON);
 						// hacky bigint to int addr...
 						for (let f of Object.values(disasmFnMap)) {
@@ -147,6 +153,12 @@
 						let disasmFnMapArg = Uint8Array.fromBase64(btoa(JSON.stringify(disasmFnMap)));
 						reportJSONstr = add_fn_calls_from_disasm(disasmFnMapArg);
 						const endTime = performance.now();
+						toast_messages = [];
+						toast_messages.push({
+							title: 'Finished. You can start to explore what we found on your program :)',
+							text: `Report generation took ${(endTime1 - startTime1) / 1000} seconds. <br>
+                                    Call annotation took ${(endTime - startTime) / 1000} seconds`
+						});
 						console.log(`After call annotation it took ${(endTime - startTime) / 1000} seconds`);
 						reportJSON = JSON.parse(reportJSONstr);
 						// Todo mv somewhere better
@@ -227,6 +239,10 @@
 
 	async function addFirmwareByLink(name, link) {
 		if (!symbol_links.includes(link)) {
+			toast_messages.push({
+				title: 'Firmware analysis running...',
+				text: 'Fetching firmware... <br>Start extracting data from the ELF file... <br>Analysing the call data... <br> Be a little patient please :)'
+			});
 			const response = await fetch(link);
 			if (link.endsWith('.elf')) {
 				loadReportFromELF(name, await response.bytes());
@@ -241,7 +257,10 @@
 				symbols.symbols[versionKey] = data[versionKey];
 			}
 		} else {
-			alert('Link already added :)');
+			toast_messages.push({
+				title: 'Nothing to do',
+				text: 'Link already added :)'
+			});
 		}
 	}
 
@@ -441,6 +460,21 @@
 			</CardFooter>
 		</Card>
 	</Container>
+</div>
+
+<div class="toast-container position-fixed bottom-0 end-0 p-3">
+	<div class="p-3 mb-3">
+		{#each toast_messages as toast_message, i (toast_message.title)}
+			<Toast class="me-1 mb-3">
+				<ToastHeader>{toast_message.title}</ToastHeader>
+				{#if Object.hasOwn(toast_message, 'text')}
+					<ToastBody>
+						{@html toast_message.text}
+					</ToastBody>
+				{/if}
+			</Toast>
+		{/each}
+	</div>
 </div>
 
 <style>
