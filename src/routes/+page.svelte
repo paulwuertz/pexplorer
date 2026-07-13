@@ -292,6 +292,10 @@
 		selected_secondary_versions = undefined;
 	}
 
+	function downloadLinks() {
+	    helpers.download("report.json", JSON.stringify(symbols))
+	}
+
 	const reset_selected_versions = () => {
 		selected_primary_versions = undefined;
 		selected_secondary_versions = undefined;
@@ -450,6 +454,7 @@
 							{/each}
 						</ul>
 
+						<Button size="md" color="success" onclick={downloadLinks}>Download json report</Button>
 						<Button size="md" color="danger" onclick={resetLinks}>Clear all links and files</Button>
 					</Col>
 					<Col sm="12" md={4}></Col>
