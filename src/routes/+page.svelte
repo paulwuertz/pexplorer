@@ -117,10 +117,23 @@
 					symbols.symbols[r] = reports[r];
 				}
 			} else if (Object.hasOwn(reports, 'multifirmware')) {
+				const startTime = performance.now();
 				for (const r of Object.keys(reports.symbols)) {
 					console.log('add:', r, 'from multi-json report');
 					symbols.symbols[r] = reports.symbols[r];
 				}
+				const endTime = performance.now();
+				toast_messages.push({
+					title: 'Finished. You can start to explore what we found on your program :)',
+					text: `Loading the report took ${(endTime - startTime) / 1000} seconds.`
+				});
+				toast_messages.push({
+					title: 'Note',
+					color: 'danger',
+					text:
+						'JSON export for call graphs is not fully implemented yet.<br>' +
+						'Upload your ELF if you want to see fully analysis. Fix comes soon :)'
+				});
 			}
 		} catch (error) {
 			// TODO UI error
@@ -484,7 +497,7 @@
 	<div class="p-3 mb-3">
 		{#each toast_messages as toast_message, i (toast_message.title)}
 			<Toast class="me-1 mb-3">
-				<ToastHeader>{toast_message.title}</ToastHeader>
+				<ToastHeader icon={toast_message.color}>{toast_message.title}</ToastHeader>
 				{#if Object.hasOwn(toast_message, 'text')}
 					<ToastBody>
 						{@html toast_message.text}
