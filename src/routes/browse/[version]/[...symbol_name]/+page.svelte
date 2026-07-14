@@ -64,8 +64,6 @@
 </script>
 
 <div class="container">
-	<hr />
-
 	<Breadcrumb divider="/">
 		{#each symbol_path_elements_and_parent_links as path_element_and_parent_links}
 			<BreadcrumbItem>

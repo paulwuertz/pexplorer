@@ -224,15 +224,15 @@ export const checkCallInstrLink = (instr, base, symbol_version, sym_path_by_addr
 };
 
 export const download = (file, text) => {
-    //creating an invisible element
-    let element = document.createElement('a');
-    element.setAttribute('href', 'data:text/plain;charset=utf-8, ' + encodeURIComponent(text));
-    element.setAttribute('download', file);
-    document.body.appendChild(element);
-    element.click();
+	//creating an invisible element
+	let element = document.createElement('a');
+	element.setAttribute('href', 'data:text/plain;charset=utf-8, ' + encodeURIComponent(text));
+	element.setAttribute('download', file);
+	document.body.appendChild(element);
+	element.click();
 
-    document.body.removeChild(element);
-}
+	document.body.removeChild(element);
+};
 
 export const csBase64ToASMText = (
 	base64text,

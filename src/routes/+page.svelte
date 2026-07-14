@@ -107,13 +107,20 @@
 	function loadReportsfromJson(jsonReports) {
 		try {
 			let reports = JSON.parse(jsonReports);
-			for (const r of Object.keys(reports)) {
-				[reports[r]['SymPathByAddr'], reports[r]['symPathByName']] = helpers.fn2symPathLookups(
-					reports[r]['functions']
-				);
-				console.log('SymPathByAddr:', reports[r]['SymPathByAddr']);
+			if (Object.hasOwn(reports, 'singlefirmware')) {
+				for (const r of Object.keys(reports)) {
+					[reports[r]['SymPathByAddr'], reports[r]['symPathByName']] = helpers.fn2symPathLookups(
+						reports[r]['functions']
+					);
+					console.log('SymPathByAddr:', reports[r]['SymPathByAddr']);
 
-				symbols.symbols[r] = reports[r];
+					symbols.symbols[r] = reports[r];
+				}
+			} else if (Object.hasOwn(reports, 'multifirmware')) {
+				for (const r of Object.keys(reports.symbols)) {
+					console.log('add:', r, 'from multi-json report');
+					symbols.symbols[r] = reports.symbols[r];
+				}
 			}
 		} catch (error) {
 			// TODO UI error
@@ -293,7 +300,13 @@
 	}
 
 	function downloadLinks() {
-	    helpers.download("report.json", JSON.stringify(symbols))
+		helpers.download(
+			'report.json',
+			JSON.stringify({
+				multifirmware: true,
+				...symbols
+			})
+		);
 	}
 
 	const reset_selected_versions = () => {
