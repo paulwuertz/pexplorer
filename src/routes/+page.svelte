@@ -26,6 +26,7 @@
 	import { onMount } from 'svelte';
 	import { base } from '$app/paths';
 	import { text } from '@sveltejs/kit';
+	import { color } from 'echarts';
 
 	const testFWsets = [
 		{

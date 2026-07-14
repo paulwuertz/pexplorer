@@ -96,6 +96,36 @@ func ExtractSections(elfFile elf.File) (sections []ElfSection, secRefs SectionMa
 			Size:    section.Size,
 			Index:   uint64(i),
 		})
+		if section.Type == elf.SHT_NOBITS {
+			// BSS and noinit sections
+			// if section.Flags & SHF_TLS {
+			// 	ram_addr_ranges.append(bound)
+			// }
+			sections[len(sections)-1].RamSize = section.Size
+		} else if section.Type == elf.SHT_PROGBITS {
+			//Sections to be in flash or memory
+			SHF_WRITE_ALLOC := elf.SHF_WRITE | elf.SHF_ALLOC
+			SHF_ALLOC_EXEC := elf.SHF_ALLOC | elf.SHF_EXECINSTR
+			if (section.Flags & SHF_ALLOC_EXEC) != 0 {
+				// Text section
+				sections[len(sections)-1].RomSize = section.Size
+			} else if (section.Flags & SHF_WRITE_ALLOC) != 0 {
+				// Read/write data
+				// TODO support xip = any(section.get_symbol_by_name('CONFIG_XIP')
+				// 		for section in elf.iter_sections('SHT_SYMTAB'))
+				// if xip:
+				//     # For XIP, the data section occupies both ROM and RAM
+				//     # since at boot, content is copied from ROM to RAM
+				//     rom_addr_ranges.append(bound)
+				//     rom_size += size
+				// if not (flags & SHF_TLS):
+				//     ram_addr_ranges.append(bound)
+				sections[len(sections)-1].RamSize = section.Size
+			} else if (section.Flags & elf.SHF_ALLOC) != 0 {
+				// Read only data
+				sections[len(sections)-1].RomSize = section.Size
+			}
+		}
 		secRefs.byName[section.Name] = section
 		secRefs.byIndex[uint64(i)] = section
 		// fmt.Println(fmt.Sprintf("fun %s at %x", sym.Name, address), sym)

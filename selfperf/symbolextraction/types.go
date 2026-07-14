@@ -9,6 +9,8 @@ type ElfSection struct {
 	Name    string `json:"name"`
 	Address uint64 `json:"address"`
 	Size    uint64 `json:"size"`
+	RamSize uint64 `json:"ram_size"`
+	RomSize uint64 `json:"rom_size"`
 	Index   uint64 `json:"index"`
 }
 
