@@ -48,6 +48,10 @@
 					><NavLink data-sveltekit-preload-data="tap" href="{base}/#/rtos/">RTOS</NavLink></NavItem
 				>
 				<NavItem
+					><NavLink data-sveltekit-preload-data="tap" href="{base}/#/sections/">Sections</NavLink
+					></NavItem
+				>
+				<NavItem
 					><NavLink data-sveltekit-preload-data="tap" href="{base}/#/config">Config</NavLink
 					></NavItem
 				>
