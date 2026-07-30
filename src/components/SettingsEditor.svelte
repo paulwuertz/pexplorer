@@ -19,6 +19,7 @@
 		CardTitle,
 		Table
 	} from '@sveltestrap/sveltestrap';
+	import Select from 'svelte-select';
 	import { symbols } from '../routes/symbols.svelte.js';
 	import * as helpers from '../routes/helpers.js';
 	import Dropzone from 'svelte-file-dropzone';
@@ -27,6 +28,8 @@
 
 	let local_storage_key = 'pexplorer_settings';
 
+	const itemId = 'address';
+	const label = 'name';
 	let versions = $derived(Object.keys(symbols.symbols));
 	let version_name = $state(versions[0]);
 	let restored_settings = $state();
@@ -52,8 +55,8 @@
 			return;
 		}
 		dynamic_calls.push({
-			call_from: selected_call_from,
-			call_to: selected_call_to
+			call_from: selected_call_from.name,
+			call_to: selected_call_to.name
 		});
 		generate_and_store_new_setting();
 	};
@@ -154,14 +157,14 @@
 		if (selected_stack_variable) {
 			// "stack_variable_name" "size"
 			threads.push({
-				thread_entry_name: selected_thread_entry,
-				stack_variable_name: selected_stack_variable
+				thread_entry_name: selected_thread_entry.name,
+				stack_variable_name: selected_stack_variable.name
 			});
 			generate_and_store_new_setting();
 		} else if (selected_stack_size) {
 			threads.push({
-				thread_entry_name: selected_thread_entry,
-				size: selected_stack_size
+				thread_entry_name: selected_thread_entry.name,
+				size: selected_stack_size.name
 			});
 			generate_and_store_new_setting();
 		} else {
@@ -206,10 +209,11 @@
 			<ButtonGroup class="pb-3 pt-3">
 				<Button
 					color="primary"
-					on:click={helpers.download(
-						'pexplorer-' + version_name + '.json',
-						JSON.stringify(restore_active_settings(), 0, 4)
-					)}
+					on:click={() =>
+						helpers.download(
+							'pexplorer-' + version_name + '.json',
+							JSON.stringify(restore_active_settings(), 0, 4)
+						)}
 				>
 					Download settings
 				</Button>
@@ -266,20 +270,10 @@
 
 			<tr>
 				<td>
-					<Input type="select" bind:value={selected_thread_entry}>
-						<option></option>
-						{#each functions as f}
-							<option>{f.name}</option>
-						{/each}
-					</Input>
+					<Select {itemId} {label} items={functions} bind:value={selected_thread_entry}></Select>
 				</td>
 				<td>
-					<Input type="select" bind:value={selected_stack_variable}>
-						<option></option>
-						{#each variables as v}
-							<option>{v.name}</option>
-						{/each}
-					</Input>
+					<Select {itemId} {label} items={variables} bind:value={selected_stack_variable}></Select>
 				</td>
 				<td>
 					<Input type="number" bind:value={selected_stack_size} />
@@ -328,20 +322,10 @@
 
 			<tr>
 				<td>
-					<Input type="select" bind:value={selected_call_from}>
-						<option></option>
-						{#each functions as f}
-							<option>{f.name}</option>
-						{/each}
-					</Input>
+					<Select {itemId} {label} items={functions} bind:value={selected_call_from}></Select>
 				</td>
 				<td>
-					<Input type="select" bind:value={selected_call_to}>
-						<option></option>
-						{#each functions as f}
-							<option>{f.name}</option>
-						{/each}
-					</Input>
+					<Select {itemId} {label} items={functions} bind:value={selected_call_to}></Select>
 				</td>
 				<td>
 					<Button color="success" on:click={add_dynamic_call}>Add dynamic call</Button>
