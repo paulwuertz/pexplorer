@@ -6,7 +6,7 @@
 	import { writable } from 'svelte/store';
 	// ui stuff
 	import { DataTable } from '@careswitch/svelte-data-table';
-	import { Button, Col, Container, Input, Row, Table } from '@sveltestrap/sveltestrap';
+	import { Button, Col, Container, Input, Row, InputGroup, Table } from '@sveltestrap/sveltestrap';
 
 	import { symbols } from '../symbols.svelte.js';
 	import * as helpers from '../helpers.js';
@@ -14,6 +14,8 @@
 	let { data } = $props();
 	let files = $state();
 	let versions = $derived(Object.keys(symbols.symbols));
+	let shown_symbole_type = $state('All');
+	let shown_symbole_diff = $state('All');
 	let bss_section = $derived(
 		(symbols.symbols[symbols.selected_version].sections || []).find(
 			(e) => e.name == 'bss' || e.name == 'bss'
@@ -287,11 +289,8 @@
 			<!-- {#key selected_thread_stat} -->
 			<h3>Thread stats and total size change</h3>
 
-			<p>
-				From {symbols.selected_version} to {symbols.selected_versions_to_compare} the change in...
-			</p>
-			<ul>
-				<!-- {#each Object.keys(selected_thread_stat) as thread_name (thread_name)}
+			<!-- <ul>
+				{#each Object.keys(selected_thread_stat) as thread_name (thread_name)}
 						{@const stackDiff =
 							selected_thread_stat[thread_name].max_static_stack_size -
 							selected_thread_stat_to_compare[thread_name].max_static_stack_size}
@@ -306,101 +305,133 @@
 							{stackDiff} bytes - now at {selected_thread_stat[thread_name].max_static_stack_size} /
 							{selected_thread_stat[thread_name].max_stack_size}
 						</li>
-					{/each} -->
-			</ul>
+					{/each}
+			</ul> -->
 			<!-- {/key} -->
-
-			<h3>Function symbols changed ({function_table.rows.length})</h3>
-
-			<Table hover bordered style="word-break: break-all;">
-				<thead>
-					<tr>
-						{#each function_table.columns as column (column.name)}
-							<th>
-								{column.name}
-								<button
-									class="flex items-center"
-									onclick={() => function_table.toggleSort(column.id)}
-									disabled={!function_table.isSortable(column.id)}
-								>
-									{#if function_table.isSortable(column.id)}
-										<span class="ml-2">
-											{#if function_table.getSortState(column.id) === 'asc'}
-												↑
-											{:else if function_table.getSortState(column.id) === 'desc'}
-												↓
-											{:else}
-												↕
-											{/if}
-										</span>
-									{/if}
-								</button>
-							</th>
+			<hr />
+			<Row>
+				<Col sm="12" md={5}>
+					<p>Show symbol type:</p>
+					<InputGroup>
+						{#each ['All', 'Only functions', 'Only variables'] as value}
+							<Input type="radio" bind:group={shown_symbole_type} {value} label={value} />
 						{/each}
-					</tr>
-				</thead>
-				<tbody>
-					{#each function_table.rows as row (row.file + row.name)}
+					</InputGroup>
+				</Col>
+
+				<Col sm="12" md={7}>
+					<p>Shown changes:</p>
+					<InputGroup>
+						{#each ['All', 'Only symbols in both versions', 'Only new', 'Only deleted'] as value}
+							<Input type="radio" bind:group={shown_symbole_diff} {value} label={value} />
+						{/each}
+					</InputGroup>
+				</Col>
+			</Row>
+			<hr />
+			<p>
+				From {symbols.selected_version} to {symbols.selected_versions_to_compare} the change in...
+			</p>
+
+			{#if shown_symbole_type != 'Only variables'}
+				<h3>Function symbols changed ({function_table.rows.length})</h3>
+
+				<Table hover bordered style="word-break: break-all;">
+					<thead>
 						<tr>
 							{#each function_table.columns as column (column.name)}
-								{#if column.name === 'Name'}
-									<td>
-										<!-- {row["file"]} -->
-										<a
-											data-sveltekit-preload-data="tap"
-											href={helpers.row2AHref(base, symbols.selected_version, row)}
-										>
-											{row[column.key]}
-										</a>
-									</td>
-								{:else}
-									<td>{row[column.key]}</td>
-								{/if}
+								<th>
+									{column.name}
+									<button
+										class="flex items-center"
+										onclick={() => function_table.toggleSort(column.id)}
+										disabled={!function_table.isSortable(column.id)}
+									>
+										{#if function_table.isSortable(column.id)}
+											<span class="ml-2">
+												{#if function_table.getSortState(column.id) === 'asc'}
+													↑
+												{:else if function_table.getSortState(column.id) === 'desc'}
+													↓
+												{:else}
+													↕
+												{/if}
+											</span>
+										{/if}
+									</button>
+								</th>
 							{/each}
 						</tr>
-					{/each}
-				</tbody>
-			</Table>
-
-			<h3>Variable symbols changed ({variable_table.rows.length})</h3>
-
-			<Table hover bordered style="word-break: break-all;">
-				<thead>
-					<tr>
-						{#each variable_table.columns as column (column.name)}
-							<th>
-								{column.name}
-								<button
-									class="flex items-center"
-									onclick={() => variable_table.toggleSort(column.id)}
-									disabled={!variable_table.isSortable(column.id)}
-								>
-									{#if variable_table.isSortable(column.id)}
-										<span class="ml-2">
-											{#if variable_table.getSortState(column.id) === 'asc'}
-												↑
-											{:else if variable_table.getSortState(column.id) === 'desc'}
-												↓
-											{:else}
-												↕
-											{/if}
-										</span>
+					</thead>
+					<tbody>
+						{#each function_table.rows as row (row.file + row.name)}
+							<tr>
+								{#each function_table.columns as column (column.name)}
+									{#if shown_symbole_diff == 'All' || (shown_symbole_diff == 'Only new' && row['remark'].startsWith('New')) || (shown_symbole_diff == 'Only deleted' && row['remark'].startsWith('Deleted')) || (shown_symbole_diff == 'Only symbols in both versions' && row['remark'] == '')}
+										{#if column.name === 'Name'}
+											<td>
+												<!-- {row["file"]} -->
+												<a
+													data-sveltekit-preload-data="tap"
+													href={helpers.row2AHref(base, symbols.selected_version, row)}
+												>
+													{row[column.key]}
+												</a>
+											</td>
+										{:else}
+											<td>{row[column.key]}</td>
+										{/if}
 									{/if}
-								</button>
-							</th>
+								{/each}
+							</tr>
 						{/each}
-					</tr>
-				</thead>
-				<tbody>
-					{#each variable_table.rows as row (row.file + row.name)}
+					</tbody>
+				</Table>
+			{/if}
+
+			{#if shown_symbole_type != 'Only functions'}
+				<h3>Variable symbols changed ({variable_table.rows.length})</h3>
+
+				<Table hover bordered style="word-break: break-all;">
+					<thead>
 						<tr>
 							{#each variable_table.columns as column (column.name)}
-								<td>{row[column.key]}</td>
+								<th>
+									{column.name}
+									<button
+										class="flex items-center"
+										onclick={() => variable_table.toggleSort(column.id)}
+										disabled={!variable_table.isSortable(column.id)}
+									>
+										{#if variable_table.isSortable(column.id)}
+											<span class="ml-2">
+												{#if variable_table.getSortState(column.id) === 'asc'}
+													↑
+												{:else if variable_table.getSortState(column.id) === 'desc'}
+													↓
+												{:else}
+													↕
+												{/if}
+											</span>
+										{/if}
+									</button>
+								</th>
 							{/each}
 						</tr>
-					{/each}
-				</tbody>
-			</Table>
+					</thead>
+					<tbody>
+						{#each variable_table.rows as row (row.file + row.name)}
+							{#if shown_symbole_diff == 'All' || (shown_symbole_diff == 'Only new' && row['remark'].startsWith('New')) || (shown_symbole_diff == 'Only deleted' && row['remark'].startsWith('Deleted')) || (shown_symbole_diff == 'Only symbols in both versions' && row['remark'] == '')}
+								<tr>
+									{#each variable_table.columns as column (column.name)}
+										<td>{row[column.key]}</td>
+									{/each}
+								</tr>
+							{/if}
+						{/each}
+					</tbody>
+				</Table>
+			{/if}
 		{/if}
 	</Container>
 </div>

@@ -92,7 +92,6 @@
 </Row>
 <hr />
 <Row>
-	<!-- TODO add filter for fn, var or both :) -->
 	<Col sm="12" md={4}></Col>
 	<Col sm="12" md={4}>Show symbol type:</Col>
 	<Col sm="12" md={4}></Col>

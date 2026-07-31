@@ -28,6 +28,7 @@
 	import * as helpers from '../../helpers.js';
 	import * as echarts from 'echarts';
 	import ThreadInfoCard from '../../../components/ThreadInfoCard.svelte';
+	import { json } from '@sveltejs/kit';
 
 	const isInMemories = (sec) => {
 		return sec.ram_size != 0 || sec.rom_size != 0;
@@ -38,8 +39,25 @@
 	let parameters = $derived(params && (params.data.data || params.data));
 	let version_name = $derived((parameters && parameters.version) || '');
 	let version = $derived(symbols.symbols[version_name] || {});
+	let functions = $derived(version.functions || []);
+	let variables = $derived(version.variables || []);
 	let secs = $derived(version.sections || []);
 	let sections = $derived(secs.filter(isInMemories));
+
+	let sum_section_id_size = (symbols) => {
+		let sec_id_size = {};
+		let nr_no_size_var = 0;
+		for (let s of symbols) {
+			if (!Object.hasOwn(sec_id_size, s.secidx)) {
+				sec_id_size[s.secidx] = 0;
+			}
+			sec_id_size[s.secidx] += s.size;
+		}
+		console.log('nr_no_size_var: ', nr_no_size_var);
+		return sec_id_size;
+	};
+
+	let sections_fill = $derived(sum_section_id_size([...functions, ...variables]));
 
 	$inspect(sections);
 </script>
@@ -57,6 +75,7 @@
 					<th></th>
 					<th>address to</th>
 					<th>size</th>
+					<th>usage</th>
 					<th>remark</th>
 				</tr>
 			</thead>
@@ -68,6 +87,7 @@
 						<td> - </td>
 						<td>0x{(section.address + section.size).toString(16)}</td>
 						<td>{section.size}</td>
+						<td>{sections_fill[section.index]}</td>
 						<td>
 							{#if section.ram_size != 0}
 								RAM
@@ -80,5 +100,6 @@
 				{/each}
 			</tbody>
 		</table>
+		{JSON.stringify(sections_fill)}
 	</Container>
 </div>
