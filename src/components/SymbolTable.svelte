@@ -22,10 +22,22 @@
 	let { fnSymbols, varSymbols, selected_version, sections, render_depth = $bindable(6) } = $props();
 	let show_sections = $state(true);
 	let show_filepath = $state('Full filepath');
-	let function_table_data = $derived([...fnSymbols, ...varSymbols]);
+	let shown_symbole_type = $state('All');
+	let nr_symbols = $state(fnSymbols.length + varSymbols.length);
+	let globalFilter = $state('');
+	let symbols_to_show = () => {
+		if (shown_symbole_type == 'All') {
+			return [...fnSymbols, ...varSymbols];
+		} else if (shown_symbole_type == 'Only functions') {
+			return [...fnSymbols];
+		} else {
+			return [...varSymbols];
+		}
+	};
+	let function_table_data = $derived(symbols_to_show());
 	let function_table = $derived(
 		new DataTable({
-			pageSize: 99999, // TODO
+			pageSize: function_table_data.length,
 			data: function_table_data,
 			columns: [
 				{ id: 'symtype', key: 'symtype', name: 'Type' },
@@ -42,6 +54,9 @@
 			]
 		})
 	);
+	$effect(() => {
+		function_table.globalFilter = globalFilter;
+	});
 </script>
 
 <hr />
@@ -58,7 +73,7 @@
 			type="text"
 			placeholder="Enter a filter string"
 			class="md:m3-auto md:max-w-[500px]"
-			bind:value={function_table.globalFilter}
+			bind:value={globalFilter}
 			style={'margin-top: 10px;'}
 		/>
 	</Col>
@@ -69,11 +84,30 @@
 				<Input type="radio" bind:group={show_filepath} {value} label={value} />
 			{/each}
 		</InputGroup>
-		<Input bind:checked={show_sections} type="switch" label="Show section column:" />
 	</Col>
 
 	<Col sm="12" md={4}>
 		<Input type="number" min="1" max="99" bind:value={render_depth} />
+	</Col>
+</Row>
+<hr />
+<Row>
+	<!-- TODO add filter for fn, var or both :) -->
+	<Col sm="12" md={4}></Col>
+	<Col sm="12" md={4}>Show symbol type:</Col>
+	<Col sm="12" md={4}></Col>
+</Row>
+<Row>
+	<Col sm="12" md={4}></Col>
+	<Col sm="12" md={4}>
+		<InputGroup>
+			{#each ['All', 'Only functions', 'Only variables'] as value}
+				<Input type="radio" bind:group={shown_symbole_type} {value} label={value} />
+			{/each}
+		</InputGroup>
+	</Col>
+	<Col sm="12" md={4}>
+		<Input reverse bind:checked={show_sections} type="switch" label="Show section column:" />
 	</Col>
 </Row>
 
@@ -81,7 +115,7 @@
 
 <Row>
 	<Col>
-		<p>Showing {function_table.allRows.length} / {function_table.baseRows.length} symbols</p>
+		<p>Showing {function_table.allRows.length} / {nr_symbols} symbols</p>
 	</Col>
 </Row>
 
