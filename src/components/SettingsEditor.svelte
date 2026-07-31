@@ -190,6 +190,37 @@
 		};
 		backup_settings(version.firmware_hash, new_setting);
 	};
+
+	let download_puncover_158_indirect_calls = () => {
+		let calls = {};
+		let active_settings = restore_active_settings();
+		// build a map
+		for (const dynamic_call of active_settings['dynamic_calls']) {
+			let call_from = dynamic_call['call_from'];
+			let call_to = dynamic_call['call_to'];
+			if (Object.hasOwn(calls, call_from)) {
+				calls[call_from].push(call_to);
+			} else {
+				calls[call_from] = [call_to];
+			}
+		}
+		// map to array
+		let calls_arr = [];
+		for (const dynamic_caller in calls) {
+			calls_arr.push({
+				caller: dynamic_caller,
+				callees: calls[dynamic_caller]
+			});
+		}
+		let indirect_calls = {
+			version: 1,
+			indirect_callees: calls_arr
+		};
+		helpers.download(
+			'puncover-dynamiccalls-' + version_name + '.json',
+			JSON.stringify(indirect_calls, 0, 4)
+		);
+	};
 </script>
 
 <div class="container" id="content">
@@ -206,20 +237,22 @@
 			</div>
 		</Col>
 		<Col>
-			<ButtonGroup class="pb-3 pt-3">
-				<Button
-					color="primary"
-					on:click={() =>
-						helpers.download(
-							'pexplorer-' + version_name + '.json',
-							JSON.stringify(restore_active_settings(), 0, 4)
-						)}
-				>
-					Download settings
-				</Button>
-				<!-- <Button color="primary" active>Upload settings</Button> -->
-				<!-- <Button color="primary">Download puncover arguments</Button> -->
-			</ButtonGroup>
+			<Button
+				color="primary"
+				on:click={() =>
+					helpers.download(
+						'pexplorer-' + version_name + '.json',
+						JSON.stringify(restore_active_settings(), 0, 4)
+					)}
+			>
+				Download settings
+			</Button>
+
+			<br />
+
+			<Button class="mt-3" color="primary" on:click={() => download_puncover_158_indirect_calls()}>
+				Download settings for puncover #158
+			</Button>
 		</Col>
 	</Row>
 
