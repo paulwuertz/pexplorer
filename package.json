@@ -9,8 +9,8 @@
 		"deploy": "npm run build && touch build/.nojekyll && npx gh-pages -d build",
 		"preview": "vite preview",
 		"prepare": "svelte-kit sync || echo ''",
-		"format": "prettier --write .",
-		"lint": "prettier --check ."
+		"format": "prettier --write ./src",
+		"lint": "prettier --check ./src"
 	},
 	"devDependencies": {
 		"@sveltejs/adapter-auto": "^4.0.0",

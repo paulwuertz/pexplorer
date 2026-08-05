@@ -47,6 +47,31 @@
 				{
 					name: 'v1.3 - GCC',
 					url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/zephyr_cannectivity_13_gcc_lpc55s16.elf'
+				},
+				{
+					name: 'v1.4 - GCC',
+					url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/cannectivity_lpcxpresso55s16_1.4.elf'
+				}
+			]
+		},
+		{
+			common_name: 'CANnectivity 1.4 - GCC',
+			versions: [
+				{
+					name: 'nucleo_h723zg',
+					url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/cannectivity_nucleo_h723zg_1.4.elf'
+				},
+				{
+					name: 'frdm_mcxn947',
+					url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/cannectivity_frdm_mcxn947_1.4.elf'
+				},
+				{
+					name: 'stm32g0b1xx',
+					url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/cannectivity_candlelightfd_stm32g0b1xx_dual_1.4.elf'
+				},
+				{
+					name: 'same70n20b',
+					url: 'https://media.githubusercontent.com/media/paulwuertz/pexplorer/refs/heads/main/testdata/elf_testdata/cannectivity_canbardo_same70n20b_1.4.elf'
 				}
 			]
 		},
@@ -371,7 +396,7 @@
 			</CardHeader>
 			<CardBody>
 				<Row>
-					<Col sm="12" md={8}>
+					<Col sm="12" md={7}>
 						<CardSubtitle><b>...by file (easiest):</b></CardSubtitle>
 						<CardText>
 							<div class="uploadfield">
@@ -396,7 +421,7 @@
 							</div>
 						</CardText>
 					</Col>
-					<Col sm="12" md={4}>
+					<Col sm="12" md={5}>
 						<Row>
 							<CardSubtitle><b>...by link:</b></CardSubtitle>
 
@@ -423,25 +448,27 @@
 							>
 							<div>
 								<div><b><small>Individual firmware samples:</small></b></div>
-								{#each testFW as fw, i ('link-' + fw.name)}
-									<Button
-										class="example-btn"
-										color="light"
-										onclick={() => addFWSample(fw.name, fw.url)}>{fw.name}</Button
-									>
-								{/each}
 								{#each testFWsets as fws, i ('fwset-' + fws.common_name)}
 									<div><b><small>{fws.common_name}:</small></b></div>
-									<ButtonGroup>
+									<div class="horizontal capitalize">
 										{#each fws.versions as fw, i ('fw-version-' + fw.name)}
 											<Button
-												class="example-btn"
+												class="m-1"
+												size="sm"
 												color="light"
 												onclick={() => addFWSample(fws.common_name + fw.name, fw.url)}
 												>{fw.name}</Button
 											>
 										{/each}
-									</ButtonGroup>
+									</div>
+								{/each}
+								{#each testFW as fw, i ('link-' + fw.name)}
+									<Button
+										size="sm"
+										class="example-btn"
+										color="light"
+										onclick={() => addFWSample(fw.name, fw.url)}>{fw.name}</Button
+									>
 								{/each}
 							</div>
 						</Row>
@@ -450,7 +477,7 @@
 			</CardBody>
 			<CardFooter>
 				<Row>
-					<Col sm="12" md={4}>
+					<Col sm="12" md={5}>
 						Currently provided symbol via links:
 
 						<ul>
