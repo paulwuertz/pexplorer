@@ -58,6 +58,7 @@
 			call_from: selected_call_from.name,
 			call_to: selected_call_to.name
 		});
+		selected_call_to = null;
 		generate_and_store_new_setting();
 	};
 
@@ -191,6 +192,41 @@
 		backup_settings(version.firmware_hash, new_setting);
 	};
 
+	let download_template_puncover_158_indirect_calls = () => {
+		let calls = {};
+		// build a map
+		for (const f of functions) {
+			let call_from = f['name'];
+			for (const callee of f['callees'] || []) {
+				let call_to = f['call_to'];
+				if (!call_to) {
+					// only add functions with unresolved calls
+					if (Object.hasOwn(calls, call_from)) {
+						calls[call_from].push('');
+					} else {
+						calls[call_from] = [''];
+					}
+				}
+			}
+		}
+		// map to array
+		let calls_arr = [];
+		for (const dynamic_caller in calls) {
+			calls_arr.push({
+				caller: dynamic_caller,
+				callees: calls[dynamic_caller]
+			});
+		}
+		let indirect_calls = {
+			version: 1,
+			indirect_callees: calls_arr
+		};
+		helpers.download(
+			'puncover-dynamiccalls-' + version_name + '.json',
+			JSON.stringify(indirect_calls, 0, 4)
+		);
+	};
+
 	let download_puncover_158_indirect_calls = () => {
 		let calls = {};
 		let active_settings = restore_active_settings();
@@ -250,9 +286,22 @@
 
 			<br />
 
-			<Button class="mt-3" color="primary" on:click={() => download_puncover_158_indirect_calls()}>
-				Download settings for puncover #158
-			</Button>
+			<ButtonGroup>
+				<Button
+					class="mt-3"
+					color="primary"
+					on:click={() => download_puncover_158_indirect_calls()}
+				>
+					Download settings for puncover #158
+				</Button>
+				<Button
+					class="mt-3"
+					color="warning"
+					on:click={() => download_template_puncover_158_indirect_calls()}
+				>
+					Download dynamic call template for puncover #158
+				</Button>
+			</ButtonGroup>
 		</Col>
 	</Row>
 
