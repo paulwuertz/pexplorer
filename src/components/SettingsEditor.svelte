@@ -40,9 +40,63 @@
 	// $inspect(setting, threads, dynamic_calls);
 	let functions = $derived(version.functions || []);
 	let variables = $derived(version.variables || []);
+	//
+	let functions_missing_calls = $derived(
+		functions.filter((f, i) => {
+			if (!Object.hasOwn(f, 'callees')) return false;
+			for (const callee of f['callees'] || []) {
+				if (!Object.hasOwn(callee, 'to')) {
+					return true;
+				}
+			}
+			return false;
+		})
+	);
+	let count_fns = () => {
+		let nr_fns_with_indirect_calls = 0;
+		for (const f of functions_missing_calls) {
+			for (const callee of f['callees'] || []) {
+				if (!Object.hasOwn(callee, 'to')) {
+					nr_fns_with_indirect_calls++;
+					break;
+				}
+			}
+		}
+		return nr_fns_with_indirect_calls;
+	};
+	let functions_missing_calls_nr = $derived(count_fns());
+	let missing_calls_nr = $derived(
+		Object.fromEntries(
+			functions_missing_calls.map((f, i) => {
+				let nr_indirect_calls = 0;
+				for (const callee of f['callees'] || []) {
+					if (!Object.hasOwn(callee, 'to')) {
+						nr_indirect_calls++;
+					}
+				}
+				return [f['name'], nr_indirect_calls];
+			})
+		)
+	);
+	let total_functions_missing_calls_nr = $derived(
+		Object.values(missing_calls_nr).reduce((acc, val) => acc + val, 0)
+	);
 
 	let selected_call_from = $state();
 	let selected_call_to = $state();
+	let link_caller_and_callee = (caller, callee) => {
+		//console.log(caller, 'bef');
+
+		for (let i = 0; i < len(caller['callees']); i++) {
+			if (!Object.hasOwn(caller['callees'][i], 'to')) {
+				caller['callees'][i]['to'] = callee['address'];
+				caller['callees'][i]['to_function_name'] = callee['name'];
+				break;
+			}
+		}
+
+		//console.log(caller, 'af');
+	};
 	let add_dynamic_call = () => {
 		if (!selected_call_from) {
 			// TODO err
@@ -58,8 +112,9 @@
 			call_from: selected_call_from.name,
 			call_to: selected_call_to.name
 		});
-		selected_call_to = null;
 		generate_and_store_new_setting();
+		link_caller_and_callee(selected_call_from, selected_call_to);
+		selected_call_to = null; //  easier allows adding new call
 	};
 
 	let store_default_settings = () => {
@@ -367,7 +422,10 @@
 		</tbody>
 	</Table>
 
-	<h4>Dynamic calls:</h4>
+	<h4>
+		Resolved dynamic calls (from {functions_missing_calls_nr} functions still {total_functions_missing_calls_nr}
+		calls unresolved):
+	</h4>
 
 	<Table bordered>
 		<thead>
@@ -404,7 +462,14 @@
 
 			<tr>
 				<td>
-					<Select {itemId} {label} items={functions} bind:value={selected_call_from}></Select>
+					<Select {itemId} {label} items={functions_missing_calls} bind:value={selected_call_from}
+					></Select>
+					<p>
+						{selected_call_from &&
+							missing_calls_nr[selected_call_from.name] +
+								' unresolved calls left for ' +
+								selected_call_from.name}
+					</p>
 				</td>
 				<td>
 					<Select {itemId} {label} items={functions} bind:value={selected_call_to}></Select>
