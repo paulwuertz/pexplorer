@@ -9,6 +9,7 @@
 		Alert,
 		Badge,
 		Button,
+		ButtonGroup,
 		Col,
 		Container,
 		FormGroup,
@@ -17,6 +18,7 @@
 		Row,
 		Table
 	} from '@sveltestrap/sveltestrap';
+	import CallGraph from './CallGraph.svelte';
 	import FlameGraph from './FlameGraph.svelte';
 	import * as helpers from '../routes/helpers.js';
 
@@ -62,7 +64,15 @@
 		)
 	);
 	let branches = $derived(fn_calltree.branches);
-
+	$inspect(fn_calltree);
+	let chartStyle = $state('callgraph');
+	let btnStyle = (btn) => {
+		if (btn == chartStyle) {
+			return 'success';
+		} else {
+			return 'secondary';
+		}
+	};
 	const worst_call_stack = () => {
 		// let my_symbol = { full_symbol_path: symbol_path_and_name, stack_size: sym_data.stack_size };
 		// let stack_down = deepest_callees_tree.concat([my_symbol]);
@@ -239,7 +249,26 @@
 	No call tree analysis for JSON reports so far...
 {/if}
 
-<FlameGraph {sym_data} {fn_calltree}></FlameGraph>
+{#if chartStyle == 'flamegraph'}
+	<FlameGraph {sym_data} {fn_calltree}></FlameGraph>
+{:else}
+	<CallGraph {sym_data} {fn_calltree}></CallGraph>
+{/if}
+
+<ButtonGroup class="d-flex justify-content-center">
+	<Button
+		on:click={() => {
+			chartStyle = 'callgraph';
+		}}
+		color={btnStyle('callgraph')}>Callgraph</Button
+	>
+	<Button
+		on:click={() => {
+			chartStyle = 'flamegraph';
+		}}
+		color={btnStyle('flamegraph')}>Flamegraph</Button
+	>
+</ButtonGroup>
 
 <!-- <Table style="word-break: break-all;" hover bordered>
 	<thead>

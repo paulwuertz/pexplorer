@@ -141,7 +141,6 @@
 		}}
 		color={btnStyle('sunburst')}>Sunburst</Button
 	>
-	<!-- <Button on:click={()=> { chartStyle="flamegraph"; updateCharts()} } color={btnStyle("flamegraph")}>Flamegraph</Button> -->
 </ButtonGroup>
 
 <style>

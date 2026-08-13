@@ -182,6 +182,15 @@ export const symbols_to_sunburst_tree_data = (symbols, data_field) => {
 	return data;
 };
 
+export const symbols_to_call_tree_data = (entry_fn) => {
+	let data = { name: entry_fn.name, value: entry_fn.stack_size, children: [] };
+	let callees = Object.hasOwn(entry_fn, 'calls') ? entry_fn['calls'] : [];
+	for (const callee of callees) {
+		data.children.push(symbols_to_call_tree_data(callee));
+	}
+	return data;
+};
+
 export const row2AHref = (base, selected_version, row_data) => {
 	if (row_data.file) {
 		return base + '/#/browse/' + selected_version + row_data.file + '/' + row_data.name;

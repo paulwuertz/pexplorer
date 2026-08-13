@@ -42,6 +42,21 @@
 			return 'danger';
 		}
 	};
+
+	let versions = $derived(Object.keys(symbols.symbols));
+	let symInOtherVersions = $derived(
+		Object.entries(symbols.symbols).map((v, i) => {
+			let version = v[0];
+			let fw_report = v[1];
+			if (version == version_name) return null;
+			for (let symIndex = 0; symIndex < fw_report.functions.length; symIndex++) {
+				const f = fw_report.functions[symIndex];
+				if (f.name == thread.name) {
+					console.log('found ', f, 'in version');
+				}
+			}
+		})
+	);
 </script>
 
 <Card>
@@ -94,6 +109,31 @@
 					{((100 * thread['max_stack_size_callees']) / thread['init_stack_size']).toFixed(2)}% - {thread[
 						'max_stack_size_callees'
 					]} / {thread['init_stack_size']} bytes
+				</Progress>
+			</div>
+			<div class="pt-3">
+				<CardSubtitle class="pb-3">in "CANnectivity 1.4 - GCC stm32g0b1xx":</CardSubtitle>
+				<Progress
+					color={stackLevelToColor(thread['max_stack_size_callees'], thread['init_stack_size'])}
+					value={816}
+					max={thread['init_stack_size']}
+					class="mb-2"
+				>
+					{((100 * thread['max_stack_size_callees']) / thread['init_stack_size']).toFixed(2)}% - {thread[
+						'max_stack_size_callees'
+					]} / {thread['init_stack_size']} bytes
+				</Progress>
+			</div>
+			<div class="pt-3">
+				<CardSubtitle class="pb-3">in "CANnectivity 1.4 - GCC LPC55S16v16"</CardSubtitle>
+				<Progress
+					color={stackLevelToColor(892, thread['init_stack_size'])}
+					value={892}
+					max={thread['init_stack_size']}
+					class="mb-2"
+				>
+					{((100 * thread['max_stack_size_callees']) / thread['init_stack_size']).toFixed(2)}% - {892}
+					/ {thread['init_stack_size']} bytes
 				</Progress>
 			</div>
 		</CardText>

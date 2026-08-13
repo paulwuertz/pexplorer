@@ -7,8 +7,6 @@
 	import * as echarts from 'echarts';
 	import * as helpers from '../routes/helpers.js';
 
-	var ROOT_PATH = base + '/t.json';
-
 	var option;
 
 	const { sym_data, fn_calltree } = $props();
@@ -152,7 +150,7 @@
 			};
 		};
 		myChart.showLoading();
-		let stackTrace = fn_calltree; //await fetch(ROOT_PATH).then((resp) => resp.json())
+		let stackTrace = fn_calltree;
 		myChart.hideLoading();
 		// console.log(stackTrace);
 
