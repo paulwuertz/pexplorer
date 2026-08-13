@@ -4,6 +4,8 @@
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 
+	import ArrowLeft from 'svelte-radix/ArrowLeft.svelte';
+	import ArrowRight from 'svelte-radix/ArrowRight.svelte';
 	import { DataTable } from '@careswitch/svelte-data-table';
 	import {
 		Alert,
@@ -64,7 +66,17 @@
 		)
 	);
 	let branches = $derived(fn_calltree.branches);
-	$inspect(fn_calltree);
+	let branch_table = $derived(
+		new DataTable({
+			pageSize: 5,
+			data: branches,
+			columns: [
+				{ id: 'symtype', key: 'symtype', name: '#' },
+				{ id: 'stack_size', key: 'stack_size', name: 'Stack usage' },
+				{ id: 'call_list', key: 'call_list', name: 'Callpath causing this stack' }
+			]
+		})
+	);
 	let chartStyle = $state('callgraph');
 	let btnStyle = (btn) => {
 		if (btn == chartStyle) {
@@ -226,25 +238,61 @@
 	<Table style="word-break: break-all;" hover bordered>
 		<thead>
 			<tr>
-				<th>#</th>
-				<th>Stack usage</th>
-				<th>Callpath causing this stack</th>
+				{#each branch_table.columns as column (column.name)}
+					<th>{column.name}</th>
+				{/each}
 			</tr>
 		</thead>
 		<tbody>
-			{#each branches.slice(0, 10) as b, i}
+			{#each branch_table.rows as row, i (row.stack_size + row.call_list + i)}
 				<tr>
-					<td>i</td>
-					<td>{JSON.stringify(b['stack_size'])}</td>
-					<td>
-						{#each b['call_list'] as c, j}
-							{c['name'] + ' (' + c['stack_size'] + ') ->'}
-						{/each}
-					</td>
+					<td>{(branch_table.currentPage - 1) * 5 + i + 1}</td>
+					{#each branch_table.columns as column (column.name)}
+						{#if column.key == 'stack_size'}
+							<td>
+								{row[column.key]}
+							</td>
+						{:else if column.key == 'call_list'}
+							<td>
+								{#each row[column.key] as c, j}
+									{c['name'] + ' (' + c['stack_size'] + ') ->'}
+								{/each}
+							</td>
+						{:else}
+							<td>{row[column.key]}</td>
+						{/if}
+					{/each}
 				</tr>
 			{/each}
 		</tbody>
 	</Table>
+	<div class="flex items-center gap-2 border-t py-2">
+		<div class="flex items-center gap-0">
+			<Button
+				size="icon"
+				variant="ghost"
+				disabled={!branch_table.canGoBack}
+				on:click={() => branch_table.currentPage--}
+			>
+				<ArrowLeft class="h-5 w-5" />
+			</Button>
+			<Button
+				size="icon"
+				variant="ghost"
+				disabled={!branch_table.canGoForward}
+				on:click={() => branch_table.currentPage++}
+			>
+				<ArrowRight class="h-5 w-5" />
+			</Button>
+		</div>
+		<p class="text-sm">
+			Page <span class="font-semibold">{branch_table.currentPage}</span> of
+			<span class="font-semibold">{branch_table.totalPages}</span>
+		</p>
+		<span class="text-xs">
+			({branch_table.allRows.length} / {branch_table.baseRows.length})
+		</span>
+	</div>
 {:else}
 	No call tree analysis for JSON reports so far...
 {/if}
@@ -269,43 +317,6 @@
 		color={btnStyle('flamegraph')}>Flamegraph</Button
 	>
 </ButtonGroup>
-
-<!-- <Table style="word-break: break-all;" hover bordered>
-	<thead>
-		<tr>
-			<th>#</th>
-			<th>Name</th>
-			<th>Stack size</th>
-		</tr>
-	</thead>
-	<tbody>
-		{#each worst_call_stack() as caller, index}
-			<tr>
-				<td>{index + ' '}</td>
-				<td>
-					 <a href={helpers.callxrs_text_to_links(base, symbol_version, caller, sym_path_by_addr)}>
-						{#if symbol_path_and_name.includes(caller)}
-							<small>
-								<b>{helpers.callxrs_text_to_symname(caller, sym_path_by_addr)}</b> - (this function)
-							</small>
-						{:else}
-						{/if}
-					</a>
-				</td>
-				<td>
-					{caller.stack_size}
-				</td>
-			</tr>
-		{/each}
-	</tbody>
-	<tfoot>
-		<tr>
-			<td></td>
-			<td></td>
-			<td><b>&sum; {sym_data.deepest_callee_tree_size + sym_data.deepest_caller_tree_size}</b></td>
-		</tr>
-	</tfoot>
-</Table> -->
 
 <style>
 	pre {
