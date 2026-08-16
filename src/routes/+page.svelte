@@ -447,7 +447,6 @@
 								:)</CardText
 							>
 							<div>
-								<div><b><small>Individual firmware samples:</small></b></div>
 								{#each testFWsets as fws, i ('fwset-' + fws.common_name)}
 									<div><b><small>{fws.common_name}:</small></b></div>
 									<div class="horizontal capitalize">
@@ -462,14 +461,17 @@
 										{/each}
 									</div>
 								{/each}
-								{#each testFW as fw, i ('link-' + fw.name)}
-									<Button
-										size="sm"
-										class="example-btn"
-										color="light"
-										onclick={() => addFWSample(fw.name, fw.url)}>{fw.name}</Button
-									>
-								{/each}
+								<div><b><small>Individual firmware samples:</small></b></div>
+								<div class="horizontal capitalize">
+									{#each testFW as fw, i ('link-' + fw.name)}
+										<Button
+											size="sm"
+											class="m-1"
+											color="light"
+											onclick={() => addFWSample(fw.name, fw.url)}>{fw.name}</Button
+										>
+									{/each}
+								</div>
 							</div>
 						</Row>
 					</Col>
