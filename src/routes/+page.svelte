@@ -397,7 +397,7 @@
 			<CardBody>
 				<Row>
 					<Col sm="12" md={7}>
-						<CardSubtitle><b>...by file (easiest):</b></CardSubtitle>
+						<CardSubtitle><b>...by uploading your ELF file:</b></CardSubtitle>
 						<CardText>
 							<div class="uploadfield">
 								<br />
@@ -422,7 +422,7 @@
 						</CardText>
 					</Col>
 					<Col sm="12" md={5}>
-						<Row>
+						<!-- <Row>
 							<CardSubtitle><b>...by link:</b></CardSubtitle>
 
 							<CardText>
@@ -438,9 +438,9 @@
 								/>
 								<Button size="md" color="success" onclick={addLink}>Download symbols</Button>
 							</InputGroup>
-						</Row>
+						</Row> -->
 						<Row>
-							<CardSubtitle style="margin-top:10px;"><b>...OR by loading a sample:</b></CardSubtitle
+							<CardSubtitle style="margin-top:10px;"><b>...OR load a sample:</b></CardSubtitle
 							>
 							<CardText
 								>Do not have any and just want to see a demo? <br /> Then load a sample to see some features
