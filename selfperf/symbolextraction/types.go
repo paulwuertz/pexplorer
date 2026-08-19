@@ -128,3 +128,10 @@ type SElfReport struct {
 	Addr2FnMap  map[uint64]*FunctionSymbol `json:"-"`
 	SectionsMap map[uint64]*ElfSection     `json:"-"`
 }
+
+type FunctionCallEntry struct {
+	From string   `json:"from"`
+	To   []string `json:"to"`
+}
+
+type FunctionCallList []FunctionCallEntry

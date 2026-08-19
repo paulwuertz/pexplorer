@@ -18,6 +18,7 @@ func main() {
 
 	infile := flag.String("i", "", "input ELF file - obligatory")
 	outfile := flag.String("o", "", "output report to this file - if omited print to stdout")
+	function_call_list_file := flag.String("f", "", "output list of all function calls to a file in json format to compare /regression")
 	pretty := flag.Bool("p", false, "pretty-print the report else it is compact")
 
 	flag.Parse()
@@ -44,6 +45,14 @@ func main() {
 		datajson, _ = json.MarshalIndent(elfReport, "", "    ")
 	} else {
 		datajson, _ = json.Marshal(elfReport)
+	}
+
+	if *function_call_list_file != "" {
+		fn_calls := callgraph.GetFunctionCallList(&elfReport)
+		fnjson, _ := json.MarshalIndent(fn_calls, "", "    ")
+		if err := os.WriteFile(*function_call_list_file, fnjson, 0666); err != nil {
+			log.Fatal(err)
+		}
 	}
 
 	if *outfile == "" {

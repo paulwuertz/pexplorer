@@ -63,6 +63,25 @@ func IsForwardedCall(instr symbolextraction.DisAsm, f *symbolextraction.Function
 	}
 }
 
+func GetFunctionCallList(s *symbolextraction.SElfReport) symbolextraction.FunctionCallList {
+	var l symbolextraction.FunctionCallList = make(symbolextraction.FunctionCallList, 0)
+	for _, f := range s.Functions {
+		var callsTo []string = make([]string, 0)
+		for _, to := range f.Callees {
+			// removing add constprops,isra,... and other qualifiers
+			fn_name, _, _ := strings.Cut(to.CallToFunctionName, ".")
+			callsTo = append(callsTo, fn_name)
+		}
+		fn_name, _, _ := strings.Cut(f.Name, ".")
+		fun_calls := symbolextraction.FunctionCallEntry{
+			From: fn_name,
+			To:   callsTo,
+		}
+		l = append(l, fun_calls)
+	}
+	return l
+}
+
 func AddCallGraph(s *symbolextraction.SElfReport) {
 	for i := 0; i < len(s.Functions); i++ {
 		f := &s.Functions[i]
