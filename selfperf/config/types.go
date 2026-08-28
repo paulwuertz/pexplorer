@@ -4,6 +4,8 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
+	"os"
 )
 
 type RTOSThread struct {
@@ -13,8 +15,8 @@ type RTOSThread struct {
 }
 
 type DynamicCallResolution struct {
-	CallFrom string `json:"call_from"`
-	CallTo   string `json:"call_to"`
+	Caller  string   `json:"caller"`
+	Callees []string `json:"callees"`
 }
 
 type PexplorerConfig struct {
@@ -22,7 +24,7 @@ type PexplorerConfig struct {
 	DynamicCalls []DynamicCallResolution `json:"dynamic_calls,omitempty"`
 }
 
-func main() {
+func test_export() {
 	var p PexplorerConfig
 	// 	logging_stack - size: 768 bytes - addr: 0x20002400
 	// z_interrupt_stacks - size: 2048 bytes - addr: 0x20003f00
@@ -53,18 +55,53 @@ func main() {
 
 	p.DynamicCalls = make([]DynamicCallResolution, 0)
 	p.DynamicCalls = append(p.DynamicCalls, DynamicCallResolution{
-		CallFrom: "work_queue_main",
-		CallTo:   "led_event_triggered_work_handler",
+		Caller:  "work_queue_main",
+		Callees: []string{"led_event_triggered_work_handler"},
 	})
 	p.DynamicCalls = append(p.DynamicCalls, DynamicCallResolution{
-		CallFrom: "work_queue_main",
-		CallTo:   "cannectivity_usb_reboot",
+		Caller:  "work_queue_main",
+		Callees: []string{"cannectivity_usb_reboot"},
 	})
 	p.DynamicCalls = append(p.DynamicCalls, DynamicCallResolution{
-		CallFrom: "work_queue_main",
-		CallTo:   "dfu_button_poll",
+		Caller:  "work_queue_main",
+		Callees: []string{"dfu_button_poll"},
 	})
 	datajson, _ := json.Marshal(p)
 	// datajson, _ := json.MarshalIndent(p, "", "    ")
 	fmt.Println(string(datajson))
+}
+
+func import_config_from_file(filename string) (p PexplorerConfig, err error) {
+	// Open our jsonFile
+	jsonFile, err := os.Open(filename)
+	if err != nil {
+		fmt.Println(err)
+		return p, err
+	}
+	defer jsonFile.Close()
+
+	byteValue, err := io.ReadAll(jsonFile)
+	if err != nil {
+		fmt.Println("Error reading file:", err)
+		return p, err
+	}
+
+	err = json.Unmarshal([]byte(byteValue), &p)
+	if err != nil {
+		fmt.Println("Error unmarshalling JSON:", err)
+		return p, err
+	}
+	return p, nil
+}
+
+func test_import() {
+	p, _ := import_config_from_file("/home/paul/git/pexplorer/selfperf/tmp/pexplorer-CANnectivity - NXP LPC55S16v1.4 - GCC(8).json")
+	fmt.Println(p)
+}
+
+func main() {
+	fmt.Println("Test export:")
+	test_export()
+	fmt.Println("\n\nTest import:\n\n")
+	test_import()
 }
