@@ -440,7 +440,7 @@
 							</InputGroup>
 						</Row> -->
 						<Row>
-							<CardSubtitle style="margin-top:10px;"><b>...OR load a sample:</b></CardSubtitle
+							<CardSubtitle><b>...OR load a sample:</b></CardSubtitle
 							>
 							<CardText
 								>Do not have any and just want to see a demo? <br /> Then load a sample to see some features

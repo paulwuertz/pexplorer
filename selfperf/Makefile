@@ -1,4 +1,4 @@
-.PHONY: ../static/sELFperf.wasm test
+.PHONY: ../static/sELFperf.wasm test testdataReportOutput jsonvalidate goprepublish gopublish stackcheck
 
 ../static/sELFperf.wasm: main.go
 	GOOS=js GOARCH=wasm go build -o ../static/sELFperf.wasm ./wasm/jsonreport.go
@@ -33,3 +33,6 @@ gopublish:
 	# git tag v0.1.0
 	# git push origin v0.1.0
 	GOPROXY=proxy.golang.org go list -m github.com/paulwuertz/pexplorer/selfperf@v0.1.0
+
+stackcheck:
+	go run ./cmd/stackcheck/stackcheck.go -i ../testdata/elf_testdata/cannectivity_lpcxpresso55s16_1.4.elf

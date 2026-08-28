@@ -143,6 +143,18 @@
 		}
 	};
 
+	let download_template_settings = () => {
+		let all_settings = restore_default_settings();
+		restored_settings = all_settings;
+		if (Object.hasOwn(all_settings, version.firmware_hash)) {
+			let settings = all_settings[version.firmware_hash];
+            settings["dynamic_calls"] = puncover_158_indirect_calls();
+            return settings;
+		} else {
+			return {};
+		}
+	};
+
 	onMount(() => {
 		setting = restore_active_settings();
 	});
@@ -247,7 +259,7 @@
 		backup_settings(version.firmware_hash, new_setting);
 	};
 
-	let download_template_puncover_158_indirect_calls = () => {
+	let puncover_158_indirect_calls = () => {
 		let calls = {};
 		// build a map
 		for (const f of functions) {
@@ -305,10 +317,10 @@
 		}
 		let indirect_calls = {
 			version: 1,
-			indirect_callees: calls_arr
+			indirect_callees: puncover_158_indirect_calls()
 		};
 		helpers.download(
-			'puncover-dynamiccalls-' + version_name + '.json',
+			'puncover-dynamic-calls-' + version_name + '.json',
 			JSON.stringify(indirect_calls, 0, 4)
 		);
 	};
@@ -333,7 +345,7 @@
 				on:click={() =>
 					helpers.download(
 						'pexplorer-' + version_name + '.json',
-						JSON.stringify(restore_active_settings(), 0, 4)
+						JSON.stringify(download_template_settings(), 0, 4)
 					)}
 			>
 				Download settings
