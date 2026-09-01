@@ -1,5 +1,5 @@
 // package config
-package main
+package config
 
 import (
 	"encoding/json"
@@ -12,6 +12,8 @@ type RTOSThread struct {
 	ThreadEntryName   string `json:"thread_entry_name"`
 	StackVariableName string `json:"stack_variable_name,omitempty"`
 	Size              uint64 `json:"size,omitempty,omitzero"`
+	Used              uint64 `json:"-"`
+	NrUnresolvedCalls uint64 `json:"-"`
 }
 
 type DynamicCallResolution struct {
@@ -71,7 +73,7 @@ func test_export() {
 	fmt.Println(string(datajson))
 }
 
-func import_config_from_file(filename string) (p PexplorerConfig, err error) {
+func Import_config_from_file(filename string) (p PexplorerConfig, err error) {
 	// Open our jsonFile
 	jsonFile, err := os.Open(filename)
 	if err != nil {
@@ -95,13 +97,13 @@ func import_config_from_file(filename string) (p PexplorerConfig, err error) {
 }
 
 func test_import() {
-	p, _ := import_config_from_file("/home/paul/git/pexplorer/selfperf/tmp/pexplorer-CANnectivity - NXP LPC55S16v1.4 - GCC(8).json")
+	p, _ := Import_config_from_file("/home/paul/git/pexplorer/selfperf/tmp/pexplorer-CANnectivity - NXP LPC55S16v1.4 - GCC(8).json")
 	fmt.Println(p)
 }
 
-func main() {
-	fmt.Println("Test export:")
-	test_export()
-	fmt.Println("\n\nTest import:\n\n")
-	test_import()
-}
+// func main() {
+// 	fmt.Println("Test export:")
+// 	test_export()
+// 	fmt.Println("\n\nTest import:\n\n")
+// 	test_import()
+// }

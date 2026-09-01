@@ -3,9 +3,11 @@ package rtos
 import (
 	"fmt"
 	"log"
+	"maps"
 	"math"
 	"slices"
 
+	"github.com/paulwuertz/pexplorer/selfperf/config"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
@@ -50,13 +52,34 @@ func arrayToUint64(data []byte) uint64 {
 	return val
 }
 
-func ScanForRtosFeatures(s *symbolextraction.SElfReport) {
+func PrintStackStats(threads []config.RTOSThread) {
+	// ┌─────────────────────────────────────────────────────────────────────────┐
+	// │ log_process_thread_func   -  42.3% -   352/  832b - ████████------------│
+	// │ shell_thread              -   7.3% -   304/ 4160b - █-------------------│
+	// │ mgmt_event_work_handler   -  31.2% -   280/  896b - ██████--------------│
+	// │ bg_thread_main            -  58.3% -  1232/ 2112b - ███████████---------│
+	// │ work_queue_main           -  25.0% -   272/ 1088b - █████---------------│
+	// └─────────────────────────────────────────────────────────────────────────┘
+	for _, thread := range threads {
+		stackusage_percent := float64(thread.Used) / float64(thread.Size) * 100.0
+		fmt.Printf("| %.25s uses at least %d / %d (%.2f%%)|", thread.ThreadEntryName, thread.Used, thread.Size, stackusage_percent)
+		fmt.Println()
+	}
+	for _, thread := range threads {
+		if thread.NrUnresolvedCalls != 0 {
+			fmt.Print("WARNING: ", thread.NrUnresolvedCalls, " unresolved calls - incomplete calltree, the analysis needs to be resolved for better results)")
+		}
+		fmt.Println()
+	}
+}
+
+type ThreadMap map[uint64]config.RTOSThread
+
+// TODO only zephyr for now... how to definitly detect it though...
+func FindStaticZephyrRtosThreads(s *symbolextraction.SElfReport) (tm ThreadMap) {
 	idx := slices.IndexFunc(s.Types, func(c symbolextraction.Typedef) bool { return c.Name == "_static_thread_data" })
 	static_thread_data_struct := s.Types[idx]
-	// TODO only zephyr for now... how to definitly detect it though...
-	fmt.Println("User thread static stack usage analysis - worst case found might be higher during runtime,")
-	fmt.Println("due to unresolved calls, unknown to the static analysis or how interrupts are handled on your architecture")
-	fmt.Println("Results:")
+	tm = make(ThreadMap)
 	for _, v := range s.Variables {
 		// static threads created by macro
 		if IsStaticZephyrThread(v, s) {
@@ -74,18 +97,72 @@ func ScanForRtosFeatures(s *symbolextraction.SElfReport) {
 				log.Fatal("static thread init_entry not found at address:", threadEntryVarAddr)
 			}
 			stackVar := GetVarByAddr(stackAddr, s)
-			threadName := threadEntryFn.Name
 			stackSize := len(stackVar.Data)
-
 			thread_fn_calltree := threadEntryFn.GetCallTreeJson(s)
-			nr_unresolved_calls := len(thread_fn_calltree.UnresolvedCalls)
-			stackusage_percent := float64(threadEntryFn.MaxStackSizeCallees) / float64(stackSize) * 100.0
-			fmt.Print("\t - ", threadName, " uses at least ", threadEntryFn.MaxStackSizeCallees, "/")
-			fmt.Print(stackSize, " (", stackusage_percent, "%) ")
-			if nr_unresolved_calls != 0 {
-				fmt.Print("(WARNING - ", nr_unresolved_calls, " unresolved calls - incomplete calltree, the analysis needs to be resolved for better results)")
+			tm[threadEntryVarAddr] = config.RTOSThread{
+				ThreadEntryName:   threadEntryFn.Name,
+				StackVariableName: stackVar.Name,
+				Size:              uint64(stackSize),
+				Used:              uint64(thread_fn_calltree.Tree.MaxStackSizeCallees),
+				NrUnresolvedCalls: uint64(len(thread_fn_calltree.UnresolvedCalls)),
 			}
-			fmt.Println()
+			fmt.Println("Found Zephyr thread: ", tm[threadEntryVarAddr])
 		}
 	}
+	return tm
+}
+
+func FindConfiguredZephyrRtosThreads(s *symbolextraction.SElfReport, conf config.PexplorerConfig, tm ThreadMap) ThreadMap {
+	var threadEntryFn symbolextraction.FunctionSymbol
+	for _, t := range conf.Threads {
+		tName := t.ThreadEntryName
+		sName := t.StackVariableName
+		stackSize := 0
+		threadFound := false
+		stackFound := false
+		for _, f := range s.Functions {
+			if f.Name == tName {
+				threadFound = true
+				threadEntryFn = f
+				break
+			}
+		}
+		if !threadFound {
+			log.Fatal("Configured thread ", tName, " not found in ELF functions")
+		}
+
+		if t.StackVariableName != "" {
+			for _, v := range s.Variables {
+				if v.Name == sName {
+					stackFound = true
+					stackSize = len(v.Data)
+					break
+				}
+			}
+		}
+
+		if !stackFound {
+			if t.Size != 0 {
+				stackSize = int(t.Size)
+			} else {
+				log.Fatal("Configured thread - associated thread ", sName, "not found in ELF functions")
+			}
+		}
+		thread_fn_calltree := threadEntryFn.GetCallTreeJson(s)
+		tm[threadEntryFn.Address] = config.RTOSThread{
+			ThreadEntryName:   tName,
+			StackVariableName: sName,
+			Size:              uint64(stackSize),
+			Used:              uint64(thread_fn_calltree.Tree.MaxStackSizeCallees),
+			NrUnresolvedCalls: uint64(len(thread_fn_calltree.UnresolvedCalls)),
+		}
+	}
+	return tm
+}
+
+func GetAllThreads(s *symbolextraction.SElfReport, conf config.PexplorerConfig) []config.RTOSThread {
+	tm := FindStaticZephyrRtosThreads(s)
+	tm = FindConfiguredZephyrRtosThreads(s, conf, tm)
+	threads := slices.Collect(maps.Values(tm))
+	return threads
 }

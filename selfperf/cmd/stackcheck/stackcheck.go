@@ -8,12 +8,14 @@ import (
 	"log"
 
 	"github.com/paulwuertz/pexplorer/selfperf/callgraph"
+	"github.com/paulwuertz/pexplorer/selfperf/config"
 	"github.com/paulwuertz/pexplorer/selfperf/rtos"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
 func main() {
 	infile := flag.String("i", "", "input ELF file - obligatory")
+	conffile := flag.String("c", "", "config file - containing dynamic threads and calls")
 
 	flag.Parse()
 
@@ -24,6 +26,15 @@ func main() {
 	}
 	elfFile, err := elf.Open(*infile)
 
+	var p config.PexplorerConfig
+	if *conffile != "" {
+		p, err = config.Import_config_from_file(*conffile)
+		if err != nil {
+			fmt.Println("Error importing config file:", err)
+			return
+		}
+	}
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -32,5 +43,6 @@ func main() {
 	callgraph.EnhanceByDisasm(&elfReport)
 	callgraph.GetStackUseDetails(&elfReport)
 	callgraph.TraverseCallGraph(&elfReport)
-	rtos.ScanForRtosFeatures(&elfReport)
+	threads := rtos.GetAllThreads(&elfReport, p)
+	rtos.PrintStackStats(threads)
 }
