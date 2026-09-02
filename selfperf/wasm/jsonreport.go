@@ -12,6 +12,7 @@ import (
 	"syscall/js"
 
 	"github.com/paulwuertz/pexplorer/selfperf/callgraph"
+	"github.com/paulwuertz/pexplorer/selfperf/config"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
@@ -51,19 +52,26 @@ func wasm_get_elf_report() js.Func {
 func wasm_get_fn_calls_from_disasm() js.Func {
 
 	jsonFunc := js.FuncOf(func(this js.Value, args []js.Value) any {
-		if len(args) != 1 {
+		if len(args) != 2 {
 			return "Invalid no of arguments passed"
 		}
 		disasm_js := args[0]
+		config_js := args[1]
 		disasm_size := disasm_js.Length()
 		disasm_binary := make([]byte, disasm_size)
 		bytes_copied := js.CopyBytesToGo(disasm_binary, disasm_js)
+		config_size := config_js.Length()
+		config_binary := make([]byte, config_size)
+		js.CopyBytesToGo(config_binary, config_js)
 
 		var addr2Disasm map[uint64][]symbolextraction.DisAsm
 		json.Unmarshal(disasm_binary, &addr2Disasm)
+		var pexplorer_config config.PexplorerConfig
+		json.Unmarshal(config_binary, &pexplorer_config)
 
 		fmt.Printf("args # %d\n", len(args))
 		fmt.Printf("n %d bytes\n", bytes_copied)
+		fmt.Printf("config %d bytes = '%s'\n", config_size, config_binary)
 
 		for addr, disasm := range addr2Disasm {
 			f, ok := elfReport.Addr2FnMap[addr]
@@ -73,7 +81,8 @@ func wasm_get_fn_calls_from_disasm() js.Func {
 			f.DisAsm = disasm
 		}
 		callgraph.GetStackUseDetails(&elfReport)
-		callgraph.AddCallGraph(&elfReport)
+		// TODO pass report from web localstorage
+		callgraph.AddCallGraph(&elfReport, pexplorer_config.DynamicCalls)
 		callgraph.TraverseCallGraph(&elfReport)
 
 		datajson, _ := json.Marshal(elfReport)

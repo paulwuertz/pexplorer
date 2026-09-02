@@ -21,6 +21,8 @@ type DynamicCallResolution struct {
 	Callees []string `json:"callees"`
 }
 
+type DynamicCallResolutionMap map[string]DynamicCallResolution
+
 type PexplorerConfig struct {
 	Threads      []RTOSThread            `json:"threads,omitempty"`
 	DynamicCalls []DynamicCallResolution `json:"dynamic_calls,omitempty"`

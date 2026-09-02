@@ -18,6 +18,7 @@ func GetFWReport(elfFile *elf.File, fwhash string) SElfReport {
 		Variables:    variables,
 		Info:         info,
 		Addr2FnMap:   map[uint64]*FunctionSymbol{},
+		Name2FnMap:   map[string]*FunctionSymbol{},
 		SectionsMap:  map[uint64]*ElfSection{},
 		Architecture: elfFile.FileHeader.Machine.String(),
 		FirmwareHash: fwhash,
@@ -25,6 +26,7 @@ func GetFWReport(elfFile *elf.File, fwhash string) SElfReport {
 	for i := 0; i < len(elfReport.Functions); i++ {
 		f := &elfReport.Functions[i]
 		elfReport.Addr2FnMap[f.Address] = f
+		elfReport.Name2FnMap[f.Name] = f
 	}
 	for i := 0; i < len(elfReport.Sections); i++ {
 		s := &elfReport.Sections[i]

@@ -29,10 +29,6 @@
 	import * as echarts from 'echarts';
 	import ThreadInfoCard from '../../../components/ThreadInfoCard.svelte';
 
-	let local_storage_key = 'pexplorer_settings';
-	let DUMMY_STANDARD_SETTINGS_NAME = 'test';
-	let active_settings = DUMMY_STANDARD_SETTINGS_NAME;
-
 	let params = $props();
 	// TODO - why are propsed nested +1 here on production build?!
 	let parameters = $derived(params && (params.data.data || params.data));
@@ -46,17 +42,6 @@
 			return val.name == '_static_thread_data';
 		})
 	);
-
-	let restore_default_settings = () => {
-		let stored_settings_str = localStorage.getItem(local_storage_key);
-		let no_settings_backed_up = !stored_settings_str;
-		if (no_settings_backed_up) {
-			stored_settings_str = store_default_settings();
-		}
-		console.log('stored_settings_str', stored_settings_str);
-		let stored_settings = JSON.parse(stored_settings_str);
-		return stored_settings;
-	};
 
 	const isStaticThread = (symbol) => {
 		let secidx = symbol.secidx || null;
@@ -79,7 +64,7 @@
 
 	let staticThreads = $derived(variables.filter(isStaticThread));
 	let variableTypes = $derived(version['types']);
-	let manuallyEntered = $state(restore_default_settings());
+	let manuallyEntered = $derived(helpers.restore_default_settings(version.firmware_hash));
 	let manuallyEnteredConfig = $derived(
 		Object.hasOwn(manuallyEntered, version.firmware_hash)
 			? manuallyEntered[version.firmware_hash]

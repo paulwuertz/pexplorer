@@ -126,6 +126,7 @@ type SElfReport struct {
 	Info               []string         `json:"info"`
 	// lookup
 	Addr2FnMap  map[uint64]*FunctionSymbol `json:"-"`
+	Name2FnMap  map[string]*FunctionSymbol `json:"-"` // todo no more lookup by just symbol name...
 	SectionsMap map[uint64]*ElfSection     `json:"-"`
 }
 

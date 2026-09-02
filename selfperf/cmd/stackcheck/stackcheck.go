@@ -42,7 +42,7 @@ func main() {
 	elfReport := symbolextraction.GetFWReport(elfFile, fw_hash_str)
 	callgraph.EnhanceByDisasm(&elfReport)
 	callgraph.GetStackUseDetails(&elfReport)
-	callgraph.TraverseCallGraph(&elfReport)
+	callgraph.TraverseCallGraph(&elfReport, p.DynamicCalls)
 	threads := rtos.GetAllThreads(&elfReport, p)
 	rtos.PrintStackStats(threads)
 }

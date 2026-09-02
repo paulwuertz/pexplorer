@@ -197,7 +197,12 @@
 							}
 						}
 						let disasmFnMapArg = Uint8Array.fromBase64(btoa(JSON.stringify(disasmFnMap)));
-						reportJSONstr = add_fn_calls_from_disasm(disasmFnMapArg);
+						let allConfigs = helpers.restore_default_settings(reportJSON.firmware_hash);
+						let config = allConfigs[reportJSON.firmware_hash];
+						const config_uint8Array = Uint8Array.fromBase64(btoa(JSON.stringify(config)));
+						console.log('config', config);
+
+						reportJSONstr = add_fn_calls_from_disasm(disasmFnMapArg, config_uint8Array);
 						const endTime = performance.now();
 						toast_messages = [];
 						toast_messages.push({
@@ -440,8 +445,7 @@
 							</InputGroup>
 						</Row> -->
 						<Row>
-							<CardSubtitle><b>...OR load a sample:</b></CardSubtitle
-							>
+							<CardSubtitle><b>...OR load a sample:</b></CardSubtitle>
 							<CardText
 								>Do not have any and just want to see a demo? <br /> Then load a sample to see some features
 								:)</CardText

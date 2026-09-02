@@ -10,6 +10,7 @@ import (
 
 	"github.com/go-delve/delve/pkg/dwarf/frame"
 	"github.com/go-delve/delve/pkg/dwarf/godwarf"
+	"github.com/paulwuertz/pexplorer/selfperf/config"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
@@ -82,11 +83,35 @@ func GetFunctionCallList(s *symbolextraction.SElfReport) symbolextraction.Functi
 	return l
 }
 
-func AddCallGraph(s *symbolextraction.SElfReport) {
+func DynamicCallResolutionToMap(dynamicCalls []config.DynamicCallResolution) (callMap config.DynamicCallResolutionMap) {
+	callMap = make(config.DynamicCallResolutionMap, len(dynamicCalls))
+	for _, d := range dynamicCalls {
+		callerName := d.Caller
+		_, isNew := callMap[callerName]
+		if !isNew {
+			fmt.Println("Warning: ", callerName, "configured as a dynamic callback is not unique -> TODO fix symbol ident not by name")
+		}
+		// assumem symbol by name is unique for now, even if we know better...
+		callMap[callerName] = d
+	}
+	return callMap
+}
+
+func AddCallGraph(s *symbolextraction.SElfReport, dynamicCalls []config.DynamicCallResolution) {
+	callMap := DynamicCallResolutionToMap(dynamicCalls)
 	for i := 0; i < len(s.Functions); i++ {
 		f := &s.Functions[i]
+
+		dynamicCalls, hasResolvedCalls := callMap[f.Name]
+		if hasResolvedCalls {
+			for _, calleeName := range dynamicCalls.Callees {
+				fmt.Println(dynamicCalls.Caller, "p-p", calleeName)
+			}
+
+		}
+
 		if len(f.Asm) == 0 {
-			msg := fmt.Sprintf("no call data for %s at %d function with no disasm data", f.Name, f.Address)
+			msg := fmt.Sprintf("no static call data for %s at %d function with no disasm data", f.Name, f.Address)
 			s.Info = append(s.Info, msg)
 			continue
 		}
@@ -141,6 +166,7 @@ func AddCallGraph(s *symbolextraction.SElfReport) {
 	}
 }
 
+// test only for ARM for a working web demo
 func ExtractFunctionStackUsage(f *symbolextraction.FunctionSymbol) {
 	// fmt.Println("\t\tfn", f.Name, mainfde.Length, f.SourceFilePath, f.SourceFileLine)
 	var current_stacksize int64 = 0

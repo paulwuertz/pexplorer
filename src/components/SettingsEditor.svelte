@@ -26,8 +26,6 @@
 
 	const { settings } = $props();
 
-	let local_storage_key = 'pexplorer_settings';
-
 	const itemId = 'address';
 	const label = 'name';
 	let versions = $derived(Object.keys(symbols.symbols));
@@ -117,24 +115,8 @@
 		selected_call_to = null; //  easier allows adding new call
 	};
 
-	let store_default_settings = () => {
-		localStorage.setItem(version.firmware_hash, '{}');
-		return '{}';
-	};
-
-	let restore_default_settings = () => {
-		let stored_settings_str = localStorage.getItem(local_storage_key);
-		let no_settings_backed_up = !stored_settings_str;
-		if (no_settings_backed_up) {
-			stored_settings_str = store_default_settings();
-		}
-		console.log('stored_settings_str', stored_settings_str);
-		let stored_settings = JSON.parse(stored_settings_str);
-		return stored_settings;
-	};
-
 	let restore_active_settings = () => {
-		let all_settings = restore_default_settings();
+		let all_settings = helpers.restore_default_settings(version.firmware_hash);
 		restored_settings = all_settings;
 		if (Object.hasOwn(all_settings, version.firmware_hash)) {
 			return all_settings[version.firmware_hash];
@@ -144,12 +126,12 @@
 	};
 
 	let download_template_settings = () => {
-		let all_settings = restore_default_settings();
+		let all_settings = helpers.restore_default_settings(version.firmware_hash);
 		restored_settings = all_settings;
 		if (Object.hasOwn(all_settings, version.firmware_hash)) {
 			let settings = all_settings[version.firmware_hash];
-            settings["dynamic_calls"] = puncover_158_indirect_calls();
-            return settings;
+			settings['dynamic_calls'] = puncover_158_indirect_calls();
+			return settings;
 		} else {
 			return {};
 		}
@@ -242,12 +224,12 @@
 	};
 
 	let backup_settings = (settings_name, new_setting_set) => {
-		let stored_settings = restore_default_settings();
+		let stored_settings = helpers.restore_default_settings(version.firmware_hash);
 		// TODO protect overwrites?
 		// if (Object.hasOwn(stored_settings, settings_name)) {
 		stored_settings[settings_name] = new_setting_set;
 		// }
-		localStorage.setItem(local_storage_key, JSON.stringify(stored_settings));
+		localStorage.setItem(helpers.local_storage_key, JSON.stringify(stored_settings));
 		restored_settings = stored_settings;
 	};
 

@@ -352,3 +352,20 @@ export const stored_thread_settings_stack_size = (thread, variables) => {
 		return 0; // TODO error
 	}
 };
+
+let store_default_settings = (firmware_hash) => {
+	localStorage.setItem(version.firmware_hash, '{}');
+	return '{}';
+};
+
+export const local_storage_key = 'pexplorer_settings';
+export const restore_default_settings = (firmware_hash) => {
+	let stored_settings_str = localStorage.getItem(local_storage_key);
+	let no_settings_backed_up = !stored_settings_str;
+	if (no_settings_backed_up) {
+		stored_settings_str = store_default_settings(firmware_hash);
+	}
+	console.log('stored_settings_str', stored_settings_str);
+	let stored_settings = JSON.parse(stored_settings_str);
+	return stored_settings;
+};
