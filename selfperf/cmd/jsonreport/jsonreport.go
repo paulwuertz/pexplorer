@@ -10,6 +10,7 @@ import (
 	"os"
 
 	"github.com/paulwuertz/pexplorer/selfperf/callgraph"
+	"github.com/paulwuertz/pexplorer/selfperf/config"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
@@ -17,6 +18,7 @@ func main() {
 	// arg input, output file, indentation
 
 	infile := flag.String("i", "", "input ELF file - obligatory")
+	conffile := flag.String("c", "", "config file - containing dynamic threads and calls")
 	outfile := flag.String("o", "", "output report to this file - if omited print to stdout")
 	function_call_list_file := flag.String("f", "", "output list of all function calls to a file in json format to compare /regression")
 	pretty := flag.Bool("p", false, "pretty-print the report else it is compact")
@@ -26,6 +28,7 @@ func main() {
 	if *infile == "" {
 		log.Fatal("Please add an ELF file to generate a report for.")
 	}
+	var conf config.PexplorerConfig
 	elfFile, err := elf.Open(*infile)
 	fw_hash := sha256.Sum256([]byte(*infile))
 	fw_hash_str := fmt.Sprintf("%x", fw_hash)
@@ -34,8 +37,16 @@ func main() {
 		log.Fatal(err)
 	}
 
+	if *conffile != "" {
+		conf, err = config.Import_config_from_file(*conffile)
+		if err != nil {
+			fmt.Println("Error importing config file:", err)
+			return
+		}
+	}
+
 	elfReport := symbolextraction.GetFWReport(elfFile, fw_hash_str)
-	callgraph.EnhanceByDisasm(&elfReport)
+	callgraph.EnhanceByDisasm(&elfReport, conf.DynamicCalls)
 	callgraph.TraverseCallGraph(&elfReport)
 	elfReport.SingleFirmware = true
 	elfReport.FirmwareIdentifier = "unspecified"

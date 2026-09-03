@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/knightsc/gapstone"
+	"github.com/paulwuertz/pexplorer/selfperf/config"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
@@ -47,9 +48,9 @@ func AddDisAsmFromAsm(s *symbolextraction.SElfReport) {
 	g.Close()
 }
 
-func EnhanceByDisasm(s *symbolextraction.SElfReport) {
+func EnhanceByDisasm(s *symbolextraction.SElfReport, dynamicCalls []config.DynamicCallResolution) {
 	// get calls from disasm
 	AddDisAsmFromAsm(s)
-	AddCallGraph(s)
+	AddCallGraph(s, dynamicCalls)
 	GetStackUseDetails(s)
 }
