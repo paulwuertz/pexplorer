@@ -243,19 +243,15 @@
 
 	let puncover_158_indirect_calls = () => {
 		let calls = {};
+		let active_settings = restore_active_settings();
 		// build a map
-		for (const f of functions) {
-			let call_from = f['name'];
-			for (const callee of f['callees'] || []) {
-				let call_to = f['call_to'];
-				if (!call_to) {
-					// only add functions with unresolved calls
-					if (Object.hasOwn(calls, call_from)) {
-						calls[call_from].push('');
-					} else {
-						calls[call_from] = [''];
-					}
-				}
+		for (const dynamic_call of active_settings['dynamic_calls']) {
+			let call_from = dynamic_call['call_from'];
+			let call_to = dynamic_call['call_to'];
+			if (Object.hasOwn(calls, call_from)) {
+				calls[call_from].push(call_to);
+			} else {
+				calls[call_from] = [call_to];
 			}
 		}
 		// map to array
@@ -266,14 +262,7 @@
 				callees: calls[dynamic_caller]
 			});
 		}
-		let indirect_calls = {
-			version: 1,
-			indirect_callees: calls_arr
-		};
-		helpers.download(
-			'puncover-dynamiccalls-' + version_name + '.json',
-			JSON.stringify(indirect_calls, 0, 4)
-		);
+		return calls_arr;
 	};
 
 	let download_puncover_158_indirect_calls = () => {

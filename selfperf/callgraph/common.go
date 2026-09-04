@@ -102,14 +102,6 @@ func AddCallGraph(s *symbolextraction.SElfReport, dynamicCalls []config.DynamicC
 	for i := 0; i < len(s.Functions); i++ {
 		f := &s.Functions[i]
 
-		dynamicCalls, hasResolvedCalls := callMap[f.Name]
-		if hasResolvedCalls {
-			for _, calleeName := range dynamicCalls.Callees {
-				fmt.Println(dynamicCalls.Caller, "p-p", calleeName)
-			}
-
-		}
-
 		if len(f.Asm) == 0 {
 			msg := fmt.Sprintf("no static call data for %s at %d function with no disasm data", f.Name, f.Address)
 			s.Info = append(s.Info, msg)
@@ -123,6 +115,7 @@ func AddCallGraph(s *symbolextraction.SElfReport, dynamicCalls []config.DynamicC
 				var calladdr []uint64 = make([]uint64, 1) // wasteful hack to get a nullable int... TODO any better way?
 				foundNumber, err := fmt.Sscanf(insn.Opstr, "#0x%X", &calladdr[0])
 				if err != nil || foundNumber != 1 {
+					// branch instruction with ill formed address assume dynamic call
 					f.Callees = append(f.Callees, symbolextraction.FunctionCall{
 						CallFromFunctionName: f.Name,
 						CallFrom:             &f.Address,
@@ -161,6 +154,39 @@ func AddCallGraph(s *symbolextraction.SElfReport, dynamicCalls []config.DynamicC
 					s.Info = append(s.Info, msg)
 				}
 				f.Callees = append(f.Callees, call)
+			}
+		}
+		// resolve dynamic calls from conffile
+		dynamicCalls, hasResolvedCalls := callMap[f.Name]
+		if hasResolvedCalls {
+			for _, calleeName := range dynamicCalls.Callees {
+				callee, found := s.Name2FnMap[calleeName]
+				if !found {
+					log.Fatal("Callee of '", f.Name, "' to '", calleeName, "' from conf file not found")
+				}
+				filled_unresolved := false
+				// fill all unresolved calls first
+				// some dynamic calls might call into more then one function...
+				for i := 0; i < len(f.Callees); i++ {
+					if f.Callees[i].DynamicCall && f.Callees[i].CallTo == nil {
+						f.Callees[i].CallToFunctionName = calleeName
+						f.Callees[i].CallTo = &callee.Address
+						filled_unresolved = true
+						break
+					}
+				}
+				// ... in that case append further
+				if !filled_unresolved {
+					call := symbolextraction.FunctionCall{
+						CallFromFunctionName: f.Name,
+						CallFrom:             &f.Address,
+						CallTo:               &callee.Address,
+						CallToFunctionName:   callee.Name,
+						DynamicCall:          true,
+					}
+					f.Callees = append(f.Callees, call)
+				}
+				fmt.Println(dynamicCalls.Caller, "p-p", calleeName)
 			}
 		}
 	}

@@ -29,10 +29,6 @@ func main() {
 	var p config.PexplorerConfig
 	if *conffile != "" {
 		p, err = config.Import_config_from_file(*conffile)
-		if err != nil {
-			fmt.Println("Error importing config file:", err)
-			return
-		}
 	}
 
 	if err != nil {
@@ -40,9 +36,8 @@ func main() {
 	}
 
 	elfReport := symbolextraction.GetFWReport(elfFile, fw_hash_str)
-	callgraph.EnhanceByDisasm(&elfReport)
-	callgraph.GetStackUseDetails(&elfReport)
-	callgraph.TraverseCallGraph(&elfReport, p.DynamicCalls)
+	callgraph.EnhanceByDisasm(&elfReport, p.DynamicCalls)
+	callgraph.TraverseCallGraph(&elfReport)
 	threads := rtos.GetAllThreads(&elfReport, p)
 	rtos.PrintStackStats(threads)
 }

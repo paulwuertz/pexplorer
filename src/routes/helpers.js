@@ -118,7 +118,7 @@ export const callxrs_text_to_links = (
 export const callxrs_text_to_symname = (callxrs, sym_path_by_addr, isCaller) => {
 	let direction = isCaller ? 'from' : 'to';
 	if (direction == 'to' && !Object.hasOwn(callxrs, 'to') && callxrs['dynamic']) {
-		return 'Unresolved dynamic call from addr ' + callxrs['from'] + ', ';
+		return 'Unresolved dynamic call, ';
 	}
 	let callxrs_addr = callxrs[direction];
 	let callxrs_text = sym_path_by_addr[callxrs_addr];
@@ -368,4 +368,27 @@ export const restore_default_settings = (firmware_hash) => {
 	console.log('stored_settings_str', stored_settings_str);
 	let stored_settings = JSON.parse(stored_settings_str);
 	return stored_settings;
+};
+
+export const flat_calls_to_arrayed_callees = (stored_settings) => {
+	let calls = {};
+	// build a map
+	for (const dynamic_call of stored_settings['dynamic_calls']) {
+		let call_from = dynamic_call['call_from'];
+		let call_to = dynamic_call['call_to'];
+		if (Object.hasOwn(calls, call_from)) {
+			calls[call_from].push(call_to);
+		} else {
+			calls[call_from] = [call_to];
+		}
+	}
+	// map to array
+	let calls_arr = [];
+	for (const dynamic_caller in calls) {
+		calls_arr.push({
+			caller: dynamic_caller,
+			callees: calls[dynamic_caller]
+		});
+	}
+	return calls_arr;
 };
