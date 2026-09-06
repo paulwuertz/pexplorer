@@ -183,7 +183,11 @@ export const symbols_to_sunburst_tree_data = (symbols, data_field) => {
 };
 
 export const symbols_to_call_tree_data = (entry_fn) => {
-	let data = { name: entry_fn.name, value: entry_fn.stack_size, children: [] };
+	let data = {
+		name: entry_fn.name + '(' + entry_fn.stack_size + ')',
+		value: entry_fn.stack_size,
+		children: []
+	};
 	let callees = Object.hasOwn(entry_fn, 'calls') ? entry_fn['calls'] : [];
 	for (const callee of callees) {
 		data.children.push(symbols_to_call_tree_data(callee));

@@ -110,6 +110,9 @@ func AddCallGraph(s *symbolextraction.SElfReport, dynamicCalls []config.DynamicC
 
 		for _, insn := range f.DisAsm {
 			isForwardedCall, forwardedAddr := IsForwardedCall(insn, f, s)
+			// if f.Name == "z_log_msg_post_finalize" {
+			// 	fmt.Println("p-p")
+			// }
 			if IsFnCallInstr(insn.Instruction) {
 				//stackoverflow.com/questions/75285743/arm-gcc-cortex-m4-calling-address-as-function-generates-blx-instead-of-bl
 				var calladdr []uint64 = make([]uint64, 1) // wasteful hack to get a nullable int... TODO any better way?
@@ -196,7 +199,7 @@ func AddCallGraph(s *symbolextraction.SElfReport, dynamicCalls []config.DynamicC
 func ExtractFunctionStackUsage(f *symbolextraction.FunctionSymbol) {
 	// fmt.Println("\t\tfn", f.Name, mainfde.Length, f.SourceFilePath, f.SourceFileLine)
 	var current_stacksize int64 = 0
-	if f.Name == "main" {
+	if f.Name == "gs_usb_rx_thread" {
 		f.StackQualifiers = "experimental-estimate"
 	}
 	for _, d := range f.DisAsm {

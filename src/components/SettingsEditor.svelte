@@ -242,27 +242,9 @@
 	};
 
 	let puncover_158_indirect_calls = () => {
-		let calls = {};
 		let active_settings = restore_active_settings();
-		// build a map
-		for (const dynamic_call of active_settings['dynamic_calls']) {
-			let call_from = dynamic_call['call_from'];
-			let call_to = dynamic_call['call_to'];
-			if (Object.hasOwn(calls, call_from)) {
-				calls[call_from].push(call_to);
-			} else {
-				calls[call_from] = [call_to];
-			}
-		}
-		// map to array
-		let calls_arr = [];
-		for (const dynamic_caller in calls) {
-			calls_arr.push({
-				caller: dynamic_caller,
-				callees: calls[dynamic_caller]
-			});
-		}
-		return calls_arr;
+		active_settings['dynamic_calls'] = helpers.flat_calls_to_arrayed_callees(active_settings);
+		return active_settings;
 	};
 
 	let download_puncover_158_indirect_calls = () => {

@@ -13,7 +13,7 @@ import (
 )
 
 func AddDisAsmFromAsm(s *symbolextraction.SElfReport) {
-	g, err := gapstone.New(gapstone.CS_ARCH_ARM, gapstone.CS_MODE_THUMB)
+	g, err := gapstone.New(gapstone.CS_ARCH_ARM, gapstone.CS_MODE_THUMB+gapstone.CS_MODE_MCLASS)
 	if err != nil {
 		log.Fatalf("Failed to initialize engine: %v", err)
 	}
@@ -24,6 +24,10 @@ func AddDisAsmFromAsm(s *symbolextraction.SElfReport) {
 			s.Info = append(s.Info, msg)
 			continue
 		}
+
+		// if f.Name == "z_log_msg_post_finalize" {
+		// 	fmt.Println("p-p")
+		// }
 		insns, err := g.Disasm(
 			f.Asm,     // code buffer
 			f.Address, // starting address

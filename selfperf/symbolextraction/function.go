@@ -112,7 +112,7 @@ func (f *FunctionSymbol) traverseCallSubGraph(parent *CallNode, t *CallTree, s *
 	}
 }
 
-func (f *FunctionSymbol) GetCallTreeJson(s *SElfReport) *CallTree {
+func (f *FunctionSymbol) GetCallTreeJson(s *SElfReport, numPrintWorstPaths int) *CallTree {
 	root := f.ToUnlinkedCallNode()
 	var t *CallTree = &CallTree{
 		Tree:            root,
@@ -131,5 +131,21 @@ func (f *FunctionSymbol) GetCallTreeJson(s *SElfReport) *CallTree {
 	slices.SortFunc(t.Branches, func(i, j CallBranch) int {
 		return int(j.StackSize) - int(i.StackSize)
 	})
+	for i := 0; i < numPrintWorstPaths; i++ {
+		function_call_path := t.Branches[i]
+		fmt.Println(f.Name, " worst ", i, "th stacksize", function_call_path.StackSize)
+		for j := 0; j < len(function_call_path.CallList); j++ {
+			c := function_call_path.CallList[j]
+			fmt.Println("\t*", j, ".", c.Name, c.StackSize)
+
+		}
+	}
+	// if f.Name == "gs_usb_rx_thread" {
+	// 	var datajson []byte
+	// 	datajson, _ = json.MarshalIndent(t, "", "    ")
+	// 	if err := os.WriteFile(f.Name+"_calltree.json", datajson, 0666); err != nil {
+	// 		log.Fatal(err)
+	// 	}
+	// }
 	return t
 }

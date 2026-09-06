@@ -98,7 +98,7 @@ func FindStaticZephyrRtosThreads(s *symbolextraction.SElfReport) (tm ThreadMap) 
 			}
 			stackVar := GetVarByAddr(stackAddr, s)
 			stackSize := len(stackVar.Data)
-			thread_fn_calltree := threadEntryFn.GetCallTreeJson(s)
+			thread_fn_calltree := threadEntryFn.GetCallTreeJson(s, 0)
 			tm[threadEntryVarAddr] = config.RTOSThread{
 				ThreadEntryName:   threadEntryFn.Name,
 				StackVariableName: stackVar.Name,
@@ -148,7 +148,7 @@ func FindConfiguredZephyrRtosThreads(s *symbolextraction.SElfReport, conf config
 				log.Fatal("Configured thread - associated thread ", sName, "not found in ELF functions")
 			}
 		}
-		thread_fn_calltree := threadEntryFn.GetCallTreeJson(s)
+		thread_fn_calltree := threadEntryFn.GetCallTreeJson(s, 0)
 		tm[threadEntryFn.Address] = config.RTOSThread{
 			ThreadEntryName:   tName,
 			StackVariableName: sName,
