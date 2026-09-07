@@ -6,6 +6,7 @@ import (
 	"maps"
 	"math"
 	"slices"
+	"strings"
 
 	"github.com/paulwuertz/pexplorer/selfperf/config"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
@@ -53,23 +54,31 @@ func arrayToUint64(data []byte) uint64 {
 }
 
 func PrintStackStats(threads []config.RTOSThread) {
-	// ┌─────────────────────────────────────────────────────────────────────────┐
+
+	fmt.Println("┌────────────────────────────────────────────────────────────────────────────────────┐")
 	// │ log_process_thread_func   -  42.3% -   352/  832b - ████████------------│
 	// │ shell_thread              -   7.3% -   304/ 4160b - █-------------------│
 	// │ mgmt_event_work_handler   -  31.2% -   280/  896b - ██████--------------│
 	// │ bg_thread_main            -  58.3% -  1232/ 2112b - ███████████---------│
 	// │ work_queue_main           -  25.0% -   272/ 1088b - █████---------------│
-	// └─────────────────────────────────────────────────────────────────────────┘
 	for _, thread := range threads {
 		stackusage_percent := float64(thread.Used) / float64(thread.Size) * 100.0
-		fmt.Printf("| %.25s uses at least %d / %d (%.2f%%)|", thread.ThreadEntryName, thread.Used, thread.Size, stackusage_percent)
+		var stackusage_barfill int = int(stackusage_percent+4) / 5
+		var bar = strings.Repeat("█", stackusage_barfill) + strings.Repeat("-", 20-stackusage_barfill)
+		fmt.Printf("| %25s uses at least %5d / %5d (%3.1f%%) |%20s|", thread.ThreadEntryName, thread.Used, thread.Size, stackusage_percent, bar)
 		fmt.Println()
 	}
+	fmt.Println("└────────────────────────────────────────────────────────────────────────────────────┘")
+
+	any_unresolved_fn_in_thread := false
 	for _, thread := range threads {
 		if thread.NrUnresolvedCalls != 0 {
-			fmt.Print("WARNING: ", thread.NrUnresolvedCalls, " unresolved calls - incomplete calltree, the analysis needs to be resolved for better results)")
+			fmt.Println("WARNING: ", thread.ThreadEntryName, " has ", thread.NrUnresolvedCalls, " unresolved calls - incomplete calltree)")
+			any_unresolved_fn_in_thread = true
 		}
-		fmt.Println()
+	}
+	if any_unresolved_fn_in_thread {
+		fmt.Println("        --> consider adding a config and add unresolved calls for better results")
 	}
 }
 
