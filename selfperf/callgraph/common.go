@@ -41,11 +41,14 @@ func IsDynamicCallInstr(instr string) bool {
 
 // TODO - are there more like these?
 func IsForwardedCall(instr symbolextraction.DisAsm, f *symbolextraction.FunctionSymbol, s *symbolextraction.SElfReport) (bool, uint64) {
+	if f.Name == "log_backend_enable" {
+		f.StackQualifiers = "estimated+experimental"
+	}
 	var calladdr uint64 = 0
 	noKnownForwardedInstruction := instr.Instruction != "b.w"
 	foundNumber, err := fmt.Sscanf(instr.Opstr, "#0x%X", &calladdr)
-	if f.Name == "log_backend_enable" {
-		f.StackQualifiers = "estimated+experimental"
+	if err != nil || foundNumber != 1 {
+		foundNumber, err = fmt.Sscanf(instr.Opstr, "0x%X", &calladdr)
 	}
 	if err != nil || foundNumber != 1 || noKnownForwardedInstruction {
 		return false, 0
@@ -108,15 +111,18 @@ func AddCallGraph(s *symbolextraction.SElfReport, dynamicCalls []config.DynamicC
 			continue
 		}
 
+		if f.Name == "z_log_msg_static_create.constprop.0" {
+			fmt.Println("p-p")
+		}
 		for _, insn := range f.DisAsm {
 			isForwardedCall, forwardedAddr := IsForwardedCall(insn, f, s)
-			// if f.Name == "z_log_msg_post_finalize" {
-			// 	fmt.Println("p-p")
-			// }
 			if IsFnCallInstr(insn.Instruction) {
 				//stackoverflow.com/questions/75285743/arm-gcc-cortex-m4-calling-address-as-function-generates-blx-instead-of-bl
 				var calladdr []uint64 = make([]uint64, 1) // wasteful hack to get a nullable int... TODO any better way?
 				foundNumber, err := fmt.Sscanf(insn.Opstr, "#0x%X", &calladdr[0])
+				if err != nil || foundNumber != 1 {
+					foundNumber, err = fmt.Sscanf(insn.Opstr, "0x%X", &calladdr[0])
+				}
 				if err != nil || foundNumber != 1 {
 					// branch instruction with ill formed address assume dynamic call
 					f.Callees = append(f.Callees, symbolextraction.FunctionCall{
@@ -164,16 +170,20 @@ func AddCallGraph(s *symbolextraction.SElfReport, dynamicCalls []config.DynamicC
 		if hasResolvedCalls {
 			for _, calleeName := range dynamicCalls.Callees {
 				callee, found := s.Name2FnMap[calleeName]
-				if !found {
+				if !found && calleeName != "" {
 					log.Fatal("Callee of '", f.Name, "' to '", calleeName, "' from conf file not found")
 				}
 				filled_unresolved := false
 				// fill all unresolved calls first
 				// some dynamic calls might call into more then one function...
 				for i := 0; i < len(f.Callees); i++ {
-					if f.Callees[i].DynamicCall && f.Callees[i].CallTo == nil {
-						f.Callees[i].CallToFunctionName = calleeName
-						f.Callees[i].CallTo = &callee.Address
+					if f.Callees[i].DynamicCall && f.Callees[i].CallTo == nil && f.Callees[i].CallToFunctionName != "null" {
+						if calleeName != "" {
+							f.Callees[i].CallToFunctionName = calleeName
+							f.Callees[i].CallTo = &callee.Address
+						} else {
+							f.Callees[i].CallToFunctionName = "null"
+						}
 						filled_unresolved = true
 						break
 					}
@@ -199,7 +209,7 @@ func AddCallGraph(s *symbolextraction.SElfReport, dynamicCalls []config.DynamicC
 func ExtractFunctionStackUsage(f *symbolextraction.FunctionSymbol) {
 	// fmt.Println("\t\tfn", f.Name, mainfde.Length, f.SourceFilePath, f.SourceFileLine)
 	var current_stacksize int64 = 0
-	if f.Name == "gs_usb_rx_thread" {
+	if f.Name == "cannectivity_led_event" {
 		f.StackQualifiers = "experimental-estimate"
 	}
 	for _, d := range f.DisAsm {

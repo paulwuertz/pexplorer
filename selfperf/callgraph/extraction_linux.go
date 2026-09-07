@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"log"
 
-	"github.com/knightsc/gapstone"
+	"github.com/bpfsnoop/gapstone"
 	"github.com/paulwuertz/pexplorer/selfperf/config"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
@@ -25,9 +25,9 @@ func AddDisAsmFromAsm(s *symbolextraction.SElfReport) {
 			continue
 		}
 
-		// if f.Name == "z_log_msg_post_finalize" {
-		// 	fmt.Println("p-p")
-		// }
+		if f.Name == "net_buf_unref" {
+			fmt.Println("p-p")
+		}
 		insns, err := g.Disasm(
 			f.Asm,     // code buffer
 			f.Address, // starting address
@@ -42,10 +42,10 @@ func AddDisAsmFromAsm(s *symbolextraction.SElfReport) {
 		f.DisAsm = make([]symbolextraction.DisAsm, len(insns))
 		for i, insn := range insns {
 			f.DisAsm[i] = symbolextraction.DisAsm{
-				Addr:        uint64(insn.Address),
-				Instruction: insn.Mnemonic,
-				Opstr:       insn.OpStr,
-				InsBytes:    insn.Bytes,
+				Addr:        uint64(insn.InstructionHeader.Address),
+				Instruction: insn.InstructionHeader.Mnemonic,
+				Opstr:       insn.InstructionHeader.OpStr,
+				InsBytes:    insn.InstructionHeader.Bytes,
 			}
 		}
 	}

@@ -101,14 +101,11 @@
 			alert('Add missing selected_call_from');
 			return;
 		}
-		if (!selected_call_to) {
-			// TODO err
-			alert('Add missing selected_call_to');
-			return;
-		}
+		// if not set allow null to resolve undefined callbacks like nullpointers
+		let call_to = selected_call_to ? selected_call_to.name : null;
 		dynamic_calls.push({
 			call_from: selected_call_from.name,
-			call_to: selected_call_to.name
+			call_to: call_to
 		});
 		generate_and_store_new_setting();
 		link_caller_and_callee(selected_call_from, selected_call_to);

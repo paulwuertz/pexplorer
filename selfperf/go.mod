@@ -7,6 +7,6 @@ require (
 	github.com/ianlancetaylor/demangle v0.0.0-20251118225945-96ee0021ea0f
 )
 
-require github.com/knightsc/gapstone v4.0.1+incompatible
+require github.com/bpfsnoop/gapstone v0.0.0-20260226134052-b57d31fae271 // indirect
 
 //replace github.com/paulwuertz/pexplorer/selfperf/symbolextraction => ./symbolextraction
