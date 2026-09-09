@@ -187,8 +187,8 @@
 <Alert color="warning">
 	<h4 class="alert-heading text-capitalize">Warning: experimental</h4>
 
-	Estimating the stack use from the ELF+dwarf debug .framesection is still an experiment and needs
-	testing!
+	Estimating the stack use from the ASM instructions is experimental, needs testing and only working
+	for ARM at the moment!
 </Alert>
 
 {#key unresolved}

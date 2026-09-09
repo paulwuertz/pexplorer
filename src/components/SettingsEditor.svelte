@@ -63,6 +63,22 @@
 		return nr_fns_with_indirect_calls;
 	};
 	let functions_missing_calls_nr = $derived(count_fns());
+	let dynamic_calls_nr = $derived(
+		Object.fromEntries(
+			functions.map((f, i) => {
+				let nr_indirect_calls = 0;
+				for (const callee of f['callees'] || []) {
+					if (Object.hasOwn(callee, 'dynamic') && callee.dynamic == true) {
+						nr_indirect_calls++;
+					}
+				}
+				return [f['name'], nr_indirect_calls];
+			})
+		)
+	);
+	let total_dynamic_calls = $derived(
+		Object.values(dynamic_calls_nr).reduce((acc, val) => acc + val, 0)
+	);
 	let missing_calls_nr = $derived(
 		Object.fromEntries(
 			functions_missing_calls.map((f, i) => {
@@ -79,13 +95,30 @@
 	let total_functions_missing_calls_nr = $derived(
 		Object.values(missing_calls_nr).reduce((acc, val) => acc + val, 0)
 	);
+	let nr_static_calls = $derived(
+		Object.fromEntries(
+			functions.map((f, i) => {
+				let static_calls = 0;
+				for (const callee of f['callees'] || []) {
+					if (Object.hasOwn(callee, 'dynamic') && callee.dynamic == false) {
+						static_calls++;
+					}
+				}
+				return [f['name'], static_calls];
+			})
+		)
+	);
+	let total_static_calls = $derived(
+		Object.values(nr_static_calls).reduce((acc, val) => acc + val, 0)
+	);
+	let nr_resolved_calls = $derived(total_dynamic_calls - total_functions_missing_calls_nr);
 
 	let selected_call_from = $state();
 	let selected_call_to = $state();
 	let link_caller_and_callee = (caller, callee) => {
 		//console.log(caller, 'bef');
 
-		for (let i = 0; i < len(caller['callees']); i++) {
+		for (let i = 0; i < caller['callees'].length; i++) {
 			if (!Object.hasOwn(caller['callees'][i], 'to')) {
 				caller['callees'][i]['to'] = callee['address'];
 				caller['callees'][i]['to_function_name'] = callee['name'];
@@ -384,10 +417,15 @@
 		</tbody>
 	</Table>
 
-	<h4>
-		Resolved dynamic calls (from {functions_missing_calls_nr} functions still {total_functions_missing_calls_nr}
-		calls unresolved):
-	</h4>
+	<h4>Resolve dynamic calls</h4>
+	<p>
+		{functions_missing_calls_nr} out of {functions.length} functions have dynamic calls. There are {total_static_calls}
+		static and {total_dynamic_calls} dynamic calls.
+
+		{nr_resolved_calls}/{total_dynamic_calls} are resolved with at least one call candidate and {total_functions_missing_calls_nr}
+		unresolved calls. Hint: In some case there are more then one candidate, like a work queue executing
+		various functions.
+	</p>
 
 	<Table bordered>
 		<thead>

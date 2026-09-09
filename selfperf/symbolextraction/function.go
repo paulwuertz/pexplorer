@@ -60,6 +60,7 @@ func (f *FunctionSymbol) traverseCallSubGraph(parent *CallNode, t *CallTree, s *
 	// }
 	f.Visited = true
 	if len(f.Callees) == 0 {
+		// end of the call tree branch, add it to the list
 		call_branch := CallBranch{}
 		for _, c := range t.CurrentBranch.CallList {
 			cn := CallNode{Name: c.Name, StackSize: c.StackSize, Recursion: c.Recursion}
@@ -72,8 +73,11 @@ func (f *FunctionSymbol) traverseCallSubGraph(parent *CallNode, t *CallTree, s *
 		for i := 0; i < len(f.Callees); i++ {
 			call := &f.Callees[i]
 			callAddr := call.CallTo
+			// either unresolved call or resolved fn pointer is null
 			if callAddr == nil {
-				t.UnresolvedCalls = append(t.UnresolvedCalls, *call)
+				if call.CallToFunctionName != "null" {
+					t.UnresolvedCalls = append(t.UnresolvedCalls, *call)
+				}
 				continue
 			}
 			fnCallee, ok := s.Addr2FnMap[*callAddr]

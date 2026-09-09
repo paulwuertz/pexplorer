@@ -111,7 +111,8 @@
 					]} / {thread['init_stack_size']} bytes
 				</Progress>
 			</div>
-			<div class="pt-3">
+			<!--TODO show stack use of other fw versions or builds?-->
+			<!-- <div class="pt-3">
 				<CardSubtitle class="pb-3">in "CANnectivity 1.4 - GCC stm32g0b1xx":</CardSubtitle>
 				<Progress
 					color={stackLevelToColor(thread['max_stack_size_callees'], thread['init_stack_size'])}
@@ -135,7 +136,7 @@
 					{((100 * thread['max_stack_size_callees']) / thread['init_stack_size']).toFixed(2)}% - {892}
 					/ {thread['init_stack_size']} bytes
 				</Progress>
-			</div>
+			</div> -->
 		</CardText>
 	</CardBody>
 </Card>
