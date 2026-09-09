@@ -106,12 +106,11 @@ export const callxrs_text_to_links = (
 	base,
 	symbol_version,
 	callxrs,
-	sym_path_by_addr,
-	isCaller
+	sym_map,
+	key
 ) => {
-	let direction = isCaller ? 'from' : 'to';
-	let callxrs_addr = callxrs[direction];
-	let callxrs_text = sym_path_by_addr[callxrs_addr];
+	let sym_key = callxrs[key];
+	let callxrs_text = sym_map[sym_key];
 	return base + '/#/browse/' + symbol_version + '/' + callxrs_text;
 };
 
