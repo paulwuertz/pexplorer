@@ -10,6 +10,80 @@
 <article class="article">
 
 <h3 id="motivation">
+Forwarded calls
+</h3>
+
+<p>May 7, 2026 by <a href="https://p4w5.eu/blog">paul</a></p>
+
+While in ARM, most functions I saw start with a push and stack increase.
+The push as far as I understand to save the registers used in this function to it's before-call state.
+And the stack increase to make room for local variables declared inside the function.
+This look usually something like this:
+
+```asm
+Addr	INSTR bytes     mnemonic	OP
+0x445:	b0b5           	push		{r4, r5, r7, lr}
+0x447:	264b           	ldr		r3, [pc, #0x98]
+0x449:	84b0           	sub		sp, #0x10
+```
+
+Some very different function entry, no `push` or `sub sp` looks like this:
+
+```asm
+Addr	INSTR bytes     mnemonic	OP
+0xbbf7:	4368           	ldr		r3, [r0, #4]
+0xbbf9:	da71           	strb		r2, [r3, #7]
+0xbbfb:	122            	movs		r2, #1
+0xbbfd:	4368           	ldr		r3, [r0, #4]
+0xbbff:	1960           	str		r1, [r3]
+0xbc01:	4368           	ldr		r3, [r0, #4]
+0xbc03:	5a71           	strb		r2, [r3, #5]
+0xbc05:	f5f74cbe       	b.w		#0x18a1
+```
+
+Registers r0-r3 pass function call arguments afaik.
+Then this forwards a call to another function.
+
+How is this called? Don't know yet, TODO investigate :)
+
+But it is a function call by an ordinary `branch` instruction,
+which I thought was just used for if and only `bl` and `blx`
+for function calling.
+
+So I added a new check to detect this kind of function call.
+I saw it only with a wide branch instruction `b.w`, that calls a address outside of the function body to another function:
+
+```go
+func IsForwardedCall(instr symbolextraction.DisAsm, f *symbolextraction.FunctionSymbol, s *symbolextraction.SElfReport) (bool, uint64) {
+	var calladdr uint64 = 0
+	noKnownForwardedInstruction := instr.Instruction != "b.w"
+	foundNumber, err := fmt.Sscanf(instr.Opstr, "#0x%X", &calladdr)
+	if err != nil || foundNumber != 1 {
+		foundNumber, err = fmt.Sscanf(instr.Opstr, "0x%X", &calladdr)
+	}
+	if err != nil || foundNumber != 1 || noKnownForwardedInstruction {
+		return false, 0
+	}
+	startAddr := f.Address
+	endAddr := f.Address + f.FlashSize
+	outsiteCallrange := (calladdr < startAddr) || (calladdr > endAddr)
+	if !outsiteCallrange {
+		return false, 0
+	}
+	_, ok := s.Addr2FnMap[calladdr]
+	if !ok {
+		return false, 0
+	} else {
+		return true, calladdr
+	}
+}
+```
+
+</article>
+
+<article class="article">
+
+<h3 id="motivation">
 Motivation - No free RAM vs stack overflows and manual measurment
 </h3>
 
