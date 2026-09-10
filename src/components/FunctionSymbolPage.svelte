@@ -127,7 +127,7 @@
 								symbol_version,
 								caller,
 								sym_path_by_addr,
-								"from"
+								'from'
 							)}
 						>
 							<small>
@@ -153,7 +153,7 @@
 								symbol_version,
 								callee,
 								sym_path_by_addr,
-								"to"
+								'to'
 							)}
 						>
 							<small>
@@ -209,9 +209,9 @@
 							href={helpers.callxrs_text_to_links(
 								base,
 								symbol_version,
-                                { from: parseInt(addr_occurences[0]) },
+								{ from: parseInt(addr_occurences[0]) },
 								sym_path_by_addr,
-								"from"
+								'from'
 							)}
 						>
 							<small>

@@ -37,9 +37,9 @@
 			{ thread_entry_name: 'work_queue_main', stack_variable_name: 'sys_work_q_stack' }
 		],
 		dynamic_calls: [
-			{ call_from: 'work_queue_main', call_to: 'led_event_triggered_work_handler' },
-			{ call_from: 'work_queue_main', call_to: 'cannectivity_usb_reboot' },
-			{ call_from: 'work_queue_main', call_to: 'dfu_button_poll' }
+			{ from: 'work_queue_main', to: 'led_event_triggered_work_handler' },
+			{ from: 'work_queue_main', to: 'cannectivity_usb_reboot' },
+			{ from: 'work_queue_main', to: 'dfu_button_poll' }
 		]
 	};
 </script>

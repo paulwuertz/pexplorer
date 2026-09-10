@@ -86,13 +86,8 @@ export const sympath_to_link = (base, symbol_version, callxrs_text) => {
 	return base + '/#/browse/' + symbol_version + '/' + callxrs_text;
 };
 
-export const try_get_callee_link_by_addr = (
-	base,
-	symbol_version,
-	call_to_addr,
-	sym_path_by_addr
-) => {
-	let callee_name = sym_path_by_addr[call_to_addr];
+export const try_get_callee_link_by_addr = (base, symbol_version, to_addr, sym_path_by_addr) => {
+	let callee_name = sym_path_by_addr[to_addr];
 	let link_href = base + '/#/browse/' + symbol_version + '/' + callee_name;
 	if (callee_name == undefined) {
 		return ['/', '???'];
@@ -102,13 +97,7 @@ export const try_get_callee_link_by_addr = (
 	return [link_href, sym_name];
 };
 
-export const callxrs_text_to_links = (
-	base,
-	symbol_version,
-	callxrs,
-	sym_map,
-	key
-) => {
+export const callxrs_text_to_links = (base, symbol_version, callxrs, sym_map, key) => {
 	let sym_key = callxrs[key];
 	let callxrs_text = sym_map[sym_key];
 	return base + '/#/browse/' + symbol_version + '/' + callxrs_text;
@@ -357,7 +346,7 @@ export const stored_thread_settings_stack_size = (thread, variables) => {
 };
 
 let store_default_settings = (firmware_hash) => {
-	localStorage.setItem(version.firmware_hash, '{}');
+	localStorage.setItem(firmware_hash, '{}');
 	return '{}';
 };
 
@@ -376,13 +365,14 @@ export const restore_default_settings = (firmware_hash) => {
 export const flat_calls_to_arrayed_callees = (stored_settings) => {
 	let calls = {};
 	// build a map
-	for (const dynamic_call of stored_settings['dynamic_calls']) {
-		let call_from = dynamic_call['call_from'];
-		let call_to = dynamic_call['call_to'];
-		if (Object.hasOwn(calls, call_from)) {
-			calls[call_from].push(call_to);
+	let dynamic_calls = stored_settings ? stored_settings['dynamic_calls'] : [];
+	for (const dynamic_call of dynamic_calls) {
+		let from = dynamic_call['from'];
+		let to = dynamic_call['to'];
+		if (Object.hasOwn(calls, from)) {
+			calls[from].push(to);
 		} else {
-			calls[call_from] = [call_to];
+			calls[from] = [to];
 		}
 	}
 	// map to array

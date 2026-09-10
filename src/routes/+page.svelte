@@ -198,12 +198,15 @@
 						}
 						let disasmFnMapArg = Uint8Array.fromBase64(btoa(JSON.stringify(disasmFnMap)));
 						let allConfigs = helpers.restore_default_settings(reportJSON.firmware_hash);
+						let config_uint8Array = Uint8Array.fromBase64(btoa(JSON.stringify('{}')));
 						let config = allConfigs[reportJSON.firmware_hash];
-						config['dynamic_calls'] = helpers.flat_calls_to_arrayed_callees(config);
-						const config_uint8Array = Uint8Array.fromBase64(btoa(JSON.stringify(config)));
-						console.log('config', config);
-
+						if (config) {
+							config['dynamic_calls'] = config.dynamic_calls;
+							config_uint8Array = Uint8Array.fromBase64(btoa(JSON.stringify(config)));
+							console.log('config', config);
+						}
 						reportJSONstr = add_fn_calls_from_disasm(disasmFnMapArg, config_uint8Array);
+
 						const endTime = performance.now();
 						toast_messages = [];
 						toast_messages.push({

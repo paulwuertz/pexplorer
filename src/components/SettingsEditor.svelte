@@ -137,8 +137,8 @@
 		// if not set allow null to resolve undefined callbacks like nullpointers
 		let call_to = selected_call_to ? selected_call_to.name : null;
 		dynamic_calls.push({
-			call_from: selected_call_from.name,
-			call_to: call_to
+			from: selected_call_from.name,
+			to: call_to
 		});
 		generate_and_store_new_setting();
 		link_caller_and_callee(selected_call_from, selected_call_to);
@@ -206,7 +206,17 @@
 					//TODO verify to schema
 					//TODO support multiple schemas
 					let settings = JSON.parse(reader.result);
-					dynamic_calls = settings.dynamic_calls;
+					let loaded_dyn_calls = [];
+					for (const fn_dynamic_calls of settings.dynamic_calls) {
+						let caller = fn_dynamic_calls.caller;
+						for (const fn_dynamic_call_to of fn_dynamic_calls.callees) {
+							loaded_dyn_calls.push({
+								from: caller,
+								to: fn_dynamic_call_to
+							});
+						}
+					}
+					dynamic_calls = loaded_dyn_calls;
 					threads = settings.threads;
 					backup_settings(version.firmware_hash, {
 						threads: threads,
@@ -282,8 +292,8 @@
 		let active_settings = restore_active_settings();
 		// build a map
 		for (const dynamic_call of active_settings['dynamic_calls']) {
-			let call_from = dynamic_call['call_from'];
-			let call_to = dynamic_call['call_to'];
+			let call_from = dynamic_call['from'];
+			let call_to = dynamic_call['to'];
 			if (Object.hasOwn(calls, call_from)) {
 				calls[call_from].push(call_to);
 			} else {
@@ -436,10 +446,10 @@
 			</tr>
 		</thead>
 		<tbody>
-			{#each dynamic_calls as dynamic_call, index (dynamic_call.call_from + dynamic_call.call_to + index)}
+			{#each dynamic_calls as dynamic_call, index (dynamic_call.from + dynamic_call.to + index)}
 				<tr>
-					<td>{dynamic_call.call_from}</td>
-					<td>{dynamic_call.call_to}</td>
+					<td>{dynamic_call.from}</td>
+					<td>{dynamic_call.to}</td>
 					<td>
 						<Button
 							onclick={() => {
