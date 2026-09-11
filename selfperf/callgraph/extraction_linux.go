@@ -25,9 +25,9 @@ func AddDisAsmFromAsm(s *symbolextraction.SElfReport) {
 			continue
 		}
 
-		if f.Name == "net_buf_unref" {
-			fmt.Println("p-p")
-		}
+		// if f.Name == "net_buf_unref" {
+		// 	fmt.Println("p-p")
+		// }
 		insns, err := g.Disasm(
 			f.Asm,     // code buffer
 			f.Address, // starting address

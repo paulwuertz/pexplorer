@@ -6,6 +6,8 @@ import (
 	"fmt"
 	"io"
 	"os"
+
+	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
 type RTOSThread struct {
@@ -14,6 +16,7 @@ type RTOSThread struct {
 	Size              uint64 `json:"size,omitempty,omitzero"`
 	Used              uint64 `json:"-"`
 	NrUnresolvedCalls uint64 `json:"-"`
+	WorstStackBranch  symbolextraction.CallBranch
 }
 
 type DynamicCallResolution struct {

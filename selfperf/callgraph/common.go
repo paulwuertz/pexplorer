@@ -111,9 +111,9 @@ func AddCallGraph(s *symbolextraction.SElfReport, dynamicCalls []config.DynamicC
 			continue
 		}
 
-		if f.Name == "z_log_msg_static_create.constprop.0" {
-			fmt.Println("p-p")
-		}
+		// if f.Name == "z_log_msg_static_create.constprop.0" {
+		// 	fmt.Println("p-p")
+		// }
 		for _, insn := range f.DisAsm {
 			isForwardedCall, forwardedAddr := IsForwardedCall(insn, f, s)
 			if IsFnCallInstr(insn.Instruction) {
@@ -199,7 +199,7 @@ func AddCallGraph(s *symbolextraction.SElfReport, dynamicCalls []config.DynamicC
 					}
 					f.Callees = append(f.Callees, call)
 				}
-				fmt.Println(dynamicCalls.Caller, "p-p", calleeName)
+				// fmt.Println(dynamicCalls.Caller, "p-p", calleeName)
 			}
 		}
 	}

@@ -65,8 +65,18 @@ func PrintStackStats(threads []config.RTOSThread) {
 		stackusage_percent := float64(thread.Used) / float64(thread.Size) * 100.0
 		var stackusage_barfill int = int(stackusage_percent+4) / 5
 		var bar = strings.Repeat("█", stackusage_barfill) + strings.Repeat("-", 20-stackusage_barfill)
-		fmt.Printf("| %25s uses at least %5d / %5d (%3.1f%%) |%20s|", thread.ThreadEntryName, thread.Used, thread.Size, stackusage_percent, bar)
-		fmt.Println()
+		fmt.Printf("│ %-25s uses at least %5d / %5d (%3.1f%%) |%20s│\n", thread.ThreadEntryName, thread.Used, thread.Size, stackusage_percent, bar)
+		if thread.Used > thread.Size {
+			function_call_path := thread.WorstStackBranch
+			for j := 0; j < len(function_call_path.CallList); j++ {
+				c := function_call_path.CallList[j]
+				list_str := "├──"
+				if j == len(function_call_path.CallList)-1 {
+					list_str = "└──"
+				}
+				fmt.Printf("│    %-3s %-35s StackSize: %-5d bytes                  │\n", list_str, c.Name, c.StackSize)
+			}
+		}
 	}
 	fmt.Println("└────────────────────────────────────────────────────────────────────────────────────┘")
 
@@ -164,6 +174,7 @@ func FindConfiguredZephyrRtosThreads(s *symbolextraction.SElfReport, conf config
 			Size:              uint64(stackSize),
 			Used:              uint64(thread_fn_calltree.Tree.MaxStackSizeCallees),
 			NrUnresolvedCalls: uint64(len(thread_fn_calltree.UnresolvedCalls)),
+			WorstStackBranch:  thread_fn_calltree.Branches[0],
 		}
 	}
 	return tm
