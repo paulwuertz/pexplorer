@@ -157,11 +157,9 @@
 
 	let download_template_settings = () => {
 		let all_settings = helpers.restore_default_settings(version.firmware_hash);
-		restored_settings = all_settings;
 		if (Object.hasOwn(all_settings, version.firmware_hash)) {
 			let settings = all_settings[version.firmware_hash];
-			settings['dynamic_calls'] = puncover_158_indirect_calls();
-			return settings;
+			return puncover_158_indirect_calls();
 		} else {
 			return {};
 		}
@@ -282,9 +280,10 @@
 	};
 
 	let puncover_158_indirect_calls = () => {
-		let active_settings = restore_active_settings();
-		active_settings['dynamic_calls'] = helpers.flat_calls_to_arrayed_callees(active_settings);
-		return active_settings;
+		let active_settings = helpers.restore_default_settings(version.firmware_hash);
+        let setting = active_settings[version.firmware_hash];
+		setting['dynamic_calls'] = helpers.flat_calls_to_arrayed_callees(setting);
+		return setting;
 	};
 
 	let download_puncover_158_indirect_calls = () => {
