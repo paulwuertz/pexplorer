@@ -90,10 +90,10 @@ func DynamicCallResolutionToMap(dynamicCalls []config.DynamicCallResolution) (ca
 	callMap = make(config.DynamicCallResolutionMap, len(dynamicCalls))
 	for _, d := range dynamicCalls {
 		callerName := d.Caller
-		_, isNew := callMap[callerName]
-		if !isNew {
-			fmt.Println("Warning: ", callerName, "configured as a dynamic callback is not unique -> TODO fix symbol ident not by name")
-		}
+		// _, isNew := callMap[callerName]
+		// if !isNew {
+		// 	fmt.Println("Warning: ", callerName, "configured as a dynamic callback is not unique -> TODO fix symbol ident not by name")
+		// }
 		// assumem symbol by name is unique for now, even if we know better...
 		callMap[callerName] = d
 	}

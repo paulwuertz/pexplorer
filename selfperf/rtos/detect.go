@@ -61,21 +61,34 @@ func PrintStackStats(threads []config.RTOSThread) {
 	// │ mgmt_event_work_handler   -  31.2% -   280/  896b - ██████--------------│
 	// │ bg_thread_main            -  58.3% -  1232/ 2112b - ███████████---------│
 	// │ work_queue_main           -  25.0% -   272/ 1088b - █████---------------│
+	const colorRed = "\033[0;31m"
+	const colorNone = "\033[0m"
 	for _, thread := range threads {
 		stackusage_percent := float64(thread.Used) / float64(thread.Size) * 100.0
-		var stackusage_barfill int = int(stackusage_percent+4) / 5
-		var bar = strings.Repeat("█", stackusage_barfill) + strings.Repeat("-", 20-stackusage_barfill)
-		fmt.Printf("│ %-25s uses at least %5d / %5d (%3.1f%%) |%20s│\n", thread.ThreadEntryName, thread.Used, thread.Size, stackusage_percent, bar)
-		if thread.Used > thread.Size {
+		var stackusage_barfill int = min(int(stackusage_percent+4)/5, 20)
+		var bar = strings.Repeat("█", stackusage_barfill) + strings.Repeat("-", max(0, 20-stackusage_barfill))
+		var is_overflow = thread.Used > thread.Size
+		var color_start = colorNone
+		var color_end = colorNone
+		if is_overflow {
+			color_start = colorRed
+		}
+		fmt.Printf("│ %-26s uses at least %5d / %5d (%3.0f%%) %s|%20s│%s\n", thread.ThreadEntryName, thread.Used, thread.Size, stackusage_percent, color_start, bar, color_end)
+		if is_overflow {
 			function_call_path := thread.WorstStackBranch
+			var stack_sum int64 = 0
 			for j := 0; j < len(function_call_path.CallList); j++ {
 				c := function_call_path.CallList[j]
 				list_str := "├──"
 				if j == len(function_call_path.CallList)-1 {
 					list_str = "└──"
 				}
-				fmt.Printf("│    %-3s %-35s StackSize: %-5d bytes                  │\n", list_str, c.Name, c.StackSize)
+				stack_sum += c.StackSize
+				fmt.Printf("│    %-3s %-35s StackSize: %-5d bytes (Sum: %-8d)  │\n", list_str, c.Name, c.StackSize, stack_sum)
 			}
+		}
+		if thread.NrOverflowPaths > 1 {
+			fmt.Printf("│ └ WARNING: %-14d paths are overflowing, check pexplorer for more details! │\n", thread.NrOverflowPaths)
 		}
 	}
 	fmt.Println("└────────────────────────────────────────────────────────────────────────────────────┘")
@@ -83,7 +96,7 @@ func PrintStackStats(threads []config.RTOSThread) {
 	any_unresolved_fn_in_thread := false
 	for _, thread := range threads {
 		if thread.NrUnresolvedCalls != 0 {
-			fmt.Println("WARNING: ", thread.ThreadEntryName, " has ", thread.NrUnresolvedCalls, " unresolved calls - incomplete calltree)")
+			fmt.Printf("WARNING: %-25s - incomplete calltree: %-10d unresolved calls)\n", thread.ThreadEntryName, thread.NrUnresolvedCalls)
 			any_unresolved_fn_in_thread = true
 		}
 	}
@@ -117,13 +130,14 @@ func FindStaticZephyrRtosThreads(s *symbolextraction.SElfReport) (tm ThreadMap) 
 			}
 			stackVar := GetVarByAddr(stackAddr, s)
 			stackSize := len(stackVar.Data)
-			thread_fn_calltree := threadEntryFn.GetCallTreeJson(s, 0)
+			thread_fn_calltree, ovb := threadEntryFn.GetCallTreeJson(s, uint64(stackSize), 0)
 			tm[threadEntryVarAddr] = config.RTOSThread{
 				ThreadEntryName:   threadEntryFn.Name,
 				StackVariableName: stackVar.Name,
 				Size:              uint64(stackSize),
 				Used:              uint64(thread_fn_calltree.Tree.MaxStackSizeCallees),
 				NrUnresolvedCalls: uint64(len(thread_fn_calltree.UnresolvedCalls)),
+				NrOverflowPaths:   ovb,
 			}
 			fmt.Println("Found Zephyr thread: ", tm[threadEntryVarAddr])
 		}
@@ -167,7 +181,7 @@ func FindConfiguredZephyrRtosThreads(s *symbolextraction.SElfReport, conf config
 				log.Fatal("Configured thread - associated thread ", sName, "not found in ELF functions")
 			}
 		}
-		thread_fn_calltree := threadEntryFn.GetCallTreeJson(s, 0)
+		thread_fn_calltree, ovb := threadEntryFn.GetCallTreeJson(s, uint64(stackSize), 0)
 		tm[threadEntryFn.Address] = config.RTOSThread{
 			ThreadEntryName:   tName,
 			StackVariableName: sName,
@@ -175,6 +189,7 @@ func FindConfiguredZephyrRtosThreads(s *symbolextraction.SElfReport, conf config
 			Used:              uint64(thread_fn_calltree.Tree.MaxStackSizeCallees),
 			NrUnresolvedCalls: uint64(len(thread_fn_calltree.UnresolvedCalls)),
 			WorstStackBranch:  thread_fn_calltree.Branches[0],
+			NrOverflowPaths:   ovb,
 		}
 	}
 	return tm

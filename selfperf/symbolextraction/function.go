@@ -116,7 +116,7 @@ func (f *FunctionSymbol) traverseCallSubGraph(parent *CallNode, t *CallTree, s *
 	}
 }
 
-func (f *FunctionSymbol) GetCallTreeJson(s *SElfReport, numPrintWorstPaths int) *CallTree {
+func (f *FunctionSymbol) GetCallTreeJson(s *SElfReport, threadStackSize uint64, numPrintWorstPaths int) (*CallTree, int) {
 	root := f.ToUnlinkedCallNode()
 	var t *CallTree = &CallTree{
 		Tree:            root,
@@ -151,5 +151,13 @@ func (f *FunctionSymbol) GetCallTreeJson(s *SElfReport, numPrintWorstPaths int) 
 	// 		log.Fatal(err)
 	// 	}
 	// }
-	return t
+	number_of_overflow_paths := 0
+	for _, b := range t.Branches {
+		if b.StackSize > int64(threadStackSize) {
+			number_of_overflow_paths += 1
+		} else {
+			break
+		}
+	}
+	return t, number_of_overflow_paths
 }

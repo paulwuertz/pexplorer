@@ -104,7 +104,8 @@ func wasm_get_fn_calltree() js.Func {
 		fn_addr := fn_addr_js.Int()
 
 		fn := elfReport.Addr2FnMap[uint64(fn_addr)]
-		tree := fn.GetCallTreeJson(&elfReport, 0)
+		thread_stack_size := 0xFFFF_FFFF // TODO get from config if exists
+		tree, _ /* nr_overflowing_branches*/ := fn.GetCallTreeJson(&elfReport, uint64(thread_stack_size), 0)
 
 		fmt.Printf("args # %d\n", len(args))
 		fmt.Printf("fn addr %d\n", fn_addr)

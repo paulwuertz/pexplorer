@@ -16,6 +16,7 @@ type RTOSThread struct {
 	Size              uint64 `json:"size,omitempty,omitzero"`
 	Used              uint64 `json:"-"`
 	NrUnresolvedCalls uint64 `json:"-"`
+	NrOverflowPaths   int    `json:"-"`
 	WorstStackBranch  symbolextraction.CallBranch
 }
 
