@@ -73,7 +73,7 @@ func PrintStackStats(threads []config.RTOSThread) {
 		if is_overflow {
 			color_start = colorRed
 		}
-		fmt.Printf("│ %-26s uses at least %5d / %5d (%3.0f%%) %s|%20s│%s\n", thread.ThreadEntryName, thread.Used, thread.Size, stackusage_percent, color_start, bar, color_end)
+		fmt.Printf("│ %-26s uses at least %5d / %5d (%3.0f%%) |%s%20s%s│\n", thread.ThreadEntryName, thread.Used, thread.Size, stackusage_percent, color_start, bar, color_end)
 		if is_overflow {
 			function_call_path := thread.WorstStackBranch
 			var stack_sum int64 = 0
