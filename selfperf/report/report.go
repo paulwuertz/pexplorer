@@ -11,7 +11,7 @@ import (
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
-func Get(elfFile *elf.File, p config.PexplorerConfig) (symbolextraction.SElfReport, []config.RTOSThread) {
+func GetReportAndRTOSStats(elfFile *elf.File, p config.PexplorerConfig) (symbolextraction.SElfReport, []config.RTOSThread) {
 	fw_hash := sha256.Sum256([]byte(elfFile.Data.GoString()))
 	fw_hash_str := fmt.Sprintf("%x", fw_hash)
 

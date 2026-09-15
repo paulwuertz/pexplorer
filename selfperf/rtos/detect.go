@@ -56,11 +56,7 @@ func arrayToUint64(data []byte) uint64 {
 func PrintStackStats(threads []config.RTOSThread) {
 
 	fmt.Println("┌────────────────────────────────────────────────────────────────────────────────────┐")
-	// │ log_process_thread_func   -  42.3% -   352/  832b - ████████------------│
-	// │ shell_thread              -   7.3% -   304/ 4160b - █-------------------│
-	// │ mgmt_event_work_handler   -  31.2% -   280/  896b - ██████--------------│
-	// │ bg_thread_main            -  58.3% -  1232/ 2112b - ███████████---------│
-	// │ work_queue_main           -  25.0% -   272/ 1088b - █████---------------│
+	//           │ gs_usb_tx_thread           uses at least   728 /  1024 ( 71%) |███████████████-----│ ...
 	const colorRed = "\033[0;31m"
 	const colorNone = "\033[0m"
 	for _, thread := range threads {
