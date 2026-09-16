@@ -2,9 +2,11 @@ package diff
 
 import (
 	"fmt"
+	"slices"
 	"strings"
 
 	"github.com/paulwuertz/pexplorer/selfperf/config"
+	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
 type ThreadMap map[string][2]config.RTOSThread
@@ -72,6 +74,76 @@ func RTOSStackDiff(new []config.RTOSThread, ref []config.RTOSThread) {
 	// }
 }
 
-func SymbolDiff() {
+type FunctionSymbolMap map[string]*symbolextraction.FunctionSymbol
+type VariableSymbolMap map[string]*symbolextraction.VariableSymbol
+type FunctionSymbolMatch map[string][2]*symbolextraction.FunctionSymbol
+type VariableSymbolMatch map[string][2]*symbolextraction.VariableSymbol
+type FunctionDiffReport struct {
+	functionsMatches FunctionSymbolMatch
+	functionsDeleted FunctionSymbolMap
+	functionsAdded   FunctionSymbolMap
+	functionsRenamed FunctionSymbolMatch // TODO
+}
 
+func getCommonFunctionSymbols(new FunctionSymbolMap, ref FunctionSymbolMap) FunctionDiffReport {
+	var diff FunctionDiffReport
+	diff.functionsMatches = make(FunctionSymbolMatch)
+	diff.functionsDeleted = make(FunctionSymbolMap)
+	diff.functionsAdded = make(FunctionSymbolMap)
+	diff.functionsRenamed = make(FunctionSymbolMatch)
+
+	for k, newF := range new {
+		refF, isInRef := ref[k]
+		if !isInRef {
+			// TODO WARNING existing insert
+			diff.functionsAdded[k] = newF
+			continue
+		}
+		if slices.Compare(newF.Asm, refF.Asm) != 0 {
+			diff.functionsMatches[k] = [2]*symbolextraction.FunctionSymbol{newF, refF}
+		}
+		// fmt.Println("kvloop", k, v, refF)
+	}
+
+	for k, fRef := range ref {
+		_, isInNew := new[k]
+		if !isInNew {
+			// TODO WARNING existing insert
+			for kAdded, fAdded := range diff.functionsAdded {
+				if slices.Compare(fAdded.Asm, fRef.Asm) == 0 {
+					// identical fn with different name
+					// is renamed not added and deleted
+					diff.functionsRenamed[kAdded] = [2]*symbolextraction.FunctionSymbol{
+						fRef, fAdded,
+					}
+					continue
+				}
+			}
+			diff.functionsDeleted[k] = fRef
+		}
+	}
+	// make a new added slice with no remakes
+	functionsAddedNoRenames := make(FunctionSymbolMap)
+	for kRenamed, fAdded := range diff.functionsAdded {
+		_, isRenamed := diff.functionsRenamed[kRenamed]
+		if !isRenamed {
+			functionsAddedNoRenames[kRenamed] = fAdded
+		}
+	}
+	diff.functionsAdded = functionsAddedNoRenames
+
+	fmt.Println("matches", len(diff.functionsMatches))
+	fmt.Println("added", len(diff.functionsAdded))
+	fmt.Println("deleted", len(diff.functionsDeleted))
+	fmt.Println("renamed", len(diff.functionsRenamed))
+	return diff
+}
+
+func getCommonVariableSymbols(new FunctionSymbolMap, ref FunctionSymbolMap) FunctionDiffReport {
+
+}
+
+func SymbolDiff(new symbolextraction.SElfReport, ref symbolextraction.SElfReport) {
+	getCommonFunctionSymbols(new.Name2FnMap, ref.Name2FnMap)
+	getCommonVariableSymbols(new.Name2FnMap, ref.Name2FnMap)
 }

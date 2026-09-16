@@ -49,10 +49,11 @@ func main() {
 		log.Fatal(err)
 	}
 
-	_, newTreadStats := report.GetReportAndRTOSStats(newElfFile, p)
-	_, refTreadStats := report.GetReportAndRTOSStats(refElfFile, ref_p)
+	newReport, newTreadStats := report.GetReportAndRTOSStats(newElfFile, p)
+	refReport, refTreadStats := report.GetReportAndRTOSStats(refElfFile, ref_p)
+	diff.RTOSStackDiff(newTreadStats, refTreadStats)
+	diff.SymbolDiff(newReport, refReport)
 	// rtos.PrintStackStats(newTreadStats)
 	// rtos.PrintStackStats(refTreadStats)
 	// log.Printf("%d %d", &newReport, &refReport)
-	diff.RTOSStackDiff(newTreadStats, refTreadStats)
 }
