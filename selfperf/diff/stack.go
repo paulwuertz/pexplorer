@@ -2,6 +2,7 @@ package diff
 
 import (
 	"fmt"
+	"math"
 	"slices"
 	"strings"
 
@@ -140,8 +141,12 @@ func getCommonFunctionSymbols(new FunctionSymbolMap, ref FunctionSymbolMap) Func
 }
 
 type FunctionStackDiff struct {
-	NewFunction   *symbolextraction.FunctionSymbol
-	DiffStackSize int64
+	NewFunctionName string  `json:"function_name"`
+	NewFunctionPath string  `json:"function_path"`
+	DiffStackSize   int64   `json:"diff_stacksize"`
+	NewStackSize    int64   `json:"new_stacksize"`
+	OldStackSize    int64   `json:"old_stacksize"`
+	DiffPercentage  float64 `json:"diff_percentage"`
 }
 type FunctionStackDiffReport []FunctionStackDiff
 
@@ -152,7 +157,20 @@ func getStackDiff(diff FunctionDiffReport) FunctionStackDiffReport {
 		refF := pair[1]
 		var diff int64 = newF.StackSize - refF.StackSize
 		if diff != 0 {
-			stackDiff = append(stackDiff, FunctionStackDiff{NewFunction: newF, DiffStackSize: diff})
+			diff_perc := 100.0*float64(newF.StackSize)/float64(refF.StackSize) - 100.0
+			if math.IsInf(diff_perc, 1) {
+				diff_perc = 100.0
+			} else if math.IsInf(diff_perc, -1) {
+				diff_perc = -100.0
+			}
+			stackDiff = append(stackDiff, FunctionStackDiff{
+				NewFunctionName: newF.Name,
+				NewFunctionPath: newF.SourceFilePath,
+				DiffStackSize:   diff,
+				NewStackSize:    newF.StackSize,
+				OldStackSize:    refF.StackSize,
+				DiffPercentage:  diff_perc,
+			})
 			// fmt.Println("\tstackDiff", k, diff, newF.StackSize, refF.StackSize)
 		}
 	}
@@ -166,13 +184,12 @@ func getStackDiff(diff FunctionDiffReport) FunctionStackDiffReport {
 
 // }
 
-func SymbolDiff(new symbolextraction.SElfReport, ref symbolextraction.SElfReport) {
+func SymbolDiff(new symbolextraction.SElfReport, ref symbolextraction.SElfReport) FunctionStackDiffReport {
 	diffReport := getCommonFunctionSymbols(new.Name2FnMap, ref.Name2FnMap)
 	stackDiffReport := getStackDiff(diffReport)
-	for _, sd := range stackDiffReport {
-		old_stack_size := sd.NewFunction.StackSize - sd.DiffStackSize
-		diff_perc := 100.0*float64(sd.NewFunction.StackSize)/float64(old_stack_size) - 100.0
-		fmt.Printf("stack_diff %40s:%d -> %d (%d / %-3.1f%%)\n", sd.NewFunction.Name, old_stack_size, sd.NewFunction.StackSize, sd.DiffStackSize, diff_perc)
-	}
+	// for _, sd := range stackDiffReport {
+	// 	fmt.Printf("stack_diff %40s:%d -> %d (%d / %-3.1f%%)\n", sd.NewFunction.Name, sd.OldStackSize, sd.NewFunction.StackSize, sd.DiffStackSize, sd.DiffPercentage)
+	// }
+	return stackDiffReport
 	// getCommonVariableSymbols(new.Name2FnMap, ref.Name2FnMap)
 }

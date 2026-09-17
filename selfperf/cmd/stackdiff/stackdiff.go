@@ -2,7 +2,9 @@ package main
 
 import (
 	"debug/elf"
+	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 
 	"github.com/paulwuertz/pexplorer/selfperf/config"
@@ -52,7 +54,10 @@ func main() {
 	newReport, newTreadStats := report.GetReportAndRTOSStats(newElfFile, p)
 	refReport, refTreadStats := report.GetReportAndRTOSStats(refElfFile, ref_p)
 	diff.RTOSStackDiff(newTreadStats, refTreadStats)
-	diff.SymbolDiff(newReport, refReport)
+	stack_diff := diff.SymbolDiff(newReport, refReport)
+
+	var datajson, _ = json.MarshalIndent(stack_diff, "", "    ")
+	fmt.Println(string(datajson))
 	// rtos.PrintStackStats(newTreadStats)
 	// rtos.PrintStackStats(refTreadStats)
 	// log.Printf("%d %d", &newReport, &refReport)
