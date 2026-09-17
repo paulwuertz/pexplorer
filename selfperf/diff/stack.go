@@ -139,11 +139,40 @@ func getCommonFunctionSymbols(new FunctionSymbolMap, ref FunctionSymbolMap) Func
 	return diff
 }
 
-func getCommonVariableSymbols(new FunctionSymbolMap, ref FunctionSymbolMap) FunctionDiffReport {
+type FunctionStackDiff struct {
+	NewFunction   *symbolextraction.FunctionSymbol
+	DiffStackSize int64
+}
+type FunctionStackDiffReport []FunctionStackDiff
 
+func getStackDiff(diff FunctionDiffReport) FunctionStackDiffReport {
+	stackDiff := make(FunctionStackDiffReport, 0)
+	for _, pair := range diff.functionsMatches {
+		newF := pair[0]
+		refF := pair[1]
+		var diff int64 = newF.StackSize - refF.StackSize
+		if diff != 0 {
+			stackDiff = append(stackDiff, FunctionStackDiff{NewFunction: newF, DiffStackSize: diff})
+			// fmt.Println("\tstackDiff", k, diff, newF.StackSize, refF.StackSize)
+		}
+	}
+	slices.SortFunc(stackDiff, func(i, j FunctionStackDiff) int {
+		return int(j.DiffStackSize) - int(i.DiffStackSize)
+	})
+	return stackDiff
 }
 
+// func getCommonVariableSymbols(new FunctionSymbolMap, ref FunctionSymbolMap) FunctionDiffReport {
+
+// }
+
 func SymbolDiff(new symbolextraction.SElfReport, ref symbolextraction.SElfReport) {
-	getCommonFunctionSymbols(new.Name2FnMap, ref.Name2FnMap)
-	getCommonVariableSymbols(new.Name2FnMap, ref.Name2FnMap)
+	diffReport := getCommonFunctionSymbols(new.Name2FnMap, ref.Name2FnMap)
+	stackDiffReport := getStackDiff(diffReport)
+	for _, sd := range stackDiffReport {
+		old_stack_size := sd.NewFunction.StackSize - sd.DiffStackSize
+		diff_perc := 100.0*float64(sd.NewFunction.StackSize)/float64(old_stack_size) - 100.0
+		fmt.Printf("stack_diff %40s:%d -> %d (%d / %-3.1f%%)\n", sd.NewFunction.Name, old_stack_size, sd.NewFunction.StackSize, sd.DiffStackSize, diff_perc)
+	}
+	// getCommonVariableSymbols(new.Name2FnMap, ref.Name2FnMap)
 }

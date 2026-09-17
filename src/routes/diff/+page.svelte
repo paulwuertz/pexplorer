@@ -30,6 +30,7 @@
 	let symbols_to_show = $state({});
 	let function_table_data = $state([]);
 	let variable_table_data = $state([]);
+    $inspect(variable_table_data)
 	let function_table = $derived(
 		new DataTable({
 			pageSize: 999999, // TODO
