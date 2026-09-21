@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"math"
 	"slices"
-	"strings"
 
 	"github.com/paulwuertz/pexplorer/selfperf/config"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
@@ -24,26 +23,64 @@ func getCommonThreads(new []config.RTOSThread, ref []config.RTOSThread) ThreadMa
 	return commonThreads
 }
 
+func getColoredDiffedProgessBar(now, before int, isOverflow bool) string {
+	const colorRed = "\033[0;31m"
+	const colorGreen = "\033[0;32m"
+	const colorNone = "\033[0m"
+	var color string
+
+	// either freed some stack -> green, used more -> red or neutral -> white
+	if now > before {
+		color = colorRed
+	} else if now < before {
+		color = colorGreen
+	} else {
+		color = colorNone
+	}
+
+	var bar []byte = make([]byte, 0)
+	if isOverflow {
+		bar = append(bar, []byte(colorRed)...)
+	}
+
+	// color in starting from 1% in 5% steps
+	// nr_changed_blocks := int(math.Abs(float64(now)-float64(before))+4.0) / 5
+	max_used := (max(now, before) + 4) / 5
+	color_starts_at := int(min(now, before)) / 5
+	for i := 0; i < 20; i++ {
+		// color start and stop
+		if i == color_starts_at+1 && !isOverflow {
+			bar = append(bar, []byte(color)...)
+		}
+		// chars
+		if i >= max_used {
+			bar = append(bar, '-')
+		} else {
+			bar = append(bar, []byte("█")...)
+		}
+		if i == max_used && !isOverflow {
+			bar = append(bar, []byte(colorNone)...)
+		}
+	}
+
+	if isOverflow {
+		bar = append(bar, []byte(colorNone)...)
+	}
+	return string(bar)
+}
+
 func RTOSStackDiff(new []config.RTOSThread, ref []config.RTOSThread) {
 	commonThreads := getCommonThreads(new, ref)
-	const colorRed = "\033[0;31m"
-	const colorNone = "\033[0m"
-	fmt.Println("┌────────────────────────────────────────────────────────────────────────────────────┐")
+	fmt.Println("┌────────────────────────────────────────────────────────────────────────────────────────┐")
 	for _, ts := range commonThreads {
 		thread := ts[0]
 		ref_thread := ts[1]
 		var stackusage_diff int = int(thread.Used) - int(ref_thread.Used)
 		stackdiff_percent := float64(stackusage_diff) / float64(thread.Size) * 100.0
 		stackusage_percent := float64(thread.Used) / float64(thread.Size) * 100.0
-		var stackusage_barfill int = min(int(stackusage_percent+4)/5, 20)
-		var bar = strings.Repeat("█", stackusage_barfill) + strings.Repeat("-", max(0, 20-stackusage_barfill))
 		var is_overflow = thread.Used > thread.Size
-		var color_start = colorNone
-		var color_end = colorNone
-		if is_overflow {
-			color_start = colorRed
-		}
-		fmt.Printf("│ %-26s uses at least %5d / %5d (%-3.1f%%) |%s%20s%s│\n", thread.ThreadEntryName, stackusage_diff, thread.Size, stackdiff_percent, color_start, bar, color_end)
+		var bar = getColoredDiffedProgessBar(int(stackusage_percent), int(stackusage_percent+stackdiff_percent), is_overflow)
+		fmt.Printf("│ %-25s stack-use changed %+5d / %5d (%+-3.1f%%) |%s│\n", thread.ThreadEntryName, stackusage_diff, thread.Size, stackdiff_percent, bar)
 		if is_overflow {
 			function_call_path := thread.WorstStackBranch
 			var stack_sum int64 = 0
@@ -61,7 +98,7 @@ func RTOSStackDiff(new []config.RTOSThread, ref []config.RTOSThread) {
 			fmt.Printf("│ └ WARNING: %-14d paths are overflowing, check pexplorer for more details! │\n", thread.NrOverflowPaths)
 		}
 	}
-	fmt.Println("└────────────────────────────────────────────────────────────────────────────────────┘")
+	fmt.Println("└────────────────────────────────────────────────────────────────────────────────────────┘")
 
 	// any_unresolved_fn_in_thread := false
 	// for _, thread := range threads {

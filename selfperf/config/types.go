@@ -18,6 +18,7 @@ type RTOSThread struct {
 	NrUnresolvedCalls uint64 `json:"-"`
 	NrOverflowPaths   int    `json:"-"`
 	WorstStackBranch  symbolextraction.CallBranch
+	Calltree          *symbolextraction.CallTree
 }
 
 type DynamicCallResolution struct {

@@ -53,11 +53,11 @@ func main() {
 
 	newReport, newTreadStats := report.GetReportAndRTOSStats(newElfFile, p)
 	refReport, refTreadStats := report.GetReportAndRTOSStats(refElfFile, ref_p)
-	diff.RTOSStackDiff(newTreadStats, refTreadStats)
 	stack_diff := diff.SymbolDiff(newReport, refReport)
 
 	var datajson, _ = json.MarshalIndent(stack_diff, "", "    ")
 	fmt.Println(string(datajson))
+	diff.RTOSStackDiff(newTreadStats, refTreadStats)
 	// rtos.PrintStackStats(newTreadStats)
 	// rtos.PrintStackStats(refTreadStats)
 	// log.Printf("%d %d", &newReport, &refReport)
