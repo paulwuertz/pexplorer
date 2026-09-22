@@ -33,6 +33,39 @@ type PexplorerConfig struct {
 	DynamicCalls []DynamicCallResolution `json:"dynamic_calls,omitempty"`
 }
 
+func GetUnresolvedCallStats(report *symbolextraction.SElfReport, resolvedCalls []DynamicCallResolution) symbolextraction.UnresolvedCallStats {
+	stats := symbolextraction.UnresolvedCallStats{
+		DynamicCalls:                make(map[string]int),
+		ResolvedCalls:               make(map[string]int),
+		NrFunctionsWithDynamicCalls: 0,
+		TotalNrDynamicCalls:         0,
+		TotalNrResolvedCalls:        0,
+	}
+	for _, f := range report.Functions {
+		stats.DynamicCalls[f.Name] = 0
+		flagged_dynamic := false
+		for _, call := range f.Callees {
+			if call.DynamicCall {
+				stats.DynamicCalls[f.Name] += 1
+				stats.TotalNrDynamicCalls += 1
+				if !flagged_dynamic {
+					stats.NrFunctionsWithDynamicCalls += 1
+					flagged_dynamic = true
+				}
+				if call.CallTo != nil || call.CallToFunctionName == "null" {
+					stats.TotalNrResolvedCalls += 1
+				}
+
+			}
+		}
+	}
+	for _, res := range resolvedCalls {
+		stats.DynamicCalls[res.Caller] = len(res.Callees)
+		stats.TotalNrDynamicCalls += len(res.Callees)
+	}
+	return stats
+}
+
 func test_export() {
 	var p PexplorerConfig
 	// 	logging_stack - size: 768 bytes - addr: 0x20002400

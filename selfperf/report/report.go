@@ -19,5 +19,6 @@ func GetReportAndRTOSStats(elfFile *elf.File, p config.PexplorerConfig) (symbole
 	callgraph.EnhanceByDisasm(&elfReport, p.DynamicCalls)
 	callgraph.TraverseCallGraph(&elfReport)
 	threads := rtos.GetAllThreads(&elfReport, p)
+	elfReport.UnresolvedStats = config.GetUnresolvedCallStats(&elfReport, p.DynamicCalls)
 	return elfReport, threads
 }

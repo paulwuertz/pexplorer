@@ -31,10 +31,10 @@ func main() {
 		log.Fatal(err)
 	}
 
-	_, threads := report.GetReportAndRTOSStats(elfFile, p)
+	elfReport, threads := report.GetReportAndRTOSStats(elfFile, p)
 	if *md_output {
-		rtos.PrintStackStatsMarkdown(threads)
+		rtos.PrintStackStatsMarkdown(threads, elfReport.UnresolvedStats)
 	} else {
-		rtos.PrintStackStats(threads)
+		rtos.PrintStackStats(threads, elfReport.UnresolvedStats)
 	}
 }

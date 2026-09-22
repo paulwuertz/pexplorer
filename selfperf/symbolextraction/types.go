@@ -111,19 +111,28 @@ type CompileUnit struct {
 	Variables []*VariableSymbol
 }
 
+type UnresolvedCallStats struct {
+	DynamicCalls                map[string]int `json:"dynamic_calls"`
+	ResolvedCalls               map[string]int `json:"resolved_calls"`
+	NrFunctionsWithDynamicCalls int            `json:"nr_functions_with_dynamic_calls"`
+	TotalNrDynamicCalls         int            `json:"total_nr_dynamic_calls"`
+	TotalNrResolvedCalls        int            `json:"total_nr_resolved_calls"`
+}
+
 type SElfReport struct {
-	SingleFirmware     bool             `json:"singlefirmware"`
-	FirmwareIdentifier string           `json:"firmwareID"`
-	Timestamp          string           `json:"timestamp"`
-	Architecture       string           `json:"architecture"`
-	Elf                *elf.File        `json:"-"`
-	FirmwareHash       string           `json:"firmware_hash"`
-	CompileUnits       []CompileUnit    `json:"compile_units"`
-	Sections           []ElfSection     `json:"sections"`
-	Functions          []FunctionSymbol `json:"functions"`
-	Variables          []VariableSymbol `json:"variables"`
-	Types              []Typedef        `json:"types,omitempty,omitzero"`
-	Info               []string         `json:"info"`
+	SingleFirmware     bool                `json:"singlefirmware"`
+	FirmwareIdentifier string              `json:"firmwareID"`
+	Timestamp          string              `json:"timestamp"`
+	Architecture       string              `json:"architecture"`
+	Elf                *elf.File           `json:"-"`
+	FirmwareHash       string              `json:"firmware_hash"`
+	CompileUnits       []CompileUnit       `json:"compile_units"`
+	Sections           []ElfSection        `json:"sections"`
+	Functions          []FunctionSymbol    `json:"functions"`
+	Variables          []VariableSymbol    `json:"variables"`
+	Types              []Typedef           `json:"types,omitempty,omitzero"`
+	Info               []string            `json:"info"`
+	UnresolvedStats    UnresolvedCallStats `json:"unresolved_call_stats,omitempty,omitzero"`
 	// lookup
 	Addr2FnMap  map[uint64]*FunctionSymbol `json:"-"`
 	Name2FnMap  map[string]*FunctionSymbol `json:"-"` // todo no more lookup by just symbol name...

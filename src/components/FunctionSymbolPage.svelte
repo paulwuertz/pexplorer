@@ -57,6 +57,9 @@
 	let fn_calltree = $derived(
 		typeof get_fn_calltree === 'function' && JSON.parse(get_fn_calltree(sym_data.address))
 	);
+	let nr_direct_unresolved = $derived(
+        sym_data.callees.filter(call => call.dynamic).length
+    );
 	let unresolved = $derived(
 		Object.entries(
 			(fn_calltree.unresolved || []).reduce((acc, element) => {
@@ -113,6 +116,13 @@
 			<td><b>Function stack usage</b>:</td>
 			<td>
 				{stack_size} bytes - qualified as '{stack_qualifier}' - TODO add info about qualifiers :)
+			</td>
+		</tr>
+
+		<tr>
+			<td><b># dynamic calls</b>:</td>
+			<td>
+				{nr_direct_unresolved}
 			</td>
 		</tr>
 

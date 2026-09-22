@@ -74,7 +74,7 @@ func printMdCollapsableMsgWithDetails(msgType, summaryHeader, summaryMsg, msgBod
 `, msgType, summaryHeader, summaryMsg, msgBody)
 }
 
-func PrintStackStatsMarkdown(threads []config.RTOSThread) {
+func PrintStackStatsMarkdown(threads []config.RTOSThread, stats symbolextraction.UnresolvedCallStats) {
 	fmt.Print("## Stack check\n\n")
 	fmt.Print("### Stack usage summary\n\n")
 	fmt.Println("| Thread function | Stack Use Found | Stack Max Size | Usage % | Unresolved function calls |")
@@ -139,7 +139,7 @@ func PrintStackStatsMarkdown(threads []config.RTOSThread) {
 	}
 }
 
-func PrintStackStats(threads []config.RTOSThread) {
+func PrintStackStats(threads []config.RTOSThread, stats symbolextraction.UnresolvedCallStats) {
 
 	fmt.Println("┌────────────────────────────────────────────────────────────────────────────────────┐")
 	//           │ gs_usb_tx_thread           uses at least   728 /  1024 ( 71%) |███████████████-----│ ...
@@ -183,7 +183,10 @@ func PrintStackStats(threads []config.RTOSThread) {
 		}
 	}
 	if any_unresolved_fn_in_thread {
-		fmt.Println("        --> consider adding a config and add unresolved calls for better results")
+		fmt.Println("        --> consider adding or extending a config and add unresolved calls for better results")
+		fmt.Printf("            there are at least %d dynamic calls in %d functions left to resolve. %d dynamic calls are already resolved.\n \n", stats.TotalNrDynamicCalls, stats.NrFunctionsWithDynamicCalls, stats.TotalNrResolvedCalls)
+		fmt.Println("            (Note: the actual number of dynamic calls might be higher then the number of dynamic branch instructions.")
+		fmt.Println("             Like in a workqueue a single dynamic branch can execute more then on work tasks.)")
 	}
 }
 
