@@ -135,7 +135,10 @@ func PrintStackStatsMarkdown(threads []config.RTOSThread, stats symbolextraction
 		}
 	}
 	if any_unresolved_fn_in_thread {
-		fmt.Println("        --> consider adding a config and add unresolved calls for better results")
+		fmt.Println("        --> consider adding or extending a config and add unresolved calls for better results")
+		fmt.Printf("            there are at least %d dynamic calls in %d functions left to resolve. %d dynamic calls are already resolved.\n \n", stats.TotalNrDynamicCalls, stats.NrFunctionsWithDynamicCalls, stats.TotalNrResolvedCalls)
+		fmt.Println("            (Note: the actual number of dynamic calls might be higher then the number of dynamic branch instructions.")
+		fmt.Println("             Like in a workqueue a single dynamic branch can execute more then on work tasks.)")
 	}
 }
 
