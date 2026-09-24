@@ -17,6 +17,8 @@ func main() {
 	ref_file := flag.String("ref", "", "reference ELF file - obligatory")
 	conffile := flag.String("c", "", "config file - containing dynamic threads and calls")
 	ref_conffile := flag.String("ref_config", "", "config file - containing dynamic threads and calls")
+	ref_name := flag.String("ref_name", "reference_branch", "markdown output with more details")
+	md_output := flag.Bool("md", false, "markdown output with more details")
 
 	// settings := diff.DiffSettings{
 	// 	ShowFilePath:      true,
@@ -57,7 +59,12 @@ func main() {
 
 	var datajson, _ = json.MarshalIndent(stack_diff, "", "    ")
 	fmt.Println(string(datajson))
-	diff.RTOSStackDiff(newTreadStats, refTreadStats)
+
+	if *md_output {
+		diff.PrintStackDiffMarkdown(newTreadStats, refTreadStats, newReport.UnresolvedStats, stack_diff, *ref_name)
+	} else {
+		diff.RTOSStackDiff(newTreadStats, refTreadStats)
+	}
 	// rtos.PrintStackStats(newTreadStats)
 	// rtos.PrintStackStats(refTreadStats)
 	// log.Printf("%d %d", &newReport, &refReport)

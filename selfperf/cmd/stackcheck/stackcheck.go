@@ -13,8 +13,6 @@ import (
 func main() {
 	infile := flag.String("i", "", "input ELF file - obligatory")
 	conffile := flag.String("c", "", "config file - containing dynamic threads and calls")
-	md_output := flag.Bool("md", false, "markdown output with more details")
-
 	flag.Parse()
 
 	if *infile == "" {
@@ -32,9 +30,5 @@ func main() {
 	}
 
 	elfReport, threads := report.GetReportAndRTOSStats(elfFile, p)
-	if *md_output {
-		rtos.PrintStackStatsMarkdown(threads, elfReport.UnresolvedStats)
-	} else {
-		rtos.PrintStackStats(threads, elfReport.UnresolvedStats)
-	}
+	rtos.PrintStackStats(threads, elfReport.UnresolvedStats)
 }

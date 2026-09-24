@@ -2,6 +2,7 @@ package diff
 
 import (
 	"fmt"
+	"maps"
 	"math"
 	"slices"
 
@@ -229,4 +230,113 @@ func SymbolDiff(new symbolextraction.SElfReport, ref symbolextraction.SElfReport
 	// }
 	return stackDiffReport
 	// getCommonVariableSymbols(new.Name2FnMap, ref.Name2FnMap)
+}
+
+func printMdCollapsableMsgWithDetails(msgType, summaryHeader, summaryMsg, msgBody string) string {
+	return fmt.Sprintf(`
+
+>>> [!%s] %s
+
+<details>
+<summary>
+
+%s
+
+</summary>
+
+%s
+
+</details>
+
+>>>
+
+`, msgType, summaryHeader, summaryMsg, msgBody)
+}
+
+func PrintStackDiffMarkdown(threads []config.RTOSThread, ref []config.RTOSThread, stats symbolextraction.UnresolvedCallStats, fnDiff FunctionStackDiffReport, refName string) {
+	commonThreads := getCommonThreads(threads, ref)
+	fmt.Print("## Stack check\n\n")
+	fmt.Print("### Stack usage summary\n\n")
+	fmt.Printf("| Thread function | Stack Use Found | Stack Max Size | Usage |  Δ to `%s` | Unresolved function calls |\n", refName)
+	fmt.Println("| ----------- | ----------- | ----------- | ----------- | ----------- | ----------- |")
+	for name, threads := range commonThreads {
+		thread := threads[0]
+		refThread := threads[1]
+		var stackdiff_abs int = int(thread.WorstStackBranch.StackSize) - int(refThread.WorstStackBranch.StackSize)
+		stackdiff_percent := 100.0 * float64(thread.WorstStackBranch.StackSize-refThread.WorstStackBranch.StackSize) / float64(thread.Size)
+		stackusage_percent := float64(thread.Used) / float64(thread.Size) * 100.0
+		// fmt.Printf("│ %-26s uses at least %5d / %5d (%3.0f%%) |%s%20s%s│\n", thread.ThreadEntryName, thread.Used, thread.Size, stackusage_percent, )
+		fmt.Printf("| %s | %d | %d | %3.1f %% | %+d bytes / %+3.1f %% | %d |\n", name, thread.Used, thread.Size, stackusage_percent, stackdiff_abs, stackdiff_percent, thread.NrUnresolvedCalls)
+	}
+
+	fmt.Print("\n\n### Functions with a stack-size change \n\n")
+	var stackdiffstr = "Functions with a stack-size changed :\n\n"
+
+	// TODO make it a gitlab json tables :)?
+	stackdiffstr = stackdiffstr + fmt.Sprintf("| Function name | Stack Size `%s` | New Stack Size | Δ Stack Size Bytes | Δ Stack Size %% |\n", refName)
+	stackdiffstr = stackdiffstr + fmt.Sprintln("| ----------- | ----------- | ----------- | ----------- | ----------- |")
+	for _, d := range fnDiff {
+		stackdiffstr = stackdiffstr + fmt.Sprintf("| %s | %d | %d | %+d | %+3.1f%% |\n", d.NewFunctionName, d.OldStackSize, d.NewStackSize, d.DiffStackSize, d.DiffPercentage)
+	}
+	threadWarningHeader := fmt.Sprintln("Stackdiffs")
+	threadWarningSummary := fmt.Sprintf("%d functions with changed, expand for details.", len(fnDiff))
+	fnDiffDetails := printMdCollapsableMsgWithDetails("note", threadWarningHeader, threadWarningSummary, stackdiffstr)
+	fmt.Println(fnDiffDetails)
+
+	fmt.Print("### Stack usage details - worst cases found\n\n")
+	for _, thread := range threads {
+		var is_overflow = thread.Used > thread.Size
+		var note_type = "caution"
+		if is_overflow {
+			note_type = "warning"
+		}
+		function_call_path := thread.WorstStackBranch
+		var stack_sum int64 = 0
+		var stackliststr = "Calltree\n\n"
+		for j := 0; j < len(function_call_path.CallList); j++ {
+			c := function_call_path.CallList[j]
+			stack_sum += c.StackSize
+			stackliststr = stackliststr + fmt.Sprintf("* %s StackSize: %d bytes (Sum: %d)\n", c.Name, c.StackSize, stack_sum)
+		}
+		threadWarningHeader := fmt.Sprintf("Worst Calltree for %s", thread.ThreadEntryName)
+		threadWarningSummary := fmt.Sprintf("Is %d calls deep, expand for details.", len(function_call_path.CallList))
+		warningDetails := printMdCollapsableMsgWithDetails(note_type, threadWarningHeader, threadWarningSummary, stackliststr)
+		fmt.Println(warningDetails)
+
+		if thread.NrOverflowPaths > 1 {
+			fmt.Printf("│ └ WARNING: %-14d paths are overflowing, check pexplorer for more details! │\n", thread.NrOverflowPaths)
+		}
+	}
+
+	fmt.Print("### Thread calltree details\n\n")
+	any_unresolved_fn_in_thread := false
+	for _, thread := range threads {
+		if thread.NrUnresolvedCalls != 0 {
+			threadWarningHeader := fmt.Sprintf("Unresolved calls for %s", thread.ThreadEntryName)
+			threadWarningSummary := fmt.Sprintf("%d unresolved calls in its calltree, expand for details.", thread.NrUnresolvedCalls)
+			var unresolvedFunctionsFrom map[string][]*symbolextraction.FunctionCall = make(map[string][]*symbolextraction.FunctionCall)
+			for _, f := range thread.Calltree.UnresolvedCalls {
+				unresolvedFunctionsFrom[f.CallFromFunctionName] = append(unresolvedFunctionsFrom[f.CallFromFunctionName], &f)
+			}
+			var unresolvedCalls = "Unresolved calls:\n\n"
+			for fName := range maps.Keys(unresolvedFunctionsFrom) {
+				numUndefinedCalls := len(unresolvedFunctionsFrom[fName])
+				unresolvedCalls = unresolvedCalls + fmt.Sprintf("* %s contains %d unresolved function calls\n", fName, numUndefinedCalls)
+			}
+			warningDetails := printMdCollapsableMsgWithDetails("caution", threadWarningHeader, threadWarningSummary, unresolvedCalls)
+			fmt.Println(warningDetails)
+			any_unresolved_fn_in_thread = true
+		} else {
+			threadWarningHeader := fmt.Sprintf("Calltree complete for %s", thread.ThreadEntryName)
+			warningDetails := printMdCollapsableMsgWithDetails("note", threadWarningHeader, "No unresolved calls in this calltree", "")
+			fmt.Println(warningDetails)
+		}
+	}
+	if any_unresolved_fn_in_thread {
+		fmt.Println("### Hint\n")
+		fmt.Println("Consider adding or extending a config and add unresolved calls for better results.")
+		fmt.Printf("There are at least %d dynamic calls in %d functions left to resolve. %d dynamic calls are already resolved.\n \n", stats.TotalNrDynamicCalls, stats.NrFunctionsWithDynamicCalls, stats.TotalNrResolvedCalls)
+		fmt.Println("(Note: the actual number of dynamic calls might be higher then the number of dynamic branch instructions.")
+		fmt.Println("Like in a workqueue a single dynamic branch can execute more then on work tasks.)")
+	}
 }
