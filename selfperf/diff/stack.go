@@ -2,6 +2,7 @@ package diff
 
 import (
 	"fmt"
+	"log"
 	"maps"
 	"math"
 	"slices"
@@ -71,6 +72,7 @@ func getColoredDiffedProgessBar(now, before int, isOverflow bool) string {
 }
 
 func RTOSStackDiff(new []config.RTOSThread, ref []config.RTOSThread, errors []string) {
+	var has_overflows bool = false
 	commonThreads := getCommonThreads(new, ref)
 	fmt.Println("┌────────────────────────────────────────────────────────────────────────────────────────┐")
 	for _, ts := range commonThreads {
@@ -83,6 +85,7 @@ func RTOSStackDiff(new []config.RTOSThread, ref []config.RTOSThread, errors []st
 		var bar = getColoredDiffedProgessBar(int(stackusage_percent), int(stackusage_percent+stackdiff_percent), is_overflow)
 		fmt.Printf("│ %-25s stack-use changed %+5d / %5d (%+-3.1f%%) |%s│\n", thread.ThreadEntryName, stackusage_diff, thread.Size, stackdiff_percent, bar)
 		if is_overflow {
+			has_overflows = true
 			function_call_path := thread.WorstStackBranch
 			var stack_sum int64 = 0
 			for j := 0; j < len(function_call_path.CallList); j++ {
@@ -106,6 +109,10 @@ func RTOSStackDiff(new []config.RTOSThread, ref []config.RTOSThread, errors []st
 		for _, e := range errors {
 			fmt.Println("* " + e)
 		}
+	}
+
+	if has_overflows {
+		log.Fatalln("Stackoverflow detected!")
 	}
 	// any_unresolved_fn_in_thread := false
 	// for _, thread := range threads {
@@ -260,6 +267,7 @@ func printMdCollapsableMsgWithDetails(msgType, summaryHeader, summaryMsg, msgBod
 }
 
 func PrintStackDiffMarkdown(threads []config.RTOSThread, ref []config.RTOSThread, stats symbolextraction.UnresolvedCallStats, fnDiff FunctionStackDiffReport, refName string, errors []string) {
+	var has_overflows bool = false
 	commonThreads := getCommonThreads(threads, ref)
 	fmt.Print("## Stack check\n\n")
 	fmt.Print("### Stack usage summary\n\n")
@@ -295,6 +303,7 @@ func PrintStackDiffMarkdown(threads []config.RTOSThread, ref []config.RTOSThread
 		var note_type = "caution"
 		if is_overflow {
 			note_type = "warning"
+			has_overflows = true
 		}
 		function_call_path := thread.WorstStackBranch
 		var stack_sum int64 = 0
@@ -351,5 +360,9 @@ func PrintStackDiffMarkdown(threads []config.RTOSThread, ref []config.RTOSThread
 		for _, e := range errors {
 			fmt.Println("* " + e)
 		}
+	}
+
+	if has_overflows {
+		log.Fatalln("Stackoverflow detected!")
 	}
 }
