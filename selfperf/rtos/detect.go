@@ -2,7 +2,6 @@ package rtos
 
 import (
 	"fmt"
-	"log"
 	"maps"
 	"math"
 	"slices"
@@ -119,13 +118,15 @@ func FindStaticZephyrRtosThreads(s *symbolextraction.SElfReport) (tm ThreadMap) 
 			stackAddrArr, stackOk := thread_struct["init_stack"]
 			stackEntryAddr, entryOk := thread_struct["init_entry"]
 			if !nameOk || !stackOk || !entryOk {
-				log.Fatal("static thread without valid init_{name|stack|entry}")
+				s.Errors = append(s.Errors, fmt.Sprintf("Static thread without valid init_{name|stack|entry} %v", v.Name))
+				continue
 			}
 			stackAddr := arrayToUint64(stackAddrArr)
 			threadEntryVarAddr := arrayToUint64(stackEntryAddr)
 			threadEntryFn, fnFound := s.Addr2FnMap[threadEntryVarAddr]
 			if !fnFound {
-				log.Fatal("static thread init_entry not found at address:", threadEntryVarAddr)
+				s.Errors = append(s.Errors, fmt.Sprintf("Static thread init_entry not found at address: %v", threadEntryVarAddr))
+				continue
 			}
 			stackVar := GetVarByAddr(stackAddr, s)
 			stackSize := len(stackVar.Data)
@@ -161,7 +162,8 @@ func FindConfiguredZephyrRtosThreads(s *symbolextraction.SElfReport, conf config
 			}
 		}
 		if !threadFound {
-			log.Fatal("Configured thread ", tName, " not found in ELF functions")
+			s.Errors = append(s.Errors, fmt.Sprintf("Configured thread %s not found in ELF functions", tName))
+			continue
 		}
 
 		if t.StackVariableName != "" {
@@ -178,7 +180,8 @@ func FindConfiguredZephyrRtosThreads(s *symbolextraction.SElfReport, conf config
 			if t.Size != 0 {
 				stackSize = int(t.Size)
 			} else {
-				log.Fatal("Configured thread - associated thread ", sName, "not found in ELF functions")
+				s.Errors = append(s.Errors, fmt.Sprintf("Configured thread - associated thread %s not found in ELF functions", sName))
+				continue
 			}
 		}
 		thread_fn_calltree, ovb := threadEntryFn.GetCallTreeJson(s, uint64(stackSize), 0)

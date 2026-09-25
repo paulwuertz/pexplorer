@@ -171,7 +171,8 @@ func AddCallGraph(s *symbolextraction.SElfReport, dynamicCalls []config.DynamicC
 			for _, calleeName := range dynamicCalls.Callees {
 				callee, found := s.Name2FnMap[calleeName]
 				if !found && calleeName != "" {
-					log.Fatal("Callee of '", f.Name, "' to '", calleeName, "' from conf file not found")
+					s.Errors = append(s.Errors, fmt.Sprintf("Callee of '%s' to '%s' from conf file not found", f.Name, calleeName))
+					continue
 				}
 				filled_unresolved := false
 				// fill all unresolved calls first
@@ -285,12 +286,13 @@ func GetStackUseDetails_DebugFrameUnwinding(s *symbolextraction.SElfReport) {
 	framedata, _ := godwarf.GetDebugSectionElf(s.Elf, "frame")
 	fe, err := frame.Parse(framedata, binary.LittleEndian, 0, 4, 0)
 	if err != nil {
-		log.Fatal("could not parse frame data of elffile", err)
+		s.Errors = append(s.Errors, fmt.Sprintf("Could not parse frame data of elffile: %v", err))
+		return
 	}
+
 	sort.Slice(fe, func(i, j int) bool {
 		return fe[i].Begin() < fe[j].Begin()
 	})
-
 	for i := 0; i < len(s.Functions); i++ {
 		function := &s.Functions[i]
 		GetFunctionStackUsage_DebugFrameUnwinding(function, fe)

@@ -70,7 +70,7 @@ func getColoredDiffedProgessBar(now, before int, isOverflow bool) string {
 	return string(bar)
 }
 
-func RTOSStackDiff(new []config.RTOSThread, ref []config.RTOSThread) {
+func RTOSStackDiff(new []config.RTOSThread, ref []config.RTOSThread, errors []string) {
 	commonThreads := getCommonThreads(new, ref)
 	fmt.Println("┌────────────────────────────────────────────────────────────────────────────────────────┐")
 	for _, ts := range commonThreads {
@@ -101,6 +101,12 @@ func RTOSStackDiff(new []config.RTOSThread, ref []config.RTOSThread) {
 	}
 	fmt.Println("└────────────────────────────────────────────────────────────────────────────────────────┘")
 
+	if len(errors) > 0 {
+		fmt.Println("### Errors during analysis \n")
+		for _, e := range errors {
+			fmt.Println("* " + e)
+		}
+	}
 	// any_unresolved_fn_in_thread := false
 	// for _, thread := range threads {
 	// 	if thread.NrUnresolvedCalls != 0 {
@@ -171,10 +177,10 @@ func getCommonFunctionSymbols(new FunctionSymbolMap, ref FunctionSymbolMap) Func
 	}
 	diff.functionsAdded = functionsAddedNoRenames
 
-	fmt.Println("matches", len(diff.functionsMatches))
-	fmt.Println("added", len(diff.functionsAdded))
-	fmt.Println("deleted", len(diff.functionsDeleted))
-	fmt.Println("renamed", len(diff.functionsRenamed))
+	// fmt.Println("matches", len(diff.functionsMatches))
+	// fmt.Println("added", len(diff.functionsAdded))
+	// fmt.Println("deleted", len(diff.functionsDeleted))
+	// fmt.Println("renamed", len(diff.functionsRenamed))
 	return diff
 }
 
@@ -253,7 +259,7 @@ func printMdCollapsableMsgWithDetails(msgType, summaryHeader, summaryMsg, msgBod
 `, msgType, summaryHeader, summaryMsg, msgBody)
 }
 
-func PrintStackDiffMarkdown(threads []config.RTOSThread, ref []config.RTOSThread, stats symbolextraction.UnresolvedCallStats, fnDiff FunctionStackDiffReport, refName string) {
+func PrintStackDiffMarkdown(threads []config.RTOSThread, ref []config.RTOSThread, stats symbolextraction.UnresolvedCallStats, fnDiff FunctionStackDiffReport, refName string, errors []string) {
 	commonThreads := getCommonThreads(threads, ref)
 	fmt.Print("## Stack check\n\n")
 	fmt.Print("### Stack usage summary\n\n")
@@ -338,5 +344,12 @@ func PrintStackDiffMarkdown(threads []config.RTOSThread, ref []config.RTOSThread
 		fmt.Printf("There are at least %d dynamic calls in %d functions left to resolve. %d dynamic calls are already resolved.\n \n", stats.TotalNrDynamicCalls, stats.NrFunctionsWithDynamicCalls, stats.TotalNrResolvedCalls)
 		fmt.Println("(Note: the actual number of dynamic calls might be higher then the number of dynamic branch instructions.")
 		fmt.Println("Like in a workqueue a single dynamic branch can execute more then on work tasks.)")
+	}
+
+	if len(errors) > 0 {
+		fmt.Println("\n### Errors during analysis\n")
+		for _, e := range errors {
+			fmt.Println("* " + e)
+		}
 	}
 }
