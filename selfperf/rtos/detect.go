@@ -2,6 +2,7 @@ package rtos
 
 import (
 	"fmt"
+	"log"
 	"maps"
 	"math"
 	"slices"
@@ -53,7 +54,7 @@ func arrayToUint64(data []byte) uint64 {
 }
 
 func PrintStackStats(threads []config.RTOSThread, stats symbolextraction.UnresolvedCallStats) {
-
+	var has_overflows bool = false
 	fmt.Println("┌────────────────────────────────────────────────────────────────────────────────────┐")
 	//           │ gs_usb_tx_thread           uses at least   728 /  1024 ( 71%) |███████████████-----│ ...
 	const colorRed = "\033[0;31m"
@@ -70,6 +71,7 @@ func PrintStackStats(threads []config.RTOSThread, stats symbolextraction.Unresol
 		}
 		fmt.Printf("│ %-26s uses at least %5d / %5d (%3.0f%%) |%s%20s%s│\n", thread.ThreadEntryName, thread.Used, thread.Size, stackusage_percent, color_start, bar, color_end)
 		if is_overflow {
+			has_overflows = true
 			function_call_path := thread.WorstStackBranch
 			var stack_sum int64 = 0
 			for j := 0; j < len(function_call_path.CallList); j++ {
@@ -100,6 +102,10 @@ func PrintStackStats(threads []config.RTOSThread, stats symbolextraction.Unresol
 		fmt.Printf("            there are at least %d dynamic calls in %d functions left to resolve. %d dynamic calls are already resolved.\n \n", stats.TotalNrDynamicCalls, stats.NrFunctionsWithDynamicCalls, stats.TotalNrResolvedCalls)
 		fmt.Println("            (Note: the actual number of dynamic calls might be higher then the number of dynamic branch instructions.")
 		fmt.Println("             Like in a workqueue a single dynamic branch can execute more then on work tasks.)")
+	}
+
+	if has_overflows {
+		log.Fatalln("Stackoverflow detected!")
 	}
 }
 
