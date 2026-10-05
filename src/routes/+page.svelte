@@ -201,7 +201,7 @@
 						let config_uint8Array = Uint8Array.fromBase64(btoa(JSON.stringify('{}')));
 						let config = allConfigs[reportJSON.firmware_hash];
 						if (config) {
-							config['dynamic_calls'] = config.dynamic_calls;
+							config['dynamic_calls'] = helpers.flat_calls_to_arrayed_callees(config);
 							config_uint8Array = Uint8Array.fromBase64(btoa(JSON.stringify(config)));
 							console.log('config', config);
 						}

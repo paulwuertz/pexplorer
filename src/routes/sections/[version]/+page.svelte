@@ -65,7 +65,7 @@
 <div class="container" id="content">
 	<Container fluid>
 		<h3>version_name: {JSON.stringify(version_name)}</h3>
-		<h4>Static threads by K_THREAD_DEFINE</h4>
+		<h4>Sections defined in this ELF file:</h4>
 
 		<table>
 			<thead>

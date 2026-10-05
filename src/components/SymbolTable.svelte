@@ -186,6 +186,10 @@
 								{/if}
 							</td>
 						{/if}
+					{:else if column.key == 'stack_qualifiers'}
+							<td>
+								<small>{row[column.key]}</small>
+							</td>
 					{:else if column.key == 'address'}
 						<td>0x{row[column.key].toString(16)}</td>
 					{:else if column.key == 'file'}
@@ -222,7 +226,7 @@
 
 <style>
 	td {
-		min-width: 130px;
+		min-width: 120px;
 		font-size: 14px;
 		padding-top: 0.25rem;
 		padding-bottom: 0.25rem;
