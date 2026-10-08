@@ -9,6 +9,7 @@ import (
 
 	"github.com/bpfsnoop/gapstone"
 	"github.com/paulwuertz/pexplorer/selfperf/config"
+	"github.com/paulwuertz/pexplorer/selfperf/rtos"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
@@ -57,4 +58,5 @@ func EnhanceByDisasm(s *symbolextraction.SElfReport, dynamicCalls []config.Dynam
 	AddDisAsmFromAsm(s)
 	AddCallGraph(s, dynamicCalls)
 	GetStackUseDetails(s)
+	rtos.GetDeviceAPICalls(s)
 }

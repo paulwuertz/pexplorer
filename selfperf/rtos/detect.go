@@ -211,3 +211,102 @@ func GetAllThreads(s *symbolextraction.SElfReport, conf config.PexplorerConfig) 
 	threads := slices.Collect(maps.Values(tm))
 	return threads
 }
+
+type DeviveDriverCall struct {
+	// assume a call when address in the range of the device API struct
+	// is refereneced before an unresolved call
+	DeviceStructStart    uint64
+	DeviceStructEnd      uint64
+	DeviceAPIStructStart uint64
+	DeviceAPIStructEnd   uint64
+	DeviceVar            *symbolextraction.VariableSymbol
+	DeviceAPIVar         *symbolextraction.VariableSymbol
+	Callbacks            []*symbolextraction.FunctionSymbol
+}
+type DeviveDriverCalls []DeviveDriverCall
+
+func GetDeviceAPICalls(s *symbolextraction.SElfReport) {
+	idx := slices.IndexFunc(s.Types, func(c symbolextraction.Typedef) bool { return c.Name == "device" })
+	if idx == -1 {
+		fmt.Println("No device struct found for resolving zephyr device API calls.")
+		return
+	}
+	device_data_struct := s.Types[idx]
+
+	var deviceVars []*symbolextraction.VariableSymbol
+	var deviceAPIVars []*symbolextraction.VariableSymbol
+	for _, v := range s.Variables {
+		if v.VariableType == "device" {
+			if v.FlashSize != uint64(device_data_struct.Size) {
+				fmt.Println("Size mismatch for device struct, skipping.")
+				continue
+			}
+			deviceStruct := mapMemberBytes(device_data_struct, v.Data)
+			for name, m := range deviceStruct {
+				if len(m) == 4 {
+					address := arrayToUint64(m)
+					// fmt.Printf("\t%s 0x%x\n", name, address)
+					idx := slices.IndexFunc(s.Variables, func(v symbolextraction.VariableSymbol) bool { return v.Address == address })
+
+					//just care for API calls now...?!
+					if name == "api" && address != 0 && idx != -1 {
+						apiVar := &s.Variables[idx]
+						// fmt.Printf("device var: 0x%x %s %s %d\n", v.Address, v.Name, apiVar.Name, apiVar.FlashSize)
+						deviceVars = append(deviceVars, &v)
+						deviceAPIVars = append(deviceAPIVars, apiVar)
+					}
+				} else {
+					fmt.Printf("\t%s len: %d %v\n", name, len(m), m)
+				}
+			}
+		}
+	}
+	fmt.Println("device vars:", len(deviceVars))
+
+	apicallcnt := 0
+	var DeviceApiCallMap DeviveDriverCalls = make(DeviveDriverCalls, 0)
+	for i, apiVar := range deviceAPIVars {
+		idx := slices.IndexFunc(s.Types, func(c symbolextraction.Typedef) bool { return c.Name == apiVar.VariableType })
+		if idx == -1 {
+			fmt.Println("No type for device API struct, skipping...")
+			continue
+		}
+		device_api_struct := s.Types[idx]
+		apiStruct := mapMemberBytes(device_api_struct, apiVar.Data)
+		devDriverCalls := DeviveDriverCall{
+			DeviceStructStart:    deviceVars[i].Address,
+			DeviceStructEnd:      deviceVars[i].Address + deviceVars[i].FlashSize,
+			DeviceAPIStructStart: apiVar.Address,
+			DeviceAPIStructEnd:   apiVar.Address + apiVar.FlashSize,
+			DeviceVar:            deviceVars[i],
+			DeviceAPIVar:         apiVar,
+			Callbacks:            []*symbolextraction.FunctionSymbol{},
+		}
+		for name, fnCallAddrArr := range apiStruct {
+			if len(fnCallAddrArr) == 4 {
+				fnCallAddr := arrayToUint64(fnCallAddrArr)
+				// fmt.Printf("\t%s 0x%x\n", name, address)
+				f, isCallbackFound := s.Addr2FnMap[fnCallAddr]
+
+				//just care for API calls now...?!
+				if isCallbackFound && fnCallAddr != 0 {
+					fmt.Printf("\tapicall found %s\n", f.Name)
+					apicallcnt += 1
+					devDriverCalls.Callbacks = append(devDriverCalls.Callbacks, f)
+				} else {
+					fmt.Printf("\t%s !!!nocallbackfound: %d\n", apiVar.Name, fnCallAddr)
+				}
+			} else {
+				fmt.Printf("\t%s !!!len: %d %v\n", name, len(fnCallAddrArr), fnCallAddrArr)
+			}
+		}
+		if len(devDriverCalls.Callbacks) != 0 {
+			DeviceApiCallMap = append(DeviceApiCallMap, devDriverCalls)
+		} else {
+			fmt.Printf("!!!no Dev Driver Calls found for: %s\n", apiVar.Name)
+		}
+	}
+	fmt.Println("API calls", DeviceApiCallMap)
+	fmt.Println("len API calls", apicallcnt, " over ", len(DeviceApiCallMap), " apis")
+	fmt.Println("len API calls", apicallcnt, " over ", len(DeviceApiCallMap), " apis")
+}
