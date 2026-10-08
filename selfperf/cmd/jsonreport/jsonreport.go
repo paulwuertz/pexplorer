@@ -65,6 +65,7 @@ func main() {
 			log.Fatal(err)
 		}
 	}
+	config.GetUnresolvedCallStats(&elfReport, nil)
 
 	if *outfile == "" {
 		fmt.Println(string(datajson))
