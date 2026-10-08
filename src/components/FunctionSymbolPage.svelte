@@ -58,7 +58,7 @@
 		typeof get_fn_calltree === 'function' && JSON.parse(get_fn_calltree(sym_data.address))
 	);
 	let nr_direct_unresolved = $derived(
-        sym_data.callees.filter(call => call.dynamic).length
+        [sym_data.callees || []].filter(call => Object.hasOwn(call, "dynamic") && call.dynamic).length
     );
 	let unresolved = $derived(
 		Object.entries(
