@@ -4,6 +4,8 @@ import (
 	"encoding/base64"
 	"fmt"
 	"log"
+	"os"
+	"path/filepath"
 	"testing"
 
 	"github.com/bpfsnoop/gapstone"
@@ -97,6 +99,57 @@ func Test_isFnCallInstr(t *testing.T) {
 			}
 		})
 	}
+}
+
+func TestParseVCGDir(t *testing.T) {
+	tempDir := t.TempDir()
+
+	rootFile := filepath.Join(tempDir, "root.ci")
+	if err := os.WriteFile(rootFile, []byte(`graph: {
+ title: "root"
+ node: { title: "n0" label: "main" }
+ edge: { sourcename: "n0" targetname: "n1" label: "calls" }
+}`), 0o600); err != nil {
+		t.Fatalf("write root .ci file: %v", err)
+	}
+
+	nestedDir := filepath.Join(tempDir, "nested")
+	if err := os.MkdirAll(nestedDir, 0o755); err != nil {
+		t.Fatalf("create nested dir: %v", err)
+	}
+
+	nestedFile := filepath.Join(nestedDir, "child.ci")
+	if err := os.WriteFile(nestedFile, []byte(`graph: {
+ title: "child"
+ node: { title: "n1" label: "helper" }
+}`), 0o600); err != nil {
+		t.Fatalf("write child .ci file: %v", err)
+	}
+
+	if err := os.WriteFile(filepath.Join(tempDir, "ignore.txt"), []byte("nope"), 0o600); err != nil {
+		t.Fatalf("write ignored file: %v", err)
+	}
+
+	graphs, err := ParseVCGDir(tempDir)
+	if err != nil {
+		t.Fatalf("ParseVCGDir returned error: %v", err)
+	}
+	if len(graphs) != 2 {
+		t.Fatalf("unexpected graph count: got %d want 2", len(graphs))
+	}
+	if graphs[0].Title == "" && len(graphs) > 0 {
+		// nothing to do here; titles are validated below
+	}
+	if graphs[0].Title == "root" && len(graphs[1].Nodes) == 1 && graphs[1].Title == "child" {
+		return
+	}
+	if graphs[1].Title == "root" && len(graphs[0].Nodes) == 1 && graphs[0].Title == "child" {
+		return
+	}
+	for _, g := range graphs {
+		t.Logf("graph title=%q nodes=%d edges=%d", g.Title, len(g.Nodes), len(g.Edges))
+	}
+	t.Fatal("unexpected parsed graph set")
 }
 
 func Test_capstoneUse(t *testing.T) {
