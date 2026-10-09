@@ -1,6 +1,13 @@
 package callgraph
 
-import "testing"
+import (
+	"encoding/base64"
+	"fmt"
+	"log"
+	"testing"
+
+	"github.com/bpfsnoop/gapstone"
+)
 
 func Test_isFnCallInstr(t *testing.T) {
 	tests := []struct {
@@ -90,4 +97,44 @@ func Test_isFnCallInstr(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Test_capstoneUse(t *testing.T) {
+	tests := []struct {
+		name string // description of this test case
+		// Named input parameters for target function.
+		instr string
+	}{
+		{
+			"Dissassemble some Arm instructions",
+			"ELX/9/f/EkgSSRNK//f4/hJLG2gT8AEPDtFA9hgAAPAz+QRGR/D6/w1LHGABIgtLGmAMSLLwRPsJSxhoA2icaAlJASJP9BZzoEep8Jf9/ufcTgsI8E4LCPROCwhoBwAgZAcAIF0GAAgETwsI",
+		},
+	}
+	engine, err := gapstone.New(gapstone.CS_ARCH_ARM, gapstone.CS_MODE_THUMB)
+	assembly, err := base64.StdEncoding.DecodeString(tests[0].instr)
+	fmt.Printf("%X", assembly)
+	if err == nil {
+
+		defer engine.Close()
+
+		maj, min := engine.Version()
+		log.Printf("Hello Capstone! Version: %v.%v\n", maj, min)
+		insns, err := engine.Disasm(
+			assembly, // code buffer
+			0x10000,  // starting address
+			0,        // insns to disassemble, 0 for all
+		)
+
+		if err == nil {
+			log.Printf("Disasm:\n")
+			for _, insn := range insns {
+				log.Printf("0x%x:\t%s\t\t%s\n", insn.Address, insn.Mnemonic, insn.OpStr)
+			}
+			return
+		} else {
+			t.Error("Disassembly error: ", err)
+		}
+		log.Fatalf("Disassembly error: %v", err)
+	}
+	log.Fatalf("Failed to initialize engine: %v", err)
 }

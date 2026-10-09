@@ -2,7 +2,6 @@ package diff
 
 import (
 	"fmt"
-	"log"
 	"maps"
 	"math"
 	"slices"

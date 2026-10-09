@@ -226,7 +226,7 @@ func ExtractFunctionStackUsage(f *symbolextraction.FunctionSymbol) {
 			// sub   sp, #0x10
 			stackSubSize, err := strconv.ParseInt(d.Opstr[5:], 0, 64)
 			if err != nil {
-				log.Fatalf(f.Name, "sub now hexstr err", d.Opstr)
+				log.Fatalf("%s: sub immediate parse error for %q", f.Name, d.Opstr)
 			}
 			current_stacksize += stackSubSize
 			// fmt.Println(f.Name, "sub now", current_stacksize, "@", d.Addr)
