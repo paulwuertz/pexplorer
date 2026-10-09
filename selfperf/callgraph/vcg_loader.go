@@ -102,12 +102,12 @@ func GraphsToFunctionCallList(graphs []vcg.Graph) symbolextraction.FunctionCallL
 			if id == "" {
 				continue
 			}
-			label := node.Label
+			label := normalizedGraphNodeName(node.Label)
 			if label == "" {
-				label = node.Title
+				label = normalizedGraphNodeName(node.Title)
 			}
 			if label == "" {
-				label = id
+				label = normalizedGraphNodeName(id)
 			}
 			nodeNames[id] = label
 		}
@@ -126,11 +126,11 @@ func GraphsToFunctionCallList(graphs []vcg.Graph) symbolextraction.FunctionCallL
 
 			from := nodeNames[src]
 			if from == "" {
-				from = src
+				from = normalizedGraphNodeName(src)
 			}
 			to := nodeNames[tgt]
 			if to == "" {
-				to = tgt
+				to = normalizedGraphNodeName(tgt)
 			}
 
 			if _, ok := byFrom[from]; !ok {
@@ -156,4 +156,45 @@ func GraphsToFunctionCallList(graphs []vcg.Graph) symbolextraction.FunctionCallL
 		entries = append(entries, symbolextraction.FunctionCallEntry{From: from, To: toList})
 	}
 	return entries
+}
+
+func normalizedGraphNodeName(value string) string {
+	s := strings.TrimSpace(value)
+	s = strings.Trim(s, "\"'")
+	if s == "" {
+		return ""
+	}
+	if nl := strings.IndexByte(s, '\n'); nl >= 0 {
+		left := strings.TrimSpace(s[:nl])
+		right := strings.TrimSpace(s[nl+1:])
+		if left != "" {
+			s = left
+			if strings.HasPrefix(right, "<") || strings.Contains(right, "/") || strings.Contains(right, "\\") || strings.Contains(right, ":") {
+				return s
+			}
+		}
+		if right != "" {
+			s = right
+		}
+	}
+	if strings.ContainsAny(s, "/\\") {
+		base := filepath.Base(s)
+		if idx := strings.Index(base, ":"); idx > 0 && idx < len(base)-1 {
+			prefix := base[:idx]
+			if strings.Contains(prefix, ".") {
+				s = strings.TrimSpace(base[idx+1:])
+			} else {
+				s = strings.TrimSpace(base)
+			}
+		} else {
+			s = strings.TrimSpace(base)
+		}
+	}
+	if idx := strings.Index(s, ":"); idx > 0 && idx < len(s)-1 {
+		prefix := s[:idx]
+		if strings.Contains(prefix, "/") || strings.Contains(prefix, "\\") || strings.Contains(prefix, ".") {
+			s = strings.TrimSpace(s[idx+1:])
+		}
+	}
+	return s
 }
