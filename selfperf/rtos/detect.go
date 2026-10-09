@@ -32,7 +32,7 @@ func IsStaticZephyrThread(sym symbolextraction.VariableSymbol, s *symbolextracti
 }
 
 func mapMemberBytes(t symbolextraction.Typedef, data []byte) map[string][]byte {
-	lookup := make(map[string]([]byte), 10)
+	lookup := make(map[string]([]byte), len(t.Members))
 	for i := 0; i < len(t.Members); i++ {
 		field := t.Members[i]
 		lookup[field.Name] = make([]byte, field.Size)

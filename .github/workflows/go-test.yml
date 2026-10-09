@@ -15,7 +15,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
+        with:
+          lfs: true
 
       - name: Set up Go
         uses: actions/setup-go@v5
@@ -37,6 +39,16 @@ jobs:
           wget https://github.com/capstone-engine/capstone/releases/download/6.0.0-Alpha7/libcapstone-dev_6.0.0-Alpha7_amd64.deb
           sudo dpkg -i libcapstone-dev_6.0.0-Alpha7_amd64.deb
 
+      - name: Fetch LFS files
+        run: |
+          git lfs install
+          git lfs pull
+          git lfs checkout
+
       - name: Run Go tests
         working-directory: selfperf
         run: go test ./...
+
+      - name: Run Go benchmark
+        working-directory: selfperf
+        run: go test -test.fullpath=true -benchmem -run=^$ -bench ^BenchmarkReportGen$ github.com/paulwuertz/pexplorer/selfperf/cmd/jsonreport
