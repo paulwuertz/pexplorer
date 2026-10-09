@@ -1,0 +1,42 @@
+name: Go Tests
+
+on:
+  push:
+    branches:
+      - '**'
+  pull_request:
+    branches:
+      - '**'
+  workflow_dispatch:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: selfperf/go.mod
+          cache-dependency-path: selfperf/go.sum
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            ca-certificates \
+            git \
+            wget \
+            build-essential \
+            gcc \
+            libc6-dev \
+            unzip
+          wget https://github.com/capstone-engine/capstone/releases/download/6.0.0-Alpha7/libcapstone-dev_6.0.0-Alpha7_amd64.deb
+          sudo dpkg -i libcapstone-dev_6.0.0-Alpha7_amd64.deb
+
+      - name: Run Go tests
+        working-directory: selfperf
+        run: go test ./...
