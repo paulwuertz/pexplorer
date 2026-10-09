@@ -30,5 +30,7 @@ func main() {
 	}
 
 	elfReport, threads := report.GetReportAndRTOSStats(elfFile, p)
-	rtos.PrintStackStats(threads, elfReport.UnresolvedStats)
+	if err := rtos.PrintStackStats(threads, elfReport.UnresolvedStats); err != nil {
+		log.Fatal(err)
+	}
 }

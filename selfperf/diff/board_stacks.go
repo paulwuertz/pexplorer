@@ -61,14 +61,14 @@ func PrintBoardsStackReportMarkdown(reports ReportMap, errors []string) {
 	// 	}
 	// }
 
-	fmt.Println("### Unresolved call details\n")
+	fmt.Print("### Unresolved call details\n\n")
 	for board_name, report := range reports {
 		stats := report.Report.UnresolvedStats
 		fmt.Printf("* %s at least %d dynamic calls in %d functions left to resolve. %d dynamic calls are already resolved.\n", board_name, stats.TotalNrDynamicCalls, stats.NrFunctionsWithDynamicCalls, stats.TotalNrResolvedCalls)
 	}
 
 	if len(errors) > 0 {
-		fmt.Println("\n### Errors during analysis\n")
+		fmt.Print("\n### Errors during analysis\n\n")
 		for _, e := range errors {
 			fmt.Println("* " + e)
 		}

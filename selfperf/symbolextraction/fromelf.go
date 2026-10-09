@@ -146,8 +146,8 @@ func (fm SectionMaps) getSectionByIndex(i uint64) (sec *elf.Section) {
 	return // might be nil anyway if section is not present...
 }
 
-func AddASMToFunctions(syms []FunctionSymbol, fm SectionMaps, info []string) {
-	for i, _ := range syms {
+func AddASMToFunctions(syms []FunctionSymbol, fm SectionMaps, info []string) []string {
+	for i := range syms {
 		sym := &syms[i]
 		sec := fm.getSectionByIndex(sym.SectionIndex)
 		if sec == nil {
@@ -174,13 +174,19 @@ func AddASMToFunctions(syms []FunctionSymbol, fm SectionMaps, info []string) {
 			info = append(info, msg)
 		}
 	}
+	return info
 }
 
-func AddDataToVar(syms []VariableSymbol, fm SectionMaps, info []string) {
-	for i, _ := range syms {
+func AddDataToVar(syms []VariableSymbol, fm SectionMaps, info []string) []string {
+	for i := range syms {
 		sym := &syms[i]
 		addr, size := sym.Address, sym.FlashSize
 		sec := fm.getSectionByIndex(sym.SectionIndex)
+		if sec == nil {
+			msg := fmt.Sprintf("section for variable '%s' not found in ELF, section id: %X", sym.Name, sym.SectionIndex)
+			info = append(info, msg)
+			continue
+		}
 		if strings.Contains(sec.Name, "bss") {
 			continue // will be zero data anyway...
 		}
@@ -195,4 +201,5 @@ func AddDataToVar(syms []VariableSymbol, fm SectionMaps, info []string) {
 			// fmt.Println("error reading data-bytes", nb, "/", size, err, sym)
 		}
 	}
+	return info
 }

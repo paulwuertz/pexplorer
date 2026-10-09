@@ -2,9 +2,7 @@ package rtos
 
 import (
 	"fmt"
-	"log"
 	"maps"
-	"math"
 	"slices"
 	"strings"
 
@@ -13,9 +11,10 @@ import (
 )
 
 func GetVarByAddr(addr uint64, s *symbolextraction.SElfReport) *symbolextraction.VariableSymbol {
-	for _, v := range s.Variables {
+	for i := range s.Variables {
+		v := &s.Variables[i]
 		if v.Address-addr < 2 || addr-v.Address < 2 { // of by 1 is ok
-			return &v
+			return v
 		}
 	}
 	return nil
@@ -46,14 +45,14 @@ func mapMemberBytes(t symbolextraction.Typedef, data []byte) map[string][]byte {
 }
 
 func arrayToUint64(data []byte) uint64 {
-	var val uint64 = 0
-	for i := 0; i < len(data); i++ {
-		val += uint64(data[i]) * uint64(math.Pow(256, float64(i)))
+	var val uint64
+	for i, b := range data {
+		val |= uint64(b) << (8 * i)
 	}
 	return val
 }
 
-func PrintStackStats(threads []config.RTOSThread, stats symbolextraction.UnresolvedCallStats) {
+func PrintStackStats(threads []config.RTOSThread, stats symbolextraction.UnresolvedCallStats) error {
 	var has_overflows bool = false
 	fmt.Println("┌────────────────────────────────────────────────────────────────────────────────────┐")
 	//           │ gs_usb_tx_thread           uses at least   728 /  1024 ( 71%) |███████████████-----│ ...
@@ -105,17 +104,22 @@ func PrintStackStats(threads []config.RTOSThread, stats symbolextraction.Unresol
 	}
 
 	if has_overflows {
-		log.Fatalln("Stackoverflow detected!")
+		return fmt.Errorf("stack overflow detected")
 	}
+	return nil
 }
 
 type ThreadMap map[uint64]config.RTOSThread
 
 // TODO only zephyr for now... how to definitly detect it though...
 func FindStaticZephyrRtosThreads(s *symbolextraction.SElfReport) (tm ThreadMap) {
-	idx := slices.IndexFunc(s.Types, func(c symbolextraction.Typedef) bool { return c.Name == "_static_thread_data" })
-	static_thread_data_struct := s.Types[idx]
 	tm = make(ThreadMap)
+	idx := slices.IndexFunc(s.Types, func(c symbolextraction.Typedef) bool { return c.Name == "_static_thread_data" })
+	if idx < 0 || idx >= len(s.Types) {
+		s.Errors = append(s.Errors, "_static_thread_data type not found in DWARF metadata")
+		return tm
+	}
+	static_thread_data_struct := s.Types[idx]
 	for _, v := range s.Variables {
 		// static threads created by macro
 		if IsStaticZephyrThread(v, s) {

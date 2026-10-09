@@ -70,7 +70,7 @@ func getColoredDiffedProgessBar(now, before int, isOverflow bool) string {
 	return string(bar)
 }
 
-func RTOSStackDiff(new []config.RTOSThread, ref []config.RTOSThread, errors []string) {
+func RTOSStackDiff(new []config.RTOSThread, ref []config.RTOSThread, errors []string) error {
 	var has_overflows bool = false
 	commonThreads := getCommonThreads(new, ref)
 	fmt.Println("┌────────────────────────────────────────────────────────────────────────────────────────┐")
@@ -104,15 +104,16 @@ func RTOSStackDiff(new []config.RTOSThread, ref []config.RTOSThread, errors []st
 	fmt.Println("└────────────────────────────────────────────────────────────────────────────────────────┘")
 
 	if len(errors) > 0 {
-		fmt.Println("### Errors during analysis \n")
+		fmt.Print("### Errors during analysis\n\n")
 		for _, e := range errors {
 			fmt.Println("* " + e)
 		}
 	}
 
 	if has_overflows {
-		log.Fatalln("Stackoverflow detected!")
+		return fmt.Errorf("stack overflow detected")
 	}
+	return nil
 	// any_unresolved_fn_in_thread := false
 	// for _, thread := range threads {
 	// 	if thread.NrUnresolvedCalls != 0 {
@@ -265,7 +266,7 @@ func printMdCollapsableMsgWithDetails(msgType, summaryHeader, summaryMsg, msgBod
 `, msgType, summaryHeader, summaryMsg, msgBody)
 }
 
-func PrintStackDiffMarkdown(threads []config.RTOSThread, ref []config.RTOSThread, stats symbolextraction.UnresolvedCallStats, fnDiff FunctionStackDiffReport, refName string, errors []string) {
+func PrintStackDiffMarkdown(threads []config.RTOSThread, ref []config.RTOSThread, stats symbolextraction.UnresolvedCallStats, fnDiff FunctionStackDiffReport, refName string, errors []string) error {
 	var has_overflows bool = false
 	commonThreads := getCommonThreads(threads, ref)
 	fmt.Print("## Stack check\n\n")
@@ -347,7 +348,7 @@ func PrintStackDiffMarkdown(threads []config.RTOSThread, ref []config.RTOSThread
 		}
 	}
 	if any_unresolved_fn_in_thread {
-		fmt.Println("### Hint\n")
+		fmt.Print("### Hint\n\n")
 		fmt.Println("Consider adding or extending a config and add unresolved calls for better results.")
 		fmt.Printf("There are at least %d dynamic calls in %d functions left to resolve. %d dynamic calls are already resolved.\n \n", stats.TotalNrDynamicCalls, stats.NrFunctionsWithDynamicCalls, stats.TotalNrResolvedCalls)
 		fmt.Println("(Note: the actual number of dynamic calls might be higher then the number of dynamic branch instructions.")
@@ -355,13 +356,14 @@ func PrintStackDiffMarkdown(threads []config.RTOSThread, ref []config.RTOSThread
 	}
 
 	if len(errors) > 0 {
-		fmt.Println("\n### Errors during analysis\n")
+		fmt.Print("\n### Errors during analysis\n\n")
 		for _, e := range errors {
 			fmt.Println("* " + e)
 		}
 	}
 
 	if has_overflows {
-		log.Fatalln("Stackoverflow detected!")
+		return fmt.Errorf("stack overflow detected")
 	}
+	return nil
 }

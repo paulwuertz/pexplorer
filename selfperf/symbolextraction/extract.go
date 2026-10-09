@@ -9,8 +9,8 @@ func GetFWReport(elfFile *elf.File, fwhash string) SElfReport {
 	variables := ExtractVariables(*elfFile)
 
 	info := make([]string, 0)
-	AddASMToFunctions(functions, sectionsRef, info)
-	AddDataToVar(variables, sectionsRef, info)
+	info = AddASMToFunctions(functions, sectionsRef, info)
+	info = AddDataToVar(variables, sectionsRef, info)
 	elfReport := SElfReport{
 		Elf:          elfFile,
 		Sections:     sectionJsonInfo,

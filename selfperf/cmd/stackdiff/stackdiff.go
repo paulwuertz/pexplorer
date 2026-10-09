@@ -59,9 +59,13 @@ func main() {
 	// fmt.Println(string(datajson))
 
 	if *md_output {
-		diff.PrintStackDiffMarkdown(newTreadStats, refTreadStats, newReport.UnresolvedStats, stack_diff, *ref_name, newReport.Errors)
+		if err := diff.PrintStackDiffMarkdown(newTreadStats, refTreadStats, newReport.UnresolvedStats, stack_diff, *ref_name, newReport.Errors); err != nil {
+			log.Fatal(err)
+		}
 	} else {
-		diff.RTOSStackDiff(newTreadStats, refTreadStats, newReport.Errors)
+		if err := diff.RTOSStackDiff(newTreadStats, refTreadStats, newReport.Errors); err != nil {
+			log.Fatal(err)
+		}
 	}
 	// rtos.PrintStackStats(newTreadStats)
 	// rtos.PrintStackStats(refTreadStats)

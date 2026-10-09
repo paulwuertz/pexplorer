@@ -8,6 +8,7 @@ import (
 	"log"
 
 	"github.com/paulwuertz/pexplorer/selfperf/callgraph"
+	"github.com/paulwuertz/pexplorer/selfperf/config"
 	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 )
 
@@ -24,7 +25,7 @@ func main() {
 	elfFile, err := elf.Open(*infile)
 
 	elfReport := symbolextraction.GetFWReport(elfFile, fw_hash_str)
-	callgraph.EnhanceByDisasm(&elfReport)
+	callgraph.EnhanceByDisasm(&elfReport, make([]config.DynamicCallResolution, 0))
 	// if *unitFilterName == "" || strings.Contains(cname, *unitFilterName) {
 	callgraph.GetStackUseDetails(&elfReport)
 	callgraph.TraverseCallGraph(&elfReport)
