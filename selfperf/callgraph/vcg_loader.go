@@ -5,8 +5,10 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
+	"sort"
 	"strings"
 
+	"github.com/paulwuertz/pexplorer/selfperf/symbolextraction"
 	"github.com/paulwuertz/pexplorer/selfperf/vcg"
 )
 
@@ -85,4 +87,73 @@ func ParseVCGFile(path string) (vcg.Graph, error) {
 		return vcg.Graph{}, fmt.Errorf("read file: %w", err)
 	}
 	return vcg.ParseString(string(data))
+}
+
+// GraphsToFunctionCallList converts one or more GCC VCG graphs into a symbol call list.
+func GraphsToFunctionCallList(graphs []vcg.Graph) symbolextraction.FunctionCallList {
+	byFrom := make(map[string]map[string]struct{})
+	for _, graph := range graphs {
+		nodeNames := make(map[string]string)
+		for _, node := range graph.Nodes {
+			id := node.ID
+			if id == "" {
+				id = node.Title
+			}
+			if id == "" {
+				continue
+			}
+			label := node.Label
+			if label == "" {
+				label = node.Title
+			}
+			if label == "" {
+				label = id
+			}
+			nodeNames[id] = label
+		}
+		for _, edge := range graph.Edges {
+			src := edge.Source
+			if src == "" {
+				src = edge.Sourcename
+			}
+			tgt := edge.Target
+			if tgt == "" {
+				tgt = edge.Targetname
+			}
+			if src == "" || tgt == "" {
+				continue
+			}
+
+			from := nodeNames[src]
+			if from == "" {
+				from = src
+			}
+			to := nodeNames[tgt]
+			if to == "" {
+				to = tgt
+			}
+
+			if _, ok := byFrom[from]; !ok {
+				byFrom[from] = make(map[string]struct{})
+			}
+			byFrom[from][to] = struct{}{}
+		}
+	}
+
+	entries := make(symbolextraction.FunctionCallList, 0, len(byFrom))
+	keys := make([]string, 0, len(byFrom))
+	for from := range byFrom {
+		keys = append(keys, from)
+	}
+	sort.Strings(keys)
+	for _, from := range keys {
+		values := byFrom[from]
+		toList := make([]string, 0, len(values))
+		for to := range values {
+			toList = append(toList, to)
+		}
+		sort.Strings(toList)
+		entries = append(entries, symbolextraction.FunctionCallEntry{From: from, To: toList})
+	}
+	return entries
 }

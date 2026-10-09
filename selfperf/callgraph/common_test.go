@@ -9,6 +9,7 @@ import (
 	"testing"
 
 	"github.com/bpfsnoop/gapstone"
+	"github.com/paulwuertz/pexplorer/selfperf/vcg"
 )
 
 func Test_isFnCallInstr(t *testing.T) {
@@ -150,6 +151,53 @@ func TestParseVCGDir(t *testing.T) {
 		t.Logf("graph title=%q nodes=%d edges=%d", g.Title, len(g.Nodes), len(g.Edges))
 	}
 	t.Fatal("unexpected parsed graph set")
+}
+
+func TestGraphToFunctionCallList(t *testing.T) {
+	g := vcg.Graph{
+		Title: "callgraph",
+		Nodes: []vcg.Node{
+			{Title: "n0", Label: "main"},
+			{Title: "n1", Label: "helper"},
+			{Title: "n2", Label: "cleanup"},
+		},
+		Edges: []vcg.Edge{
+			{Source: "n0", Target: "n1", Label: "calls"},
+			{Source: "n0", Target: "n2", Label: "calls"},
+			{Source: "n1", Target: "n2", Label: "calls"},
+		},
+	}
+
+	list := GraphsToFunctionCallList([]vcg.Graph{g})
+	if len(list) != 2 {
+		t.Fatalf("unexpected entry count: got %d want 2", len(list))
+	}
+
+	lookup := make(map[string][]string, len(list))
+	for _, entry := range list {
+		lookup[entry.From] = entry.To
+	}
+
+	mainCalls := lookup["main"]
+	if len(mainCalls) != 2 {
+		t.Fatalf("unexpected calls from main: %#v", mainCalls)
+	}
+	if !contains(mainCalls, "helper") || !contains(mainCalls, "cleanup") {
+		t.Fatalf("missing expected calls from main: %#v", mainCalls)
+	}
+	helperCalls := lookup["helper"]
+	if len(helperCalls) != 1 || !contains(helperCalls, "cleanup") {
+		t.Fatalf("unexpected calls from helper: %#v", helperCalls)
+	}
+}
+
+func contains(values []string, wanted string) bool {
+	for _, value := range values {
+		if value == wanted {
+			return true
+		}
+	}
+	return false
 }
 
 func Test_capstoneUse(t *testing.T) {
