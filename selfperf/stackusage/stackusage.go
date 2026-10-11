@@ -42,11 +42,6 @@ func ParseString(input string) ([]Entry, error) {
 	return entries, nil
 }
 
-// Parse is an alias for ParseString.
-func Parse(input string) ([]Entry, error) {
-	return ParseString(input)
-}
-
 // ParseFile parses one .su file.
 func ParseFile(path string) ([]Entry, error) {
 	data, err := os.ReadFile(path)
@@ -90,41 +85,6 @@ func ParseDir(root string) ([]Entry, error) {
 			return nil, err
 		}
 		entries = append(entries, parsed...)
-	}
-	return entries, nil
-}
-
-// ParseFiles parses a list of .su files or directories recursively.
-func ParseFiles(paths []string) ([]Entry, error) {
-	entries := make([]Entry, 0)
-	for _, path := range paths {
-		if path == "" {
-			continue
-		}
-		info, err := os.Stat(path)
-		if err != nil {
-			parsed, parseErr := ParseFile(path)
-			if parseErr != nil {
-				return nil, fmt.Errorf("parse %q: %w", path, parseErr)
-			}
-			entries = append(entries, parsed...)
-			continue
-		}
-		if info.IsDir() {
-			more, parseErr := ParseDir(path)
-			if parseErr != nil {
-				return nil, parseErr
-			}
-			entries = append(entries, more...)
-			continue
-		}
-		if strings.EqualFold(filepath.Ext(info.Name()), ".su") {
-			parsed, parseErr := ParseFile(path)
-			if parseErr != nil {
-				return nil, parseErr
-			}
-			entries = append(entries, parsed...)
-		}
 	}
 	return entries, nil
 }

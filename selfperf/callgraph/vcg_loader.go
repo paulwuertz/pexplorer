@@ -37,47 +37,7 @@ func ParseVCGDir(root string) ([]vcg.Graph, error) {
 		graphs = append(graphs, graph)
 		return nil
 	})
-	if err != nil {
-		return nil, err
-	}
-
-	return graphs, nil
-}
-
-// ParseVCGFiles parses a list of VCG files or directories. Directories are expanded recursively.
-func ParseVCGFiles(paths []string) ([]vcg.Graph, error) {
-	graphs := make([]vcg.Graph, 0)
-	for _, path := range paths {
-		if path == "" {
-			continue
-		}
-
-		info, err := os.Stat(path)
-		if err != nil {
-			graph, parseErr := ParseVCGFile(path)
-			if parseErr != nil {
-				return nil, fmt.Errorf("parse %q: %w", path, parseErr)
-			}
-			graphs = append(graphs, graph)
-			continue
-		}
-		if info.IsDir() {
-			more, err := ParseVCGDir(path)
-			if err != nil {
-				return nil, err
-			}
-			graphs = append(graphs, more...)
-			continue
-		}
-		if strings.EqualFold(filepath.Ext(info.Name()), ".ci") {
-			graph, err := ParseVCGFile(path)
-			if err != nil {
-				return nil, err
-			}
-			graphs = append(graphs, graph)
-		}
-	}
-	return graphs, nil
+	return graphs, err
 }
 
 // ParseVCGFile reads a single VCG file and parses it into a Graph.
@@ -93,50 +53,17 @@ func ParseVCGFile(path string) (vcg.Graph, error) {
 func GraphsToFunctionCallList(graphs []vcg.Graph) symbolextraction.FunctionCallList {
 	byFrom := make(map[string]map[string]struct{})
 	for _, graph := range graphs {
-		nodeNames := make(map[string]string)
-		for _, node := range graph.Nodes {
-			id := node.ID
-			if id == "" {
-				id = node.Title
-			}
-			if id == "" {
-				continue
-			}
-			label := normalizedGraphNodeName(node.Label)
-			if label == "" {
-				label = normalizedGraphNodeName(node.Title)
-			}
-			if label == "" {
-				label = normalizedGraphNodeName(id)
-			}
-			nodeNames[id] = label
-		}
 		for _, edge := range graph.Edges {
-			src := edge.Source
-			if src == "" {
-				src = edge.Sourcename
-			}
-			tgt := edge.Target
-			if tgt == "" {
-				tgt = edge.Targetname
-			}
+			src := edge.Sourcename
+			tgt := edge.Targetname
 			if src == "" || tgt == "" {
 				continue
 			}
 
-			from := nodeNames[src]
-			if from == "" {
-				from = normalizedGraphNodeName(src)
+			if _, ok := byFrom[src]; !ok {
+				byFrom[src] = make(map[string]struct{})
 			}
-			to := nodeNames[tgt]
-			if to == "" {
-				to = normalizedGraphNodeName(tgt)
-			}
-
-			if _, ok := byFrom[from]; !ok {
-				byFrom[from] = make(map[string]struct{})
-			}
-			byFrom[from][to] = struct{}{}
+			byFrom[src][tgt] = struct{}{}
 		}
 	}
 
@@ -156,45 +83,4 @@ func GraphsToFunctionCallList(graphs []vcg.Graph) symbolextraction.FunctionCallL
 		entries = append(entries, symbolextraction.FunctionCallEntry{From: from, To: toList})
 	}
 	return entries
-}
-
-func normalizedGraphNodeName(value string) string {
-	s := strings.TrimSpace(value)
-	s = strings.Trim(s, "\"'")
-	if s == "" {
-		return ""
-	}
-	if nl := strings.IndexByte(s, '\n'); nl >= 0 {
-		left := strings.TrimSpace(s[:nl])
-		right := strings.TrimSpace(s[nl+1:])
-		if left != "" {
-			s = left
-			if strings.HasPrefix(right, "<") || strings.Contains(right, "/") || strings.Contains(right, "\\") || strings.Contains(right, ":") {
-				return s
-			}
-		}
-		if right != "" {
-			s = right
-		}
-	}
-	if strings.ContainsAny(s, "/\\") {
-		base := filepath.Base(s)
-		if idx := strings.Index(base, ":"); idx > 0 && idx < len(base)-1 {
-			prefix := base[:idx]
-			if strings.Contains(prefix, ".") {
-				s = strings.TrimSpace(base[idx+1:])
-			} else {
-				s = strings.TrimSpace(base)
-			}
-		} else {
-			s = strings.TrimSpace(base)
-		}
-	}
-	if idx := strings.Index(s, ":"); idx > 0 && idx < len(s)-1 {
-		prefix := s[:idx]
-		if strings.Contains(prefix, "/") || strings.Contains(prefix, "\\") || strings.Contains(prefix, ".") {
-			s = strings.TrimSpace(s[idx+1:])
-		}
-	}
-	return s
 }

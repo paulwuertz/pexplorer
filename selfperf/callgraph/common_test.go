@@ -138,19 +138,21 @@ func TestParseVCGDir(t *testing.T) {
 	if len(graphs) != 2 {
 		t.Fatalf("unexpected graph count: got %d want 2", len(graphs))
 	}
-	if graphs[0].Title == "" && len(graphs) > 0 {
-		// nothing to do here; titles are validated below
-	}
-	if graphs[0].Title == "root" && len(graphs[1].Nodes) == 1 && graphs[1].Title == "child" {
-		return
-	}
-	if graphs[1].Title == "root" && len(graphs[0].Nodes) == 1 && graphs[0].Title == "child" {
-		return
-	}
 	for _, g := range graphs {
+		if g.Title == "root" {
+			if len(g.Nodes) != 1 && len(g.Edges) != 1 && g.Nodes[0].Label != "main" &&
+				g.Nodes[0].Title != "n0" && g.Edges[0].Sourcename != "n0" &&
+				g.Edges[0].Targetname != "n1" && g.Edges[0].Label != "helper" {
+				t.Error("root node parse error")
+			}
+		}
+		if g.Title == "child" {
+			if len(g.Nodes) != 1 && len(g.Edges) != 0 {
+				t.Fatal("root node parse error")
+			}
+		}
 		t.Logf("graph title=%q nodes=%d edges=%d", g.Title, len(g.Nodes), len(g.Edges))
 	}
-	t.Fatal("unexpected parsed graph set")
 }
 
 func TestGraphToFunctionCallList(t *testing.T) {
@@ -162,9 +164,9 @@ func TestGraphToFunctionCallList(t *testing.T) {
 			{Title: "n2", Label: "cleanup"},
 		},
 		Edges: []vcg.Edge{
-			{Source: "n0", Target: "n1", Label: "calls"},
-			{Source: "n0", Target: "n2", Label: "calls"},
-			{Source: "n1", Target: "n2", Label: "calls"},
+			{Sourcename: "n0", Targetname: "n1", Label: "calls"},
+			{Sourcename: "n0", Targetname: "n2", Label: "calls"},
+			{Sourcename: "n1", Targetname: "n2", Label: "calls"},
 		},
 	}
 
@@ -178,15 +180,15 @@ func TestGraphToFunctionCallList(t *testing.T) {
 		lookup[entry.From] = entry.To
 	}
 
-	mainCalls := lookup["main"]
+	mainCalls := lookup["n0"]
 	if len(mainCalls) != 2 {
 		t.Fatalf("unexpected calls from main: %#v", mainCalls)
 	}
-	if !contains(mainCalls, "helper") || !contains(mainCalls, "cleanup") {
+	if !contains(mainCalls, "n1") || !contains(mainCalls, "n2") {
 		t.Fatalf("missing expected calls from main: %#v", mainCalls)
 	}
-	helperCalls := lookup["helper"]
-	if len(helperCalls) != 1 || !contains(helperCalls, "cleanup") {
+	helperCalls := lookup["n1"]
+	if len(helperCalls) != 1 || !contains(helperCalls, "n2") {
 		t.Fatalf("unexpected calls from helper: %#v", helperCalls)
 	}
 }

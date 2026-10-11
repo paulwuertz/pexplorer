@@ -26,8 +26,8 @@ func TestParseString(t *testing.T) {
 	if len(g.Edges) != 1 {
 		t.Fatalf("unexpected edge count: got %d want 1", len(g.Edges))
 	}
-	if g.Edges[0].Source != "n0" || g.Edges[0].Target != "n1" {
-		t.Fatalf("unexpected edge endpoints: got %q -> %q", g.Edges[0].Source, g.Edges[0].Target)
+	if g.Edges[0].Sourcename != "n0" || g.Edges[0].Targetname != "n1" {
+		t.Fatalf("unexpected edge endpoints: got %q -> %q", g.Edges[0].Sourcename, g.Edges[0].Targetname)
 	}
 	if g.Edges[0].Label != "calls" {
 		t.Fatalf("unexpected edge label: got %q want %q", g.Edges[0].Label, "calls")
